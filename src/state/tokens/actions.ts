@@ -3,7 +3,7 @@ import {
   ActionCreatorWithPayload,
   createAction,
 } from '@reduxjs/toolkit';
-import { Token } from '../../types';
+import { TimeHistory, Token } from '../../types';
 
 export const fetchTokenList: Readonly<{
   pending: ActionCreatorWithoutPayload;
@@ -16,3 +16,6 @@ export const fetchTokenList: Readonly<{
 };
 
 export const selectToken = createAction<string>('tokens/select');
+export const selectTimeHistory = createAction<TimeHistory>(
+  'tokens/selectTimeHistory',
+);

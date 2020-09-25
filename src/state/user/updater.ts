@@ -53,7 +53,7 @@ export default function (): null {
   // load in the tokens
   useEffect(() => {
     fetchTokens();
-  }, [isTokenPending]);
+  }, [isTokenPending, fetchTokens]);
 
   return null;
 }

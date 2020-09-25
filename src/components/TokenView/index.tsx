@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useSelectedToken } from '../../state/tokens/hooks';
+import {
+  useSelectedTimeHistory,
+  useSelectedToken,
+} from '../../state/tokens/hooks';
 import { TimeHistory } from '../../types';
 import HeaderView from './HeaderView';
 import LineChart from './LineChart';
@@ -19,7 +22,11 @@ const Error = styled.h2`
 export default function () {
   const selectedToken = useSelectedToken();
 
-  const [selectedTimeHistory, setTimeHistory] = useState(TimeHistory.ONE_DAY);
+  const selectedTimeHistory = useSelectedTimeHistory();
+
+  const [hoveredTimestamp, setHoveredTimestamp] = useState<number | undefined>(
+    undefined,
+  );
 
   if (!selectedToken) {
     return (
@@ -31,12 +38,12 @@ export default function () {
 
   return (
     <Wrapper>
-      <HeaderView />
-      <LineChart data={selectedToken.prices[selectedTimeHistory]} />
-      <TimeHistorySelector
-        selectedTime={selectedTimeHistory}
-        onSelect={setTimeHistory}
+      <HeaderView timestamp={hoveredTimestamp} />
+      <LineChart
+        data={selectedToken.prices[selectedTimeHistory]}
+        onHover={setHoveredTimestamp}
       />
+      <TimeHistorySelector />
     </Wrapper>
   );
 }

@@ -1,5 +1,8 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { AppDispatch } from '../../state';
+import { selectToken } from '../../state/tokens/actions';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import { TimeHistory, Token } from '../../types';
 import { getSortedPrices } from '../../utils';
@@ -25,6 +28,11 @@ const Wrapper = styled.div<{ selected: boolean }>`
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.secondary : 'auto'};
   border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
+  transition: all 0.1s ease-in;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.secondary};
+  }
 `;
 
 const ItemWrapper = styled.div`
@@ -68,6 +76,7 @@ const PriceWrapper = styled.span<{ upwardsTrend?: boolean }>`
 `;
 
 export default function (props: TokenListItemProps) {
+  const dispatch = useDispatch<AppDispatch>();
   // Get the last day of data
   const prices = getSortedPrices(props.prices[TimeHistory.ONE_DAY]!); // should always be loaded;
   let upwardsTrend = false;
@@ -78,7 +87,10 @@ export default function (props: TokenListItemProps) {
   const selectedToken = useSelectedToken();
 
   return (
-    <Wrapper selected={props.ticker === selectedToken?.ticker}>
+    <Wrapper
+      selected={props.ticker === selectedToken?.ticker}
+      onClick={() => dispatch(selectToken(props.ticker))}
+    >
       <ItemWrapper>
         <TextWrapper>
           <Title>{props.title}</Title>

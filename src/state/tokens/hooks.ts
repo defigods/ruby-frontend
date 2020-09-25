@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { AppState } from '..';
-import { Token } from '../../types';
+import { TimeHistory, Token } from '../../types';
 
 export function useTokens(): Token[] {
   return useSelector((state: AppState) => state.tokens.tokens);
@@ -18,4 +18,8 @@ export function useSelectedToken(): Token | undefined {
 
 export function useIsTokenPending(): boolean {
   return useSelector((state: AppState) => state.tokens.loading);
+}
+
+export function useSelectedTimeHistory(): TimeHistory {
+  return useSelector((state: AppState) => state.tokens.selectedTimeHistory);
 }

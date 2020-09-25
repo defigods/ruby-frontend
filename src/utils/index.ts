@@ -31,15 +31,24 @@ export function getSortedPrices(prices: { [timestamp: number]: number }) {
  */
 export function getPercentChange(
   token: Token,
+  atTimestamp?: number,
   timeHistory: TimeHistory = TimeHistory.ONE_DAY,
 ): [number, number] {
-  const sorted = getSortedPrices(token.prices[timeHistory] || {});
-  if (sorted.length === 0) return [0, 0];
+  if (!token.prices[timeHistory]) {
+    return [0, 0];
+  }
 
-  const difference = sorted[sorted.length - 1] - sorted[0];
+  const base = atTimestamp
+    ? token.prices[timeHistory]![atTimestamp]
+    : token.prices[timeHistory]![
+        Number(Object.keys(token.prices[timeHistory]!)[0])
+      ];
 
-  return [difference, difference / sorted[0]];
+  const difference = token.currentPrice - base;
+
+  return [difference, difference / token.currentPrice];
 }
 
 export * from './debounce';
 export * from './library';
+export * from './hooks';

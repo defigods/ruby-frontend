@@ -13,7 +13,7 @@ function generateNextPrice(price: number, volatility: number): number {
 }
 
 function getDateStart(timeDelimeter: TimeHistory): [number, number] {
-  const NUM_PER = 20;
+  const NUM_PER = 50;
   let start: number;
   if (timeDelimeter === TimeHistory.ONE_DAY) {
     start = Date.now() - 24 * 60 * 60 * 1000;
@@ -35,20 +35,23 @@ function createPriceData(
   startPrice: number,
   volatility: number,
   timeHistory: TimeHistory = TimeHistory.ONE_DAY,
-): TokenPrice {
+): { currentPrice: number; prices: TokenPrice } {
   // create data for past 3 months at 15 minute intervals, and then now
   const prices: { [timestamp: number]: number } = {};
 
   let [start, interval] = getDateStart(timeHistory);
   let lastPrice = startPrice;
   while (start < Date.now()) {
+    lastPrice = generateNextPrice(lastPrice, volatility);
     prices[start] = lastPrice;
     start += interval;
-    lastPrice = generateNextPrice(lastPrice, volatility);
   }
 
   return {
-    [timeHistory]: prices,
+    prices: {
+      [timeHistory]: prices,
+    },
+    currentPrice: lastPrice,
   };
 }
 
@@ -57,26 +60,22 @@ function createDummyData(): Token[] {
     {
       ticker: 'WAYNE',
       name: 'Wayne Inc.',
-      currentPrice: 432.53,
-      prices: createPriceData(432.53, 0.02),
+      ...createPriceData(432.53, 0.02),
     },
     {
       ticker: 'STARK',
       name: 'Stark Industries',
-      currentPrice: 320.52,
-      prices: createPriceData(320.53, 0.02),
+      ...createPriceData(320.53, 0.02),
     },
     {
       ticker: 'PREY',
       name: 'Prey Foundation',
-      currentPrice: 21.34,
-      prices: createPriceData(21.34, 0.12),
+      ...createPriceData(21.34, 0.12),
     },
     {
       ticker: 'RUBI',
       name: 'Rubicon Governance',
-      currentPrice: 3.89,
-      prices: createPriceData(3.89, 0.14),
+      ...createPriceData(3.89, 0.14),
     },
   ];
 }

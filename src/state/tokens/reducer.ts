@@ -1,12 +1,13 @@
 import { createReducer } from '@reduxjs/toolkit';
-import { Token } from '../../types';
-import { fetchTokenList, selectToken } from './actions';
+import { TimeHistory, Token } from '../../types';
+import { fetchTokenList, selectTimeHistory, selectToken } from './actions';
 
 export interface TokensState {
   readonly tokens: Token[];
   readonly selected?: string;
   readonly loading: boolean;
   readonly error?: Error;
+  readonly selectedTimeHistory: TimeHistory;
 }
 
 const initialState: TokensState = {
@@ -14,6 +15,7 @@ const initialState: TokensState = {
   selected: undefined,
   loading: true,
   error: undefined,
+  selectedTimeHistory: TimeHistory.ONE_DAY,
 };
 
 export default createReducer(initialState, (builder) =>
@@ -43,6 +45,12 @@ export default createReducer(initialState, (builder) =>
       return {
         ...state,
         selected: action.payload,
+      };
+    })
+    .addCase(selectTimeHistory, (state, action) => {
+      return {
+        ...state,
+        selectedTimeHistory: action.payload,
       };
     }),
 );

@@ -27,7 +27,7 @@ export default function () {
     if (!tokenSelected && userTokens.length > 0) {
       dispatch(selectToken(userTokens[0].ticker));
     }
-  }, [tokenSelected, userTokens]);
+  }, [tokenSelected, userTokens, dispatch]);
 
   const data = userTokens.map((t) => ({
     ...t,

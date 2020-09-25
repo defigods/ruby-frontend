@@ -1,11 +1,10 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { AppDispatch } from '../../state';
+import { selectTimeHistory } from '../../state/tokens/actions';
+import { useSelectedTimeHistory } from '../../state/tokens/hooks';
 import { TimeHistory } from '../../types';
-
-interface TimeHistorySelectorProps {
-  selectedTime: TimeHistory;
-  onSelect: (timeHistory: TimeHistory) => void;
-}
 
 const SELECTED_CLASS = 'selected';
 
@@ -48,15 +47,18 @@ function getTimeHistoryDisplays(): string[] {
   return Object.values(TimeHistory);
 }
 
-export default function (props: TimeHistorySelectorProps) {
+export default function () {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const selectedTimeHistory = useSelectedTimeHistory();
   return (
     <OneMoreWrapper>
       <Wrapper>
         {getTimeHistoryDisplays().map((item) => (
           <Item
             key={item}
-            className={props.selectedTime === item ? SELECTED_CLASS : ''}
-            onClick={() => props.onSelect(item as TimeHistory)}
+            className={selectedTimeHistory === item ? SELECTED_CLASS : ''}
+            onClick={() => dispatch(selectTimeHistory(item as TimeHistory))}
           >
             {item.split('|')[0]}
           </Item>
