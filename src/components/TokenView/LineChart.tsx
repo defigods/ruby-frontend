@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
+import moment from 'moment';
 
 interface LineChartProps {
   data?: { [timestamp: number]: number };
@@ -37,10 +38,19 @@ const createLine = (yValue: number, theme: DefaultTheme, rect?: DOMRect) => {
   ));
 };
 
+const StyledTextLabel = styled.text`
+  font-size: 10px;
+  color: ${({ theme }) => theme.text.secondary};
+  color: red;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+`;
+
 export default function ({ data, onHover }: LineChartProps) {
   const [rect, setRect] = useState<DOMRect | undefined>(undefined);
   const [[mouseX, mouseY], setMouseCoordinates] = useState([0, 0]);
-  const [hovering, setHovering] = useState(false);
+  const [hovering, setHovering] = useState(true);
 
   const loadDimensions = useCallback((node) => {
     if (node !== null) {
@@ -126,7 +136,18 @@ export default function ({ data, onHover }: LineChartProps) {
       />
     );
 
-    return [Line, InnerCircle, OuterCircle];
+    const TextLabel = (
+      <StyledTextLabel
+        x={xGraph}
+        cy={-30}
+        key="label"
+        fill={theme.text.secondary}
+      >
+        {moment(points[minIndex][0]).format('h:mm A MMM D [CDT]')}
+      </StyledTextLabel>
+    );
+
+    return [Line, InnerCircle, OuterCircle, TextLabel];
   }, [mouseX, mouseY, points, hovering]);
 
   useEffect(() => {

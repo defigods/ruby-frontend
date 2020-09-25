@@ -19,6 +19,7 @@ export interface Token {
   logo?: string;
   currentPrice: number;
   prices: TokenPrice;
+  description?: string;
 }
 
 export interface UserToken extends Token {
