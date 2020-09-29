@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertCircle } from 'react-feather';
 import styled from 'styled-components';
 import { Token } from '../../types';
 import SearchBar from './SearchBar';
@@ -12,6 +13,18 @@ const Wrapper = styled.div`
   width: 50vw;
   height: 100vh;
   min-width: 300px;
+  position: relative;
+`;
+
+const Warning = styled.div`
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 `;
 
 export default function (props: TokenListProps) {
@@ -35,6 +48,12 @@ export default function (props: TokenListProps) {
       {filteredData.map((item) => (
         <TokenListItem {...item} key={item.title} />
       ))}
+      {filteredData.length === 0 && (
+        <Warning>
+          <AlertCircle size={12} style={{ marginRight: 5 }} />
+          No tokens found
+        </Warning>
+      )}
     </Wrapper>
   );
 }

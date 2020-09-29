@@ -11,6 +11,14 @@ const Wrapper = styled.div`
 
 const activeClassName = 'ACTIVE';
 
+const ActiveDot = styled.div`
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors.tertiary};
+  margin-right: 5px;
+`;
+
 const StyledNavLink = styled(NavLink).attrs({
   activeClassName,
 })`
@@ -26,7 +34,7 @@ const StyledNavLink = styled(NavLink).attrs({
   padding: 12px 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
 
-  &:not(.${activeClassName}) > svg {
+  &:not(.${activeClassName}) > ${ActiveDot} {
     display: none;
   }
 
@@ -48,15 +56,15 @@ export default function () {
     <Wrapper>
       <StyledNavLink to="/portfolio">
         Portfolio
-        <Crosshair size={20} />
+        <ActiveDot />
       </StyledNavLink>
       <StyledNavLink to="/trade">
         Trade
-        <Crosshair size={20} />
+        <ActiveDot />
       </StyledNavLink>
       <StyledNavLink to="/history">
         History
-        <Crosshair size={20} />
+        <ActiveDot />
       </StyledNavLink>
     </Wrapper>
   );
