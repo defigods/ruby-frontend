@@ -13,6 +13,11 @@ export type TokenPrice = {
   };
 };
 
+export interface TokenTrade {
+  quantity: number;
+  price: number;
+}
+
 export interface Token {
   ticker: string;
   name: string;
@@ -20,6 +25,8 @@ export interface Token {
   currentPrice: number;
   prices: TokenPrice;
   description?: string;
+  asks: TokenTrade[];
+  bids: TokenTrade[];
 }
 
 export interface UserToken extends Token {

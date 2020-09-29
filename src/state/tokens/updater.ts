@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
-import { TimeHistory, Token, TokenPrice } from '../../types';
+import { TimeHistory, Token, TokenPrice, TokenTrade } from '../../types';
 import { fetchTokenList } from './actions';
 
 function generateNextPrice(price: number, volatility: number): number {
@@ -31,11 +31,30 @@ function getDateStart(timeDelimeter: TimeHistory): [number, number] {
   return [start, (Date.now() - start) / NUM_PER];
 }
 
+function createTrades(price: number, multiplier: number = 1) {
+  const NUM_TRADES = 50;
+  const trades: TokenTrade[] = [];
+  let lastPrice = price;
+  for (let i = 0; i < NUM_TRADES; i++) {
+    lastPrice += Math.random() * multiplier;
+    trades.push({
+      price: lastPrice,
+      quantity: Math.random() * 50,
+    });
+  }
+  return trades;
+}
+
 function createPriceData(
   startPrice: number,
   volatility: number,
   timeHistory: TimeHistory = TimeHistory.ONE_DAY,
-): { currentPrice: number; prices: TokenPrice } {
+): {
+  currentPrice: number;
+  prices: TokenPrice;
+  bids: TokenTrade[];
+  asks: TokenTrade[];
+} {
   // create data for past 3 months at 15 minute intervals, and then now
   const prices: { [timestamp: number]: number } = {};
 
@@ -47,11 +66,16 @@ function createPriceData(
     start += interval;
   }
 
+  const asks = createTrades(lastPrice);
+  const bids = createTrades(lastPrice, -1);
+
   return {
     prices: {
       [timeHistory]: prices,
     },
     currentPrice: lastPrice,
+    asks,
+    bids,
   };
 }
 

@@ -3,10 +3,12 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
 import moment from 'moment';
+import { useDebounce } from '../../utils';
 
 interface LineChartProps {
   data?: { [timestamp: number]: number };
@@ -15,7 +17,7 @@ interface LineChartProps {
 
 const Wrapper = styled.div`
   width: calc(100% - 40px);
-  height: 300px;
+  min-height: 40%;
   margin: 0 20px;
   margin-top: 40px;
   margin-bottom: 3px;
@@ -23,10 +25,16 @@ const Wrapper = styled.div`
 
 const StyledSVG = styled.svg`
   overflow: visible;
+  height: 100%;
+  width: 100%;
+`;
+
+const OpaqueCircle = styled.circle`
+  opacity: 0.2;
 `;
 
 const createLine = (yValue: number, theme: DefaultTheme, rect?: DOMRect) => {
-  const NUM_POINTS = 50;
+  const NUM_POINTS = 60;
   if (!rect) return null;
 
   const points = [...new Array(NUM_POINTS)].map((_, idx) => [
@@ -34,7 +42,7 @@ const createLine = (yValue: number, theme: DefaultTheme, rect?: DOMRect) => {
     yValue,
   ]);
   return points.map(([x, y]) => (
-    <circle key={x} cx={x} cy={y} r=".1" stroke={theme.text.secondary} />
+    <OpaqueCircle key={x} cx={x} cy={y} r=".5" stroke={theme.text.secondary} />
   ));
 };
 
@@ -50,7 +58,23 @@ const StyledTextLabel = styled.text`
 export default function ({ data, onHover }: LineChartProps) {
   const [rect, setRect] = useState<DOMRect | undefined>(undefined);
   const [[mouseX, mouseY], setMouseCoordinates] = useState([0, 0]);
+  const [windowState, setWindowSize] = useState([0, 0]);
   const [hovering, setHovering] = useState(true);
+
+  const windowSize = useDebounce(windowState, 100);
+
+  useEffect(() => {
+    const handler = () => {
+      setWindowSize([window.innerHeight, window.innerWidth]);
+      setRect(svgContainer.current?.getBoundingClientRect());
+    };
+
+    window.addEventListener('resize', handler);
+
+    return () => window.removeEventListener('resize', handler);
+  }, [windowSize[0], windowSize[1]]);
+
+  const svgContainer = useRef<SVGSVGElement>(null);
 
   const loadDimensions = useCallback((node) => {
     if (node !== null) {
@@ -136,10 +160,17 @@ export default function ({ data, onHover }: LineChartProps) {
       />
     );
 
+    let textXValue = xGraph;
+    if (minIndex > points.length - 4) {
+      textXValue -= 100;
+    } else if (minIndex > 3) {
+      textXValue -= 50;
+    }
+
     const TextLabel = (
       <StyledTextLabel
-        x={xGraph}
-        cy={-30}
+        x={textXValue}
+        y={-5}
         key="label"
         fill={theme.text.secondary}
       >
@@ -153,7 +184,7 @@ export default function ({ data, onHover }: LineChartProps) {
   useEffect(() => {
     onHover(hovering ? hoveredTimestamp : undefined);
   }, [hoveredTimestamp, hovering]);
-
+  console.log(rect?.width, rect?.height);
   return (
     <Wrapper ref={loadDimensions}>
       <StyledSVG
@@ -162,6 +193,7 @@ export default function ({ data, onHover }: LineChartProps) {
         onMouseMove={(e) => setMouseCoordinates([e.pageX, e.pageY])}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
+        ref={svgContainer}
       >
         <polyline
           fill="none"

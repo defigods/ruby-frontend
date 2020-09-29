@@ -61,7 +61,7 @@ export default function ThemeProvider({
 export const FixedGlobalStyle = createGlobalStyle`
 html, input, textarea, button {
     font-family: 'Montserrat', sans-serif;
-    letter-spacing: -0.018em;
+    // letter-spacing: -0.018em;
     font-display: fallback;
 }
 html,
