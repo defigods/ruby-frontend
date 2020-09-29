@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Token } from '../../types';
 import SearchBar from './SearchBar';
@@ -15,10 +15,24 @@ const Wrapper = styled.div`
 `;
 
 export default function (props: TokenListProps) {
+  const [search, setSearch] = useState<string | undefined>(undefined);
+
+  const filteredData = search
+    ? props.data.filter((item) => {
+        return (
+          item.ticker.toLowerCase().includes(search.toLowerCase()) ||
+          item.name.toLowerCase().includes(search.toLowerCase())
+        );
+      })
+    : props.data;
+
   return (
     <Wrapper>
-      <SearchBar placeholder="Search by token or company name"></SearchBar>
-      {props.data.map((item) => (
+      <SearchBar
+        placeholder="Search by token or company name"
+        onSearch={(s) => setSearch(s)}
+      ></SearchBar>
+      {filteredData.map((item) => (
         <TokenListItem {...item} key={item.title} />
       ))}
     </Wrapper>

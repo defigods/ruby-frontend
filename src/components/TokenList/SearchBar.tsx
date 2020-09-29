@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 export interface SearchBarProps {
   placeholder?: string;
+  onSearch: (search: string) => void;
 }
 
 const Wrapper = styled.div`
@@ -54,7 +55,10 @@ export default function (props: SearchBarProps) {
   return (
     <Wrapper>
       <StyledSearchIcon size={14} />
-      <SearchBar placeholder={props.placeholder} />
+      <SearchBar
+        placeholder={props.placeholder}
+        onChange={(e) => props.onSearch(e.target.value)}
+      />
     </Wrapper>
   );
 }
