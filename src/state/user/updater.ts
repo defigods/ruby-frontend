@@ -4,22 +4,22 @@ import { AppDispatch } from '..';
 import { useIsTokenPending, useTokens } from '../tokens/hooks';
 import { fetchUserTokenList } from './actions';
 
-function createDummyData() {
+function createDummyData(suffix: string = '') {
   return [
     {
-      ticker: 'WAYNE',
+      ticker: 'WAYNE' + suffix,
       quantity: 430.32,
     },
     {
-      ticker: 'STARK',
+      ticker: 'STARK' + suffix,
       quantity: 314.45,
     },
     {
-      ticker: 'PREY',
+      ticker: 'PREY' + suffix,
       quantity: 0.4392,
     },
     {
-      ticker: 'RUBI',
+      ticker: 'RUBI' + suffix,
       quantity: 404.50291,
     },
   ];
@@ -41,7 +41,7 @@ export default function (): null {
       // TODO: FIX THIS WITH AN ACTUAL BACK-END CALL
       dispatch(
         fetchUserTokenList.fulfilled(
-          createDummyData().map((d) => ({
+          [...createDummyData(), ...createDummyData('_2')].map((d) => ({
             ...tokens.find((t) => t.ticker === d.ticker)!,
             quantity: d.quantity,
           })),

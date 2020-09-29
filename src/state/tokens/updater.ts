@@ -79,27 +79,27 @@ function createPriceData(
   };
 }
 
-function createDummyData(): Token[] {
+function createDummyData(suffix: string = ''): Token[] {
   return [
     {
-      ticker: 'WAYNE',
+      ticker: 'WAYNE' + suffix,
       name: 'Wayne Inc.',
       ...createPriceData(432.53, 0.02),
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum',
     },
     {
-      ticker: 'STARK',
+      ticker: 'STARK' + suffix,
       name: 'Stark Industries',
       ...createPriceData(320.53, 0.02),
     },
     {
-      ticker: 'PREY',
+      ticker: 'PREY' + suffix,
       name: 'Prey Foundation',
       ...createPriceData(21.34, 0.12),
     },
     {
-      ticker: 'RUBI',
+      ticker: 'RUBI' + suffix,
       name: 'Rubicon Governance',
       ...createPriceData(3.89, 0.14),
     },
@@ -111,18 +111,21 @@ export default function (): null {
 
   const fetchTokens = useCallback(async () => {
     dispatch(fetchTokenList.pending());
-
     setTimeout(() => {
       // TODO: FIX THIS WITH AN ACTUAL BACK-END CALL
-      const fakeData = createDummyData();
-      dispatch(fetchTokenList.fulfilled(fakeData));
+      dispatch(
+        fetchTokenList.fulfilled([
+          ...createDummyData(),
+          ...createDummyData('_2'),
+        ]),
+      );
     }, 1000);
-  }, []);
+  }, [dispatch]);
 
   // load in the tokens
   useEffect(() => {
     fetchTokens();
-  }, []);
+  }, [fetchTokens]);
 
   return null;
 }

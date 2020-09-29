@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import CountUp from 'react-countup';
 import styled from 'styled-components';
 import {
   useSelectedTimeHistory,
   useSelectedToken,
 } from '../../state/tokens/hooks';
-import { TimeHistory } from '../../types';
-import { getPercentChange, getSortedPrices, usePrevious } from '../../utils';
+import { getPercentChange, usePrevious } from '../../utils';
 
 interface HeaderViewProps {
   timestamp?: number;
@@ -53,18 +52,6 @@ export default function ({ timestamp }: HeaderViewProps) {
   const selectedTimeHistory = useSelectedTimeHistory();
 
   // TODO: create a loading thing if the prices r being loaded
-
-  const prices = useMemo(() => {
-    return getSortedPrices(
-      selectedToken.prices[selectedTimeHistory] ||
-        selectedToken.prices[TimeHistory.ONE_DAY]!,
-    );
-  }, [selectedToken, selectedTimeHistory]);
-
-  let upwardsTrend = false;
-  if (prices.length === 0 || prices[0] < prices[prices.length - 1]) {
-    upwardsTrend = true;
-  }
 
   const [absoluteDifference, percentChange] = useMemo(() => {
     return getPercentChange(selectedToken, timestamp);

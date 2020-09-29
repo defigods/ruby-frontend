@@ -61,7 +61,7 @@ export default function ({ data, onHover }: LineChartProps) {
   const [windowState, setWindowSize] = useState([0, 0]);
   const [hovering, setHovering] = useState(true);
 
-  const windowSize = useDebounce(windowState, 100);
+  const [windowHeight, windowWidth] = useDebounce(windowState, 100);
 
   useEffect(() => {
     const handler = () => {
@@ -72,7 +72,7 @@ export default function ({ data, onHover }: LineChartProps) {
     window.addEventListener('resize', handler);
 
     return () => window.removeEventListener('resize', handler);
-  }, [windowSize[0], windowSize[1]]);
+  }, [windowHeight, windowWidth]);
 
   const svgContainer = useRef<SVGSVGElement>(null);
 
@@ -179,12 +179,12 @@ export default function ({ data, onHover }: LineChartProps) {
     );
 
     return [Line, InnerCircle, OuterCircle, TextLabel];
-  }, [mouseX, mouseY, points, hovering]);
+  }, [mouseX, mouseY, points, hovering, rect, theme.text.secondary]);
 
   useEffect(() => {
     onHover(hovering ? hoveredTimestamp : undefined);
-  }, [hoveredTimestamp, hovering]);
-  console.log(rect?.width, rect?.height);
+  }, [hoveredTimestamp, hovering, onHover]);
+
   return (
     <Wrapper ref={loadDimensions}>
       <StyledSVG
