@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import CountUp from 'react-countup';
+import { useIsUserTokenPending, useUserTotal } from '../../state/user/hooks';
 
 const Wrapper = styled.div`
   flex-direction: column;
@@ -22,14 +23,19 @@ const UserTotal = styled.span`
 `;
 
 export default function () {
-  // TODO
-  const userTotal = 245940.02;
+  const tokensLoading = useIsUserTokenPending();
+  const userTotal = useUserTotal();
 
   return (
     <Wrapper>
       <Label>Portfolio Total:</Label>
       <UserTotal>
-        <CountUp end={userTotal} decimals={2} prefix="$" separator="," />
+        <CountUp
+          end={tokensLoading ? 0 : userTotal}
+          decimals={2}
+          prefix="$"
+          separator=","
+        />
       </UserTotal>
     </Wrapper>
   );
