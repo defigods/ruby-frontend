@@ -11,6 +11,7 @@ import App from './containers/App';
 import ApplicationUpdater from './state/application/updater';
 import TokensUpdater from './state/tokens/updater';
 import UserUpdater from './state/user/updater';
+import SocketProvider from './components/SocketProvider';
 
 const Updaters = () => {
   return (
@@ -25,15 +26,17 @@ const Updaters = () => {
 ReactDOM.render(
   <React.StrictMode>
     <FixedGlobalStyle />
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Provider store={store}>
-        <Updaters />
-        <ThemeProvider>
-          <ThemedGlobalStyle />
-          <App />
-        </ThemeProvider>
-      </Provider>
-    </Web3ReactProvider>
+    <Provider store={store}>
+      <SocketProvider>
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <Updaters />
+          <ThemeProvider>
+            <ThemedGlobalStyle />
+            <App />
+          </ThemeProvider>
+        </Web3ReactProvider>
+      </SocketProvider>
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

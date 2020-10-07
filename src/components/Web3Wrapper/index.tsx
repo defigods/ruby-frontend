@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { injected } from '../../connectors';
 import Loader from '../Loader';
 import logo from '../../assets/img/logo-text.png';
+import { useWebSocket } from '../SocketProvider';
 
 const MessageWrapper = styled.div`
   display: flex;
@@ -33,6 +34,8 @@ export default function ({ children }: { children: JSX.Element }) {
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect();
 
+  const websocket = useWebSocket();
+
   useEffect(() => {
     if (triedEager && !active) {
       activate(injected, undefined, true).catch((err) => {
@@ -41,7 +44,7 @@ export default function ({ children }: { children: JSX.Element }) {
     }
   }, [triedEager, active, activate]);
 
-  if (!triedEager && !active) {
+  if (websocket.loading || (!triedEager && !active)) {
     return (
       <MessageWrapper>
         <Loader size="100px" />

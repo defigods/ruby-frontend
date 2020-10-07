@@ -26,13 +26,13 @@ declare module 'styled-components' {
 export function createTheme(darkMode: boolean): DefaultTheme {
   return {
     colors: {
-      primary: darkMode ? '#222329' : '',
-      secondary: darkMode ? '#080D17' : '',
-      tertiary: darkMode ? '#BA2F2A' : '',
+      primary: darkMode ? '#222329' : '#FFFFFF',
+      secondary: darkMode ? '#080D17' : '#f5f8fa',
+      tertiary: '#BA2F2A',
     },
     text: {
-      primary: darkMode ? '#ECE9E4' : '',
-      secondary: darkMode ? '#82929F' : '',
+      primary: darkMode ? '#ECE9E4' : '#222228',
+      secondary: darkMode ? '#82929F' : '#A3A5AB',
       tertiary: '#BA2F2A',
 
       green: '#21CE99',
@@ -47,7 +47,7 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const darkMode = true; // TODO
+  const darkMode = false; // TODO
 
   const themeObject = useMemo(() => createTheme(darkMode), [darkMode]);
 
