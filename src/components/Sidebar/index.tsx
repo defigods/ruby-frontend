@@ -16,7 +16,7 @@ const Wrapper = styled.div`
 `;
 
 const LogoWrapper = styled.div`
-  background-color: ${({ theme }) => theme.text.secondaryRed};
+  background-color: ${({ theme }) => theme.colors.logoBackground};
   width: 100%;
   padding: 8px 20px;
   display: flex;

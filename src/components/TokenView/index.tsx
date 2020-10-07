@@ -46,7 +46,7 @@ const TradeWrapper = styled.div`
 const TradeButton = styled.div`
   padding: 10px 30px;
   border-radius: 5px;
-  color: ${({ theme }) => theme.text.primary};
+  color: ${({ theme }) => theme.text.againstRed};
   background-color: ${({ theme }) => theme.colors.tertiary};
   transition: all 0.1s ease-in;
   cursor: pointer;

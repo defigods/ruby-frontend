@@ -34,7 +34,7 @@ const NetworkCard = styled.span`
   top: -30px;
   font-weight: 500;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.text.primary};
+  color: ${({ theme }) => theme.text.againstRed};
   background-color: ${({ theme }) => theme.colors.tertiary};
   padding: 5px 10px;
   white-space: nowrap;

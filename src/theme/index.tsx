@@ -11,6 +11,7 @@ declare module 'styled-components' {
       primary: string;
       secondary: string;
       tertiary: string;
+      logoBackground: string;
     };
     text: {
       primary: string;
@@ -18,7 +19,7 @@ declare module 'styled-components' {
       tertiary: string;
       green: string;
       red: string;
-      secondaryRed: string;
+      againstRed: string;
     };
   }
 }
@@ -29,6 +30,7 @@ export function createTheme(darkMode: boolean): DefaultTheme {
       primary: darkMode ? '#222329' : '#FFFFFF',
       secondary: darkMode ? '#080D17' : '#f5f8fa',
       tertiary: '#BA2F2A',
+      logoBackground: darkMode ? '#461210' : '#f5f8fa',
     },
     text: {
       primary: darkMode ? '#ECE9E4' : '#222228',
@@ -37,7 +39,8 @@ export function createTheme(darkMode: boolean): DefaultTheme {
 
       green: '#21CE99',
       red: '#BA2F2A',
-      secondaryRed: '#461210',
+
+      againstRed: '#ECE9E4',
     },
   };
 }
