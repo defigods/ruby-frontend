@@ -29,7 +29,6 @@ const Warning = styled.div`
 
 export default function (props: TokenListProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
-
   const filteredData = search
     ? props.data.filter((item) => {
         return (

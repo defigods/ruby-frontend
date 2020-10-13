@@ -3,7 +3,6 @@ export enum TimeHistory {
   ONE_WEEK = '1 week|1w',
   ONE_MONTH = '1 month|1m',
   THREE_MONTHS = '3 months|3m',
-  SIX_MONTHS = '6 months|6m',
   ALL_TIME = 'all|all',
 }
 
@@ -14,7 +13,7 @@ export type TokenPrice = {
 };
 
 export interface TokenTrade {
-  quantity: number;
+  baseAmount: number;
   price: number;
 }
 
@@ -27,6 +26,7 @@ export interface Token {
   description?: string;
   asks: TokenTrade[];
   bids: TokenTrade[];
+  addresses: { chainId: number; value: string }[];
 }
 
 export interface UserToken extends Token {

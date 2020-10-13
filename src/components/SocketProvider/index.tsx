@@ -23,8 +23,8 @@ export default ({ children }: { children: React.ReactNode }) => {
     });
 
     _socket.on('success', () => {
-      setLoading(false);
       setSocket(_socket);
+      setLoading(false);
     });
 
     return () => {

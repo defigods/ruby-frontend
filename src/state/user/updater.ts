@@ -7,20 +7,12 @@ import { fetchUserTokenList } from './actions';
 function createDummyData(suffix: string = '') {
   return [
     {
-      ticker: 'WAYNE' + suffix,
+      ticker: 'WAYNE',
       quantity: 430.32,
     },
     {
-      ticker: 'STARK' + suffix,
+      ticker: 'STARK',
       quantity: 314.45,
-    },
-    {
-      ticker: 'PREY' + suffix,
-      quantity: 0.4392,
-    },
-    {
-      ticker: 'RUBI' + suffix,
-      quantity: 404.50291,
     },
   ];
 }
@@ -41,7 +33,7 @@ export default function (): null {
       // TODO: FIX THIS WITH AN ACTUAL BACK-END CALL
       dispatch(
         fetchUserTokenList.fulfilled(
-          [...createDummyData(), ...createDummyData('_2')].map((d) => ({
+          createDummyData().map((d) => ({
             ...tokens.find((t) => t.ticker === d.ticker)!,
             quantity: d.quantity,
           })),

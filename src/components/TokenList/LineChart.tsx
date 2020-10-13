@@ -38,7 +38,8 @@ export default function ({ data }: LineChartProps) {
   const points = data
     .map((rawY, rawX) => {
       const x = (rawX / maxX) * CHART_WIDTH;
-      const y = CHART_HEIGHT - ((rawY - minY) / (maxY - minY)) * CHART_HEIGHT;
+      const y =
+        CHART_HEIGHT - ((rawY - minY) / (maxY - minY + 1)) * CHART_HEIGHT;
       return `${x},${y}`;
     })
     .join(' ');

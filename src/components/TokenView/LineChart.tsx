@@ -94,7 +94,7 @@ export default function ({ data, onHover }: LineChartProps) {
 
     const average =
       prices.reduce((prev, curr) => (curr += prev)) / prices.length;
-    const yAverage = height - ((average - minY) / (maxY - minY)) * height;
+    const yAverage = height - ((average - minY) / (maxY - minY + 1)) * height;
 
     return [
       Object.keys(data)
@@ -102,7 +102,7 @@ export default function ({ data, onHover }: LineChartProps) {
         .map((timestamp, rawX) => {
           const rawY = data[timestamp];
           const x = (rawX / maxX) * width;
-          const y = height - ((rawY - minY) / (maxY - minY)) * height;
+          const y = height - ((rawY - minY) / (maxY - minY + 1)) * height;
           return [timestamp, x, y];
         }),
       yAverage,
@@ -114,6 +114,12 @@ export default function ({ data, onHover }: LineChartProps) {
   const [hoveredTimestamp, setHoveredTimestamp] = useState<number | undefined>(
     undefined,
   );
+
+  const rawValues = Object.values(data || {});
+  const upwardsTrend =
+    rawValues.length > 1
+      ? rawValues[0] < rawValues[rawValues.length - 1]
+      : false;
 
   const hoverTooltip = useMemo(() => {
     if (!rect || points.length === 0 || !hovering) return null;
@@ -133,7 +139,7 @@ export default function ({ data, onHover }: LineChartProps) {
       <polyline
         fill="none"
         stroke={theme.text.secondary}
-        strokeWidth={1}
+        strokeWidth={1.5}
         points={linePoints}
         key="line"
         style={{ opacity: 0.5 }}
@@ -145,8 +151,8 @@ export default function ({ data, onHover }: LineChartProps) {
         key="inner"
         cx={xGraph}
         cy={points[minIndex][2]}
-        r="1"
-        stroke="black"
+        r="3"
+        fill={upwardsTrend ? theme.text.green : theme.text.red}
       />
     );
 
@@ -155,8 +161,8 @@ export default function ({ data, onHover }: LineChartProps) {
         key="outer"
         cx={xGraph}
         cy={points[minIndex][2]}
-        r="2"
-        stroke={theme.text.secondary}
+        r="4"
+        fill={theme.text.secondary}
       />
     );
 
@@ -178,8 +184,8 @@ export default function ({ data, onHover }: LineChartProps) {
       </StyledTextLabel>
     );
 
-    return [Line, InnerCircle, OuterCircle, TextLabel];
-  }, [mouseX, mouseY, points, hovering, rect, theme.text.secondary]);
+    return [Line, OuterCircle, InnerCircle, TextLabel];
+  }, [mouseX, mouseY, points, hovering, rect, theme, upwardsTrend]);
 
   useEffect(() => {
     onHover(hovering ? hoveredTimestamp : undefined);
@@ -197,7 +203,7 @@ export default function ({ data, onHover }: LineChartProps) {
       >
         <polyline
           fill="none"
-          stroke={theme.text.red}
+          stroke={upwardsTrend ? theme.text.green : theme.text.red}
           strokeWidth={2}
           points={points.map(([_, x, y]) => `${x},${y}`).join(' ')}
         />

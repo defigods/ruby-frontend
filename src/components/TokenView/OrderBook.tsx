@@ -63,23 +63,23 @@ const BodyItem = styled.span`
   font-size: 11px;
 `;
 
-const Ask = (props: { quantity: number; price: number }) => {
+const Ask = (props: { baseAmount: number; price: number }) => {
   const theme = useContext(ThemeContext);
   return (
     <BodyRow>
       <BodyItem style={{ color: theme.text.red }}>
         ${props.price.toFixed(2)}
       </BodyItem>
-      <BodyItem>{props.quantity.toFixed(4)}</BodyItem>
+      <BodyItem>{props.baseAmount.toFixed(4)}</BodyItem>
     </BodyRow>
   );
 };
 
-const Bid = (props: { quantity: number; price: number }) => {
+const Bid = (props: { baseAmount: number; price: number }) => {
   const theme = useContext(ThemeContext);
   return (
     <BodyRow>
-      <BodyItem>{props.quantity.toFixed(4)}</BodyItem>
+      <BodyItem>{props.baseAmount.toFixed(4)}</BodyItem>
       <BodyItem style={{ color: theme.text.green }}>
         ${props.price.toFixed(2)}
       </BodyItem>
@@ -91,7 +91,6 @@ export default function () {
   const token = useSelectedToken();
 
   if (!token) return null;
-
   return (
     <Wrapper>
       <HeaderWrapper>

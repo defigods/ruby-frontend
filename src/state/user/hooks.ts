@@ -14,6 +14,10 @@ export function useIsUserTokenPending(): boolean {
   return useSelector((state: AppState) => state.user.loading);
 }
 
+export function useQuoteTicker(): string {
+  return useSelector((state: AppState) => state.user.quoteTicker);
+}
+
 export function useUserTotal(): number {
   const tokens = useUserTokens();
 

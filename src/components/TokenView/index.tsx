@@ -89,8 +89,7 @@ export default function () {
         <About />
       </BottomWrapper>
       <TradeWrapper>
-        <TradeButton>Buy</TradeButton>
-        <TradeButton>Sell</TradeButton>
+        <TradeButton>Trade</TradeButton>
       </TradeWrapper>
     </Wrapper>
   );

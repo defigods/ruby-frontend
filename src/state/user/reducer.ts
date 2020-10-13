@@ -7,6 +7,7 @@ export interface UserState {
   readonly darkMode: boolean;
   readonly loading: boolean;
   readonly error?: Error;
+  readonly quoteTicker: string;
 }
 
 const initialState: UserState = {
@@ -14,6 +15,7 @@ const initialState: UserState = {
   darkMode: true,
   loading: true,
   error: undefined,
+  quoteTicker: 'DAI',
 };
 
 export default createReducer(initialState, (builder) =>

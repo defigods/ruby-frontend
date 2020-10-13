@@ -49,6 +49,10 @@ export function getPercentChange(
   return [difference, difference / token.currentPrice];
 }
 
+export function getTokenAddress(token: Token, chainId: number) {
+  return token.addresses.find((t) => t.chainId === chainId)?.value;
+}
+
 export * from './debounce';
-export * from './library';
+export * from './web3';
 export * from './hooks';
