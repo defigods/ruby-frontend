@@ -1,10 +1,14 @@
-import { useWeb3React } from '@web3-react/core';
 import React from 'react';
 import { ChevronUp } from 'react-feather';
 import styled from 'styled-components';
+import { useActiveWeb3React } from '../../hooks';
 import { useBlockNumber } from '../../state/application/hooks';
 import { shortenAddress } from '../../utils';
 import Identicon from '../Identicon';
+
+interface SidebarUserProps {
+  onOpen: () => void;
+}
 
 const NETWORK_LABELS: { [key: number]: string } = {
   4: 'Rinkeby',
@@ -22,6 +26,7 @@ const Wrapper = styled.div`
   padding: 15px 15px;
   align-items: center;
   background-color: ${({ theme }) => theme.colors.secondary};
+  cursor: pointer;
 `;
 
 const NetworkCard = styled.span`
@@ -49,12 +54,12 @@ const UserText = styled.span`
   font-size: 12px;
 `;
 
-export default function () {
-  const { account, chainId } = useWeb3React();
+export default function (props: SidebarUserProps) {
+  const { account, chainId } = useActiveWeb3React();
   const blockNumber = useBlockNumber();
 
   return (
-    <Wrapper>
+    <Wrapper onClick={props.onOpen}>
       {chainId && NETWORK_LABELS[chainId] && (
         <NetworkCard>
           {NETWORK_LABELS[chainId]} ({blockNumber})

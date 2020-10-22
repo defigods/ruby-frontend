@@ -4,6 +4,7 @@ import {
   DefaultTheme,
   ThemeProvider as StyledComponentsThemeProvider,
 } from 'styled-components';
+import { useDarkMode } from '../state/user/hooks';
 
 declare module 'styled-components' {
   export interface DefaultTheme {
@@ -12,6 +13,7 @@ declare module 'styled-components' {
       secondary: string;
       tertiary: string;
       logoBackground: string;
+      modalBackground: string;
     };
     text: {
       primary: string;
@@ -31,6 +33,7 @@ export function createTheme(darkMode: boolean): DefaultTheme {
       secondary: darkMode ? '#080D17' : '#f5f8fa',
       tertiary: '#BA2F2A',
       logoBackground: darkMode ? '#461210' : '#f5f8fa',
+      modalBackground: darkMode ? 'rgba(0,0,0,.425)' : 'rgba(0,0,0,0.3)',
     },
     text: {
       primary: darkMode ? '#ECE9E4' : '#222228',
@@ -50,7 +53,7 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const darkMode = false; // TODO
+  const darkMode = useDarkMode();
 
   const themeObject = useMemo(() => createTheme(darkMode), [darkMode]);
 

@@ -1,8 +1,8 @@
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
-import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
+import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 import { useMemo } from 'react';
+import { useActiveWeb3React } from '../hooks';
 
 export function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
@@ -49,7 +49,7 @@ export function useContract(
   ABI: any,
   withSignerIfPossible = true,
 ): Contract | null {
-  const { library, account } = useWeb3React();
+  const { library, account } = useActiveWeb3React();
 
   return useMemo(() => {
     if (!address || !ABI || !library) return null;

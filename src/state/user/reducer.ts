@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { UserToken } from '../../types';
-import { fetchUserTokenList, updateDarkMode } from './actions';
+import { fetchUserTokenList, toggleDarkMode } from './actions';
 
 export interface UserState {
   readonly tokens: UserToken[];
@@ -12,7 +12,7 @@ export interface UserState {
 
 const initialState: UserState = {
   tokens: [],
-  darkMode: true,
+  darkMode: false,
   loading: true,
   error: undefined,
   quoteTicker: 'DAI',
@@ -42,10 +42,10 @@ export default createReducer(initialState, (builder) =>
         tokens: [],
       };
     })
-    .addCase(updateDarkMode, (state, action) => {
+    .addCase(toggleDarkMode, (state, action) => {
       return {
         ...state,
-        darkMode: action.payload,
+        darkMode: !state.darkMode,
       };
     }),
 );

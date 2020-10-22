@@ -1,11 +1,11 @@
-import { useWeb3React } from '@web3-react/core';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useActiveWeb3React } from '../../hooks';
 import { useDebounce } from '../../utils';
 import { updateBlockNumber } from './actions';
 
 export default function (): null {
-  const { library, chainId } = useWeb3React();
+  const { library, chainId } = useActiveWeb3React();
   const dispatch = useDispatch();
 
   const [state, setState] = useState<{

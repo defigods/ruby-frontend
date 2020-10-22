@@ -15,4 +15,4 @@ export const fetchUserTokenList: Readonly<{
   rejected: createAction('user/fetchTokenList/rejected'),
 };
 
-export const updateDarkMode = createAction<boolean>('user/updateDarkMode');
+export const toggleDarkMode = createAction('user/toggleDarkMode');

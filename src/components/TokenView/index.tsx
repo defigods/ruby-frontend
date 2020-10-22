@@ -4,6 +4,7 @@ import {
   useSelectedTimeHistory,
   useSelectedToken,
 } from '../../state/tokens/hooks';
+import TradeModal from '../TradeModal';
 import About from './About';
 import HeaderView from './HeaderView';
 import LineChart from './LineChart';
@@ -68,6 +69,8 @@ export default function () {
     undefined,
   );
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   if (!selectedToken) {
     return (
       <Wrapper>
@@ -89,8 +92,12 @@ export default function () {
         <About />
       </BottomWrapper>
       <TradeWrapper>
-        <TradeButton>Trade</TradeButton>
+        <TradeButton onClick={() => setModalOpen(true)}>Trade</TradeButton>
       </TradeWrapper>
+      <TradeModal
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+      />
     </Wrapper>
   );
 }

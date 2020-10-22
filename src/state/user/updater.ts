@@ -1,21 +1,10 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
+import { useTokenBalances } from '../../hooks/wallet';
+import { UserToken } from '../../types';
 import { useIsTokenPending, useTokens } from '../tokens/hooks';
 import { fetchUserTokenList } from './actions';
-
-function createDummyData(suffix: string = '') {
-  return [
-    {
-      ticker: 'WAYNE',
-      quantity: 430.32,
-    },
-    {
-      ticker: 'STARK',
-      quantity: 314.45,
-    },
-  ];
-}
 
 export default function (): null {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,28 +13,28 @@ export default function (): null {
 
   const tokens = useTokens();
 
+  const [userTokens, userTokensLoading] = useTokenBalances();
+
   const fetchTokens = useCallback(async () => {
     dispatch(fetchUserTokenList.pending());
 
-    if (isTokenPending) return;
+    if (isTokenPending || userTokensLoading) return;
 
-    setTimeout(() => {
-      // TODO: FIX THIS WITH AN ACTUAL BACK-END CALL
-      dispatch(
-        fetchUserTokenList.fulfilled(
-          createDummyData().map((d) => ({
-            ...tokens.find((t) => t.ticker === d.ticker)!,
-            quantity: d.quantity,
-          })),
-        ),
-      );
-    }, 1000);
-  }, [dispatch, isTokenPending, tokens]);
+    const toDispatch = Object.keys(userTokens).map<UserToken>((ticker) => {
+      const token = tokens.find((t) => t.ticker === ticker)!;
+      return {
+        ...token,
+        quantity: userTokens[ticker],
+      };
+    });
+
+    dispatch(fetchUserTokenList.fulfilled(toDispatch));
+  }, [dispatch, isTokenPending, tokens, userTokens, userTokensLoading]);
 
   // load in the tokens
   useEffect(() => {
     fetchTokens();
-  }, [isTokenPending, fetchTokens]);
+  }, [isTokenPending, fetchTokens, userTokensLoading]);
 
   return null;
 }

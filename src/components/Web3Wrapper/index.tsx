@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { useWeb3React } from '@web3-react/core';
-import { useEagerConnect } from '../../hooks';
+import { useActiveWeb3React, useEagerConnect } from '../../hooks';
 import styled from 'styled-components';
 import { injected } from '../../connectors';
 import Loader from '../Loader';
@@ -29,7 +28,7 @@ const Logo = styled.img`
 `;
 
 export default function ({ children }: { children: JSX.Element }) {
-  const { active, activate } = useWeb3React();
+  const { active, activate } = useActiveWeb3React();
 
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect();

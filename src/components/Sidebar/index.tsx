@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import logo from '../../assets/img/logo-text.png';
 import SidebarLinks from './SidebarLinks';
 import SidebarTotal from './SidebarTotal';
 import SidebarUser from './SidebarUser';
+import UserSettings from '../UserSettings';
 
 // TODO: optimize for mobile
 const Wrapper = styled.div`
@@ -38,6 +39,8 @@ const ContentWrapper = styled.div`
 `;
 
 export default function () {
+  const [userSettingsOpen, setUserSettingsOpen] = useState(false);
+
   return (
     <Wrapper>
       <LogoWrapper>
@@ -49,7 +52,11 @@ export default function () {
         <SidebarTotal />
         <SidebarLinks />
       </ContentWrapper>
-      <SidebarUser />
+      <SidebarUser onOpen={() => setUserSettingsOpen(true)} />
+      <UserSettings
+        isOpen={userSettingsOpen}
+        onRequestClose={() => setUserSettingsOpen(false)}
+      />
     </Wrapper>
   );
 }

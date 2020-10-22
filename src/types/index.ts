@@ -6,6 +6,8 @@ export enum TimeHistory {
   ALL_TIME = 'all|all',
 }
 
+export type Pair<B, Q> = [B, Q];
+
 export type TokenPrice = {
   [key in TimeHistory]?: {
     [timestamp: number]: number;

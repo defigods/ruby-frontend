@@ -1,6 +1,11 @@
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { injected } from '../connectors';
+import { Web3Provider } from '@ethersproject/providers';
+
+export function useActiveWeb3React() {
+  return useWeb3React<Web3Provider>();
+}
 
 export function useEagerConnect() {
   const { activate, active } = useWeb3React(); // specifically using useWeb3ReactCore because of what this hook does

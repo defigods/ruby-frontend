@@ -1,9 +1,9 @@
-import { useWeb3React } from '@web3-react/core';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { useWebSocket } from '../../components/SocketProvider';
-import { TimeHistory, Token, TokenPrice, TokenTrade } from '../../types';
+import { useActiveWeb3React } from '../../hooks';
+import { Token } from '../../types';
 import { useQuoteTicker } from '../user/hooks';
 import { fetchTokenList } from './actions';
 
@@ -109,20 +109,18 @@ import { fetchTokenList } from './actions';
 
 export default function (): null {
   const dispatch = useDispatch<AppDispatch>();
-  const { chainId } = useWeb3React();
+  const { chainId } = useActiveWeb3React();
   const websocket = useWebSocket();
   const quoteTicker = useQuoteTicker();
 
   useEffect(() => {
     if (websocket.loading || !chainId || !quoteTicker) return;
     dispatch(fetchTokenList.pending());
-    console.log('sending', websocket.socket, chainId, quoteTicker);
     websocket.socket?.emit(
       'LOAD_TOKENS',
       chainId,
       quoteTicker,
       (tokens: Token[]) => {
-        console.log(tokens);
         dispatch(fetchTokenList.fulfilled(tokens));
       },
     );
