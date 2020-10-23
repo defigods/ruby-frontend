@@ -19,6 +19,14 @@ export interface TokenTrade {
   price: number;
 }
 
+export interface QuoteToken {
+  ticker: string;
+  name: string;
+  logo?: string;
+  description?: string;
+  addresses: { chainId: number; value: string }[];
+}
+
 export interface Token {
   ticker: string;
   name: string;
@@ -35,4 +43,12 @@ export interface UserToken extends Token {
   quantity: number;
   // purchases: [timestamp, number][]
   // etc
+}
+
+export interface ContractOffer {
+  baseAddress: string;
+  baseAmount: number;
+  quoteAddress: string;
+  quoteAmount: number;
+  price: number; // baseAmount / quoteAmount
 }

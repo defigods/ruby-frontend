@@ -20,13 +20,17 @@ export default function (): null {
 
     if (isTokenPending || userTokensLoading) return;
 
-    const toDispatch = Object.keys(userTokens).map<UserToken>((ticker) => {
-      const token = tokens.find((t) => t.ticker === ticker)!;
-      return {
-        ...token,
-        quantity: userTokens[ticker],
-      };
-    });
+    // must ignore the quote balances
+    const toDispatch = Object.keys(userTokens)
+      .map<UserToken | undefined>((ticker) => {
+        const token = tokens.find((t) => t.ticker === ticker)!;
+        if (!token) return undefined;
+        return {
+          ...token,
+          quantity: userTokens[ticker],
+        };
+      })
+      .filter((t) => t !== undefined) as UserToken[];
 
     dispatch(fetchUserTokenList.fulfilled(toDispatch));
   }, [dispatch, isTokenPending, tokens, userTokens, userTokensLoading]);

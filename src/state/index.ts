@@ -3,6 +3,7 @@ import { save, load } from 'redux-localstorage-simple';
 import application from './application/reducer';
 import tokens from './tokens/reducer';
 import user from './user/reducer';
+import quotes from './quotes/reducer';
 
 const PERSISTENT_KEYS: string[] = ['user'];
 
@@ -11,6 +12,7 @@ const store = configureStore({
     application,
     tokens,
     user,
+    quotes,
   },
   middleware: [
     ...getDefaultMiddleware({ thunk: false }),

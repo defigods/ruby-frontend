@@ -11,12 +11,14 @@ import App from './containers/App';
 import ApplicationUpdater from './state/application/updater';
 import TokensUpdater from './state/tokens/updater';
 import UserUpdater from './state/user/updater';
+import QuotesUpdater from './state/quotes/updater';
 import SocketProvider from './components/SocketProvider';
 
 const Updaters = () => {
   return (
     <>
       <ApplicationUpdater />
+      <QuotesUpdater />
       <TokensUpdater />
       <UserUpdater />
     </>

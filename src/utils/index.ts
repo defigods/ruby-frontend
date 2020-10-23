@@ -1,5 +1,5 @@
 import { getAddress } from 'ethers/lib/utils';
-import { TimeHistory, Token } from '../types';
+import { QuoteToken, TimeHistory, Token } from '../types';
 
 export function isAddress(value: any): string | false {
   try {
@@ -49,7 +49,7 @@ export function getPercentChange(
   return [difference, difference / token.currentPrice];
 }
 
-export function getTokenAddress(token: Token, chainId: number) {
+export function getTokenAddress(token: Token | QuoteToken, chainId: number) {
   return token.addresses.find((t) => t.chainId === chainId)?.value;
 }
 

@@ -1,15 +1,16 @@
 import { useIsTokenPending, useTokens } from '../state/tokens/hooks';
-import { Interface, FunctionFragment } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { useEffect, useMemo, useState } from 'react';
-import { getContract, getTokenAddress, useContract } from '../utils';
+import { getContract, getTokenAddress } from '../utils';
 import { useActiveWeb3React } from '.';
 import { Pair } from '../types';
+import { useQuotes } from '../state/quotes/hooks';
 
 export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
   const tokens = useTokens();
+  const quotes = useQuotes();
   const tokensLoading = useIsTokenPending();
   const { chainId, account, library } = useActiveWeb3React();
 
@@ -18,18 +19,24 @@ export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
 
   const contracts = useMemo(() => {
     if (!library || !chainId || tokensLoading) return [];
-    return tokens.map<Pair<string, Contract | undefined>>((t) => {
-      try {
-        return [
-          t.ticker,
-          getContract(getTokenAddress(t, chainId!)!, ERC20_INTERFACE, library),
-        ];
-      } catch (error) {
-        console.error('Failed to get contract', error);
-        return [t.ticker, undefined];
-      }
-    });
-  }, [tokens, chainId, library, tokensLoading]);
+    return [...tokens, ...quotes].map<Pair<string, Contract | undefined>>(
+      (t) => {
+        try {
+          return [
+            t.ticker,
+            getContract(
+              getTokenAddress(t, chainId!)!,
+              ERC20_INTERFACE,
+              library,
+            ),
+          ];
+        } catch (error) {
+          console.error('Failed to get contract', error);
+          return [t.ticker, undefined];
+        }
+      },
+    );
+  }, [tokens, quotes, chainId, library, tokensLoading]);
 
   useEffect(() => {
     if (contracts.length === 0 || !account) return;
