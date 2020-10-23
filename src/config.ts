@@ -11,7 +11,7 @@ export const markets: Record<
   //   blockNumber: 0,
   // },
   [42]: {
-    address: '0x450C5368A2f39cb89F1266AE0B8c425167c0095f',
+    address: '0x1b64D1839362A4B5ABF0DccAb8c06F362d76152D',
     blockNumber: 20875039,
   },
 };

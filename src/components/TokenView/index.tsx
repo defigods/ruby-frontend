@@ -4,6 +4,7 @@ import {
   useSelectedTimeHistory,
   useSelectedToken,
 } from '../../state/tokens/hooks';
+import MatchModal from '../MatchModal';
 import TradeModal from '../TradeModal';
 import About from './About';
 import HeaderView from './HeaderView';
@@ -69,7 +70,11 @@ export default function () {
     undefined,
   );
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [[matchOpen, buyOpen, sellOpen], setModalsOpen] = useState([
+    false,
+    false,
+    false,
+  ]);
 
   if (!selectedToken) {
     return (
@@ -92,11 +97,24 @@ export default function () {
         <About />
       </BottomWrapper>
       <TradeWrapper>
-        <TradeButton onClick={() => setModalOpen(true)}>Trade</TradeButton>
+        <TradeButton onClick={() => setModalsOpen([true, false, false])}>
+          Match
+        </TradeButton>
+        <TradeButton onClick={() => setModalsOpen([false, true, false])}>
+          Buy
+        </TradeButton>
+        <TradeButton onClick={() => setModalsOpen([false, false, true])}>
+          Sell
+        </TradeButton>
       </TradeWrapper>
+      <MatchModal
+        isOpen={matchOpen}
+        onRequestClose={() => setModalsOpen([false, false, false])}
+      />
       <TradeModal
-        isOpen={modalOpen}
-        onRequestClose={() => setModalOpen(false)}
+        isOpen={buyOpen || sellOpen}
+        isBuy={buyOpen}
+        onRequestClose={() => setModalsOpen([false, false, false])}
       />
     </Wrapper>
   );

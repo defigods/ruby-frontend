@@ -44,8 +44,6 @@ export function getPercentChange(
         Number(Object.keys(token.prices[timeHistory]!)[0])
       ];
 
-  console.log(token.currentPrice, base);
-
   const difference = token.currentPrice - base;
 
   return [difference, difference / token.currentPrice];

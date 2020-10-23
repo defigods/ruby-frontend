@@ -5,7 +5,30 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { useMemo } from 'react';
 import { useActiveWeb3React } from '../hooks';
 import { ContractOffer } from '../types';
-import { formatEther } from 'ethers/lib/utils';
+import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { markets } from '../config';
+import { MaxUint256 } from '@ethersproject/constants';
+
+export async function executeTrade(
+  contract: Contract,
+  payAmount: string,
+  payGem: string,
+  buyAmount: string,
+  buyGem: string,
+) {
+  contract.functions
+    .make(payGem, buyGem, parseUnits(payAmount, 18), parseUnits(buyAmount, 18))
+    .then(() => {
+      console.log('sent a thing');
+    });
+}
+
+export async function requestAllowance(contract: Contract, chainId: number) {
+  const spender = markets[chainId].address;
+  contract.approve(spender, MaxUint256).then(() => {
+    console.log('approved');
+  });
+}
 
 export function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
@@ -104,32 +127,3 @@ export async function getBestOffer(
     price: baseAmount / quoteAmount,
   };
 }
-
-// export async function parseTradeEvent(event: EventData): Promise<TradeEvent> {
-//   const isBuy = await Token.isQuoteToken(event.returnValues['pay_gem']);
-
-//   const baseAddress = isBuy
-//     ? event.returnValues['buy_gem']
-//     : event.returnValues['pay_gem'];
-//   const quoteAddress = isBuy
-//     ? event.returnValues['pay_gem']
-//     : event.returnValues['buy_gem'];
-
-//   const baseAmount = formatERC20Amount(
-//     event.returnValues[isBuy ? 'buy_amt' : 'pay_amt'],
-//   );
-//   const quoteAmount = formatERC20Amount(
-//     event.returnValues[isBuy ? 'pay_amt' : 'buy_amt'],
-//   );
-
-//   const price = baseAmount / quoteAmount;
-
-//   return {
-//     isBuy,
-//     baseAddress,
-//     quoteAddress,
-//     baseAmount,
-//     quoteAmount,
-//     price,
-//   };
-// }

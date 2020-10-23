@@ -2,12 +2,17 @@ import { Contract } from '@ethersproject/contracts';
 import { useEffect, useMemo, useState } from 'react';
 import { useActiveWeb3React } from '.';
 import { markets } from '../config';
+import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { MARKET_INTERFACE } from '../constants/abis/RubiconMarket';
 import { selectQuoteToken } from '../state/quotes/actions';
 import { useSelectedQuote } from '../state/quotes/hooks';
 import { useSelectedToken } from '../state/tokens/hooks';
 import { ContractOffer } from '../types';
 import { getBestOffer, getTokenAddress, useContract } from '../utils';
+
+export function useTokenContract(token: string): Contract | null {
+  return useContract(token, ERC20_INTERFACE);
+}
 
 export function useMarketContract(): Contract | null {
   const { chainId } = useActiveWeb3React();
