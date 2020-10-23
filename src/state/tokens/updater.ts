@@ -3,9 +3,10 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { useWebSocket } from '../../components/SocketProvider';
 import { useActiveWeb3React } from '../../hooks';
-import { Token } from '../../types';
+import { TimeHistoryEntry, Token } from '../../types';
 import { useIsQuotePending, useSelectedQuote } from '../quotes/hooks';
-import { fetchTokenList } from './actions';
+import { fetchTokenList, fetchTokenTimeHistory } from './actions';
+import { useSelectedTimeHistory, useSelectedToken } from './hooks';
 
 export default function (): null {
   const dispatch = useDispatch<AppDispatch>();
@@ -26,6 +27,29 @@ export default function (): null {
       },
     );
   }, [dispatch, websocket.loading, chainId, quoteTicker, quotesLoading]);
+
+  const selectedToken = useSelectedToken();
+  const timeHistory = useSelectedTimeHistory();
+
+  useEffect(() => {
+    if (!selectedToken || !quoteTicker) {
+      return;
+    }
+
+    if (!(timeHistory in selectedToken.prices)) {
+      dispatch(fetchTokenTimeHistory.pending());
+      websocket.socket?.emit(
+        'LOAD_TIME_HISTORY',
+        chainId,
+        selectedToken.ticker,
+        quoteTicker.ticker,
+        timeHistory,
+        (timeHistoryEntry: TimeHistoryEntry) => {
+          dispatch(fetchTokenTimeHistory.fulfilled(timeHistoryEntry));
+        },
+      );
+    }
+  }, [dispatch, chainId, quoteTicker, selectedToken, timeHistory]);
 
   // // load in the tokens
   // useEffect(() => {

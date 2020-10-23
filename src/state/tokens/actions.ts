@@ -3,7 +3,7 @@ import {
   ActionCreatorWithPayload,
   createAction,
 } from '@reduxjs/toolkit';
-import { TimeHistory, Token } from '../../types';
+import { TimeHistory, TimeHistoryEntry, Token } from '../../types';
 
 export const fetchTokenList: Readonly<{
   pending: ActionCreatorWithoutPayload;
@@ -13,6 +13,16 @@ export const fetchTokenList: Readonly<{
   pending: createAction('tokens/fetchTokenList/pending'),
   fulfilled: createAction('tokens/fetchTokenList/fulfilled'),
   rejected: createAction('tokens/fetchTokenList/rejected'),
+};
+
+export const fetchTokenTimeHistory: Readonly<{
+  pending: ActionCreatorWithoutPayload;
+  fulfilled: ActionCreatorWithPayload<TimeHistoryEntry>;
+  rejected: ActionCreatorWithPayload<Error>;
+}> = {
+  pending: createAction('tokens/fetchTokenTimeHistory/pending'),
+  fulfilled: createAction('tokens/fetchTokenTimeHistory/fulfilled'),
+  rejected: createAction('tokens/fetchTokenTimeHistory/rejected'),
 };
 
 export const selectToken = createAction<string>('tokens/select');

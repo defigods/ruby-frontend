@@ -38,16 +38,20 @@ export default function (props: TokenListProps) {
       })
     : props.data;
 
+  const sortedData = filteredData.sort((a, b) => {
+    return b.currentPrice - a.currentPrice;
+  });
+
   return (
     <Wrapper>
       <SearchBar
         placeholder="Search by token or company name"
         onSearch={(s) => setSearch(s)}
       ></SearchBar>
-      {filteredData.map((item) => (
+      {sortedData.map((item) => (
         <TokenListItem {...item} key={item.title} />
       ))}
-      {filteredData.length === 0 && (
+      {sortedData.length === 0 && (
         <Warning>
           <AlertCircle size={12} style={{ marginRight: 5 }} />
           No tokens found

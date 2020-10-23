@@ -23,3 +23,7 @@ export function useIsTokenPending(): boolean {
 export function useSelectedTimeHistory(): TimeHistory {
   return useSelector((state: AppState) => state.tokens.selectedTimeHistory);
 }
+
+export function useTimeHistoryLoading(): boolean {
+  return useSelector((state: AppState) => state.tokens.timeHistoryLoading);
+}

@@ -54,7 +54,7 @@ export default function ({ timestamp }: HeaderViewProps) {
   // TODO: create a loading thing if the prices r being loaded
 
   const [absoluteDifference, percentChange] = useMemo(() => {
-    return getPercentChange(selectedToken, timestamp);
+    return getPercentChange(selectedToken, timestamp, selectedTimeHistory);
   }, [selectedToken, timestamp]);
 
   const [displayPrice, setDisplayPrice] = useState(0);

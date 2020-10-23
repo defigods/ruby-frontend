@@ -37,7 +37,7 @@ const AmountInput = styled.input`
   caret-color: ${({ theme }) => theme.colors.tertiary};
   border: none;
   outline: none;
-  padding: 2rem 1rem;
+  padding: 2rem 3rem;
   width: 100%;
   color: ${({ theme }) => theme.text.primary};
   text-align: center;
@@ -112,6 +112,7 @@ const InnerContentWrapper = styled.div`
   flex-direction: column;
   width: 100%;
   padding: 20px;
+  margin-top: 20px;
 `;
 
 const MainButton = styled.div<{ disabled: boolean }>`
@@ -125,7 +126,7 @@ const MainButton = styled.div<{ disabled: boolean }>`
   text-transform: uppercase;
   font-size: 14px;
   padding: 15px 0;
-  margin: 15px 0;
+  margin: 25px 0 10px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,7 +156,7 @@ const WalletBalance = styled.span`
 `;
 
 const SectionTitle = styled.span`
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: ${({ theme }) => theme.text.primary};
   width: 100%;
@@ -217,7 +218,7 @@ function useModalStyle(): Modal.Styles {
     content: {
       maxHeight: '95%',
       overflowY: 'auto',
-      width: '25.5rem',
+      width: '24.5rem',
       top: '50%',
       bottom: 'none',
       left: '50%',

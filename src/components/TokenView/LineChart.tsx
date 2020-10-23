@@ -8,7 +8,9 @@ import React, {
 } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
 import moment from 'moment';
-import { useDebounce } from '../../utils';
+import { getSortedPrices, useDebounce } from '../../utils';
+import { useTimeHistoryLoading } from '../../state/tokens/hooks';
+import Loader, { LoaderWrapper } from '../Loader';
 
 interface LineChartProps {
   data?: { [timestamp: number]: number };
@@ -86,7 +88,7 @@ export default function ({ data, onHover }: LineChartProps) {
     if (!data || !rect) return [[], 0];
     const height = rect.height;
     const width = rect.width;
-    const prices = Object.values(data);
+    const prices = getSortedPrices(data);
 
     const maxY = Math.max(...prices);
     const minY = Math.min(...prices);
@@ -98,6 +100,7 @@ export default function ({ data, onHover }: LineChartProps) {
 
     return [
       Object.keys(data)
+        .sort()
         .map((n) => Number(n))
         .map((timestamp, rawX) => {
           const rawY = data[timestamp];
@@ -190,6 +193,18 @@ export default function ({ data, onHover }: LineChartProps) {
   useEffect(() => {
     onHover(hovering ? hoveredTimestamp : undefined);
   }, [hoveredTimestamp, hovering, onHover]);
+
+  const timeHistoryLoading = useTimeHistoryLoading();
+
+  if (timeHistoryLoading) {
+    return (
+      <Wrapper>
+        <LoaderWrapper>
+          <Loader size={'50px'} />
+        </LoaderWrapper>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper ref={loadDimensions}>

@@ -8,10 +8,12 @@ export enum TimeHistory {
 
 export type Pair<B, Q> = [B, Q];
 
+export type TimeHistoryEntry = {
+  [timestamp: number]: number;
+};
+
 export type TokenPrice = {
-  [key in TimeHistory]?: {
-    [timestamp: number]: number;
-  };
+  [key in TimeHistory]?: TimeHistoryEntry;
 };
 
 export interface TokenTrade {
