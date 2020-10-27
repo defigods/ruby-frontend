@@ -32,7 +32,7 @@ export default function () {
   const data = userTokens.map((t) => ({
     ...t,
     title: t.ticker,
-    subtitle: `${t.quantity} TOKENS`,
+    subtitle: `${t.quantity.toFixed(2)} TOKENS`,
   }));
 
   return (

@@ -10,6 +10,7 @@ import { useQuotes } from '../state/quotes/hooks';
 import { formatEther } from 'ethers/lib/utils';
 import { markets } from '../config';
 import { useTokenContract } from './contract';
+import { useBlockNumber } from '../state/application/hooks';
 
 export function useTokenAllowance(token: string): [number, boolean] {
   const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ export function useTokenAllowance(token: string): [number, boolean] {
       setResult(formatted);
       setLoading(false);
     };
-
+    setLoading(true);
     fetchData();
   }, [token, owner, spender, tokenContract]);
 
@@ -64,6 +65,8 @@ export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
     );
   }, [tokens, quotes, chainId, library, tokensLoading]);
 
+  const blockNumber = useBlockNumber();
+
   useEffect(() => {
     if (contracts.length === 0 || !account) return;
 
@@ -92,7 +95,7 @@ export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
     };
 
     fetchData();
-  }, [contracts, account, loading]);
+  }, [contracts, account, loading, blockNumber]);
 
   return [results, loading];
 }

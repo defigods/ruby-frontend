@@ -1,12 +1,20 @@
+import { min } from 'moment';
 import { darken } from 'polished';
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { X } from 'react-feather';
 import Modal from 'react-modal';
 import styled, { css, ThemeContext } from 'styled-components';
-import { useBestOffers } from '../../hooks/contract';
-import { useTokenBalances } from '../../hooks/wallet';
+import { useActiveWeb3React } from '../../hooks';
+import {
+  useBestOffers,
+  useMarketContract,
+  useTokenContract,
+} from '../../hooks/contract';
+import { useTokenAllowance, useTokenBalances } from '../../hooks/wallet';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
+import { ContractOffer, QuoteToken, Token } from '../../types';
+import { executeMatch, getTokenAddress, requestAllowance } from '../../utils';
 import Loader from '../Loader';
 
 interface TradeModalProps {
@@ -37,7 +45,7 @@ const AmountInput = styled.input`
   caret-color: ${({ theme }) => theme.colors.tertiary};
   border: none;
   outline: none;
-  padding: 2rem 3rem;
+  padding: 2rem 4rem;
   width: 100%;
   color: ${({ theme }) => theme.text.primary};
   text-align: center;
@@ -183,6 +191,7 @@ const SectionItem = styled.div`
 
   span:last-child {
     color: ${({ theme }) => theme.text.primary};
+    font-weight: 500;
   }
 `;
 
@@ -204,7 +213,7 @@ const Line = styled.div`
 
 const Price = styled.span<{ isBuy: boolean }>`
   color: ${({ isBuy, theme }) =>
-    isBuy ? theme.text.red : theme.text.green} !important;
+    isBuy ? theme.text.green : theme.text.red} !important;
 `;
 
 function useWalletBalance(isBuySelected: boolean): [string, number] {
@@ -240,46 +249,182 @@ function useModalStyle(): Modal.Styles {
   };
 }
 
-function useButtonEnabled(walletBalance: number, input: string) {
+function useButtonEnabled(
+  walletBalance: number,
+  input: string,
+  allowance: number,
+  maxAmount: number,
+) {
   if (walletBalance === 0) {
     return false;
+  }
+
+  if (allowance === 0) {
+    return true;
   }
 
   if (isNaN(Number(input))) {
     return false;
   }
 
-  return walletBalance <= Number(input);
+  if (Number(input) === 0) {
+    return false;
+  }
+
+  return walletBalance >= Number(input) && Number(input) <= maxAmount;
 }
 
-function useButtonText(isBuy: boolean, walletBalance: number) {
+function useButtonText(
+  isBuy: boolean,
+  walletBalance: number,
+  allowance: number,
+) {
   if (walletBalance === 0) {
     return isBuy ? 'No funds available' : 'No supply available';
+  }
+
+  if (allowance === 0) {
+    return 'Enable';
   }
 
   return isBuy ? 'Buy' : 'Sell';
 }
 
+function useCalculatedSection(
+  offer: ContractOffer | undefined,
+  token: Token,
+  quote: QuoteToken,
+  buttonEnabled: boolean,
+  input: string,
+  isBuy: boolean,
+) {
+  if (!offer) {
+    return null;
+  }
+
+  const quantity = buttonEnabled
+    ? isBuy
+      ? Number(input) / offer.price
+      : Number(input) * offer.price
+    : isBuy
+    ? offer.baseAmount
+    : offer.quoteAmount;
+  const total = buttonEnabled
+    ? Number(input)
+    : isBuy
+    ? offer.quoteAmount
+    : offer.baseAmount;
+
+  return (
+    <>
+      <SectionItem>
+        <span>Price</span>
+        <Price isBuy={isBuy}>${offer.price.toFixed(2)}</Price>
+      </SectionItem>
+      <Line />
+      <SectionItem>
+        <span>Quantity</span>
+        <span>
+          {quantity.toFixed(4)} {isBuy ? token.ticker : quote.ticker}
+        </span>
+      </SectionItem>
+      <Line />
+      <SectionItem>
+        <span>Total</span>
+        <span>
+          {total.toFixed(4)} {isBuy ? quote.ticker : token.ticker}
+        </span>
+      </SectionItem>
+    </>
+  );
+}
+
 export default function (props: TradeModalProps) {
-  const token = useSelectedToken();
+  const token = useSelectedToken()!;
+  const quote = useSelectedQuote()!;
+
+  const { chainId } = useActiveWeb3React();
+
+  const tokenAddress = getTokenAddress(token, chainId!)!;
+  const quoteAddress = getTokenAddress(quote, chainId!)!;
 
   const [isBuySelected, toggleBuySelected] = useState(true);
   const [input, setInput] = useState('');
+
+  const [allowance, isAllowanceLoading] = useTokenAllowance(
+    isBuySelected ? quoteAddress : tokenAddress,
+  );
+  const tokenContract = useTokenContract(
+    isBuySelected ? quoteAddress : tokenAddress,
+  )!;
 
   const [offers, loadingOffers] = useBestOffers();
   const [walletTicker, walletBalance] = useWalletBalance(isBuySelected);
 
   const modalStyle = useModalStyle();
 
-  const buttonEnabled = useButtonEnabled(walletBalance, input);
-  const buttonText = useButtonText(isBuySelected, walletBalance);
-
   const currentOffer = isBuySelected ? offers.buy : offers.sell;
 
-  if (!token) {
-    // Should never happen
-    return null;
-  }
+  const buttonEnabled = useMemo(
+    () =>
+      useButtonEnabled(
+        walletBalance,
+        input,
+        allowance,
+        (isBuySelected
+          ? currentOffer?.quoteAmount
+          : currentOffer?.baseAmount) || 0,
+      ),
+    [isBuySelected, walletBalance, input, allowance, currentOffer],
+  );
+  const buttonText = useMemo(
+    () => useButtonText(isBuySelected, walletBalance, allowance),
+    [isBuySelected, walletBalance, allowance],
+  );
+
+  const marketContract = useMarketContract()!;
+
+  const maxCallback = useCallback(() => {
+    if (!currentOffer) return;
+    return setInput(
+      `${Math.min(
+        isBuySelected ? currentOffer.quoteAmount : currentOffer.baseAmount,
+        walletBalance,
+      )}`,
+    );
+  }, [currentOffer, walletBalance, setInput, isBuySelected]);
+
+  const executeClick = useCallback(async () => {
+    if (!buttonEnabled || !currentOffer) {
+      return;
+    }
+
+    if (allowance === 0) {
+      return requestAllowance(tokenContract, chainId!);
+    }
+
+    const toBuy = Number(input);
+    const maxAmount = isBuySelected
+      ? toBuy / currentOffer.price
+      : toBuy * currentOffer.price;
+
+    // TODO: execute the trade here :D
+    executeMatch(marketContract, currentOffer, maxAmount);
+    props.onRequestClose();
+  }, [allowance, buttonEnabled, marketContract, currentOffer, input]);
+
+  const calculatedSection = useMemo(
+    () =>
+      useCalculatedSection(
+        currentOffer,
+        token,
+        quote,
+        buttonEnabled,
+        input,
+        isBuySelected,
+      ),
+    [currentOffer, token, quote, input, isBuySelected, buttonEnabled],
+  );
 
   return (
     <Modal
@@ -301,9 +446,10 @@ export default function (props: TradeModalProps) {
               autoComplete="off"
               autoFocus={true}
               type="number"
+              value={input}
               onChange={(e) => setInput(e.target.value)}
             />
-            <MaxButton>Max</MaxButton>
+            <MaxButton onClick={maxCallback}>Max</MaxButton>
           </AmountInputWrapper>
           <TabGroupWrapper>
             <TabGroupSelector
@@ -325,18 +471,11 @@ export default function (props: TradeModalProps) {
           ) : (
             <InnerContentWrapper>
               <SectionTitle>Best Offer</SectionTitle>
-              <SectionItem>
-                <span>Price</span>
-                <Price isBuy={isBuySelected}>
-                  ${currentOffer.price.toFixed(2)}
-                </Price>
-              </SectionItem>
-              <Line />
-              <SectionItem>
-                <span>Quantity</span>
-                <span>{currentOffer.baseAmount.toFixed(4)}</span>
-              </SectionItem>
-              <MainButton disabled={!buttonEnabled}>{buttonText}</MainButton>
+
+              {calculatedSection}
+              <MainButton disabled={!buttonEnabled} onClick={executeClick}>
+                {buttonText}
+              </MainButton>
               <WalletBalanceWrapper>
                 <WalletBalanceLabel>Wallet Balance</WalletBalanceLabel>
                 <WalletBalance>

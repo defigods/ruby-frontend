@@ -3,7 +3,7 @@ import {
   ActionCreatorWithPayload,
   createAction,
 } from '@reduxjs/toolkit';
-import { TimeHistory, TimeHistoryEntry, Token } from '../../types';
+import { TimeHistory, TimeHistoryEntry, Token, TokenTrade } from '../../types';
 
 export const fetchTokenList: Readonly<{
   pending: ActionCreatorWithoutPayload;
@@ -24,6 +24,16 @@ export const fetchTokenTimeHistory: Readonly<{
   fulfilled: createAction('tokens/fetchTokenTimeHistory/fulfilled'),
   rejected: createAction('tokens/fetchTokenTimeHistory/rejected'),
 };
+
+export const updateOrderBook = createAction<
+  [
+    Token,
+    {
+      buys: TokenTrade[];
+      sells: TokenTrade[];
+    },
+  ]
+>('tokens/updateOrderBook');
 
 export const selectToken = createAction<string>('tokens/select');
 export const selectTimeHistory = createAction<TimeHistory>(

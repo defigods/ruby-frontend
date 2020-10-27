@@ -91,6 +91,8 @@ export default function () {
   const token = useSelectedToken();
 
   if (!token) return null;
+  const bids = [...token.bids].sort((a, b) => a.price - b.price);
+  const asks = [...token.asks].sort((a, b) => b.price - a.price);
   return (
     <Wrapper>
       <HeaderWrapper>
@@ -105,12 +107,12 @@ export default function () {
       </HeaderWrapper>
       <BodyWrapper>
         <BodyChild>
-          {token.bids.map((data, idx) => (
+          {bids.map((data, idx) => (
             <Bid {...data} key={idx} />
           ))}
         </BodyChild>
         <BodyChild>
-          {token.asks.map((data, idx) => (
+          {asks.map((data, idx) => (
             <Ask {...data} key={idx} />
           ))}
         </BodyChild>

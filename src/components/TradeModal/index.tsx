@@ -195,12 +195,12 @@ function useButtonEnabled(
   input: string,
   allowance: number,
 ) {
-  if (allowance === 0) {
-    return true;
-  }
-
   if (walletBalance === 0) {
     return false;
+  }
+
+  if (allowance === 0) {
+    return true;
   }
 
   if (isNaN(Number(input))) {
@@ -218,12 +218,12 @@ function useButtonText(
   walletBalance: number,
   allowance: number,
 ) {
-  if (allowance === 0) {
-    return 'Enable';
-  }
-
   if (walletBalance === 0) {
     return isBuy ? 'No funds available' : 'No supply available';
+  }
+
+  if (allowance === 0) {
+    return 'Enable';
   }
 
   return isBuy ? 'Buy' : 'Sell';
@@ -273,18 +273,19 @@ export default function (props: TradeModalProps) {
       return requestAllowance(tokenContract, chainId!);
     }
 
-    const payAmount = priceInput;
-    const buyAmount = quantityInput;
+    const payAmount = quantityInput;
+    const buyAmount = totalInput;
     const payAddress = props.isBuy ? quoteAddress : tokenAddress;
     const buyAddress = props.isBuy ? tokenAddress : quoteAddress;
 
     // TODO: execute the trade here :D
     executeTrade(marketContract, payAmount, payAddress, buyAmount, buyAddress);
+    props.onRequestClose();
   }, [
     allowance,
     buttonEnabled,
     marketContract,
-    priceInput,
+    totalInput,
     quantityInput,
     props.isBuy,
     tokenAddress,
@@ -294,19 +295,21 @@ export default function (props: TradeModalProps) {
   function updateValues(value: string, type: number) {
     if (type === 1) {
       setPriceInput(value);
-      setTotalInput(`${Number(value) * Number(quantityInput)}`);
+      if (quantityInput)
+        setTotalInput(`${Number(value) * Number(quantityInput)}`);
+      else if (totalInput)
+        setQuantityInput(`${Number(totalInput) / Number(value)}`);
     } else if (type === 2) {
       setQuantityInput(value);
-      setTotalInput(`${Number(value) * Number(priceInput)}`);
+      if (priceInput) setTotalInput(`${Number(value) * Number(priceInput)}`);
+      else if (totalInput)
+        setPriceInput(`${Number(totalInput) / Number(value)}`);
     } else if (type === 3) {
       setTotalInput(value);
-      setQuantityInput(`${Number(value) / Number(priceInput)}`);
+      if (priceInput) setQuantityInput(`${Number(value) / Number(priceInput)}`);
+      else if (quantityInput)
+        setPriceInput(`${Number(value) / Number(quantityInput)}`);
     }
-  }
-
-  if (!token) {
-    // Should never happen
-    return null;
   }
 
   return (

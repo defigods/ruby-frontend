@@ -1,5 +1,8 @@
 export const websocket = {
-  url: 'localhost:3000',
+  url:
+    process.env.NODE_ENV === 'production'
+      ? 'http://data.rubicon.finance:3000'
+      : 'localhost:3000',
 };
 
 export const markets: Record<
@@ -11,7 +14,7 @@ export const markets: Record<
   //   blockNumber: 0,
   // },
   [42]: {
-    address: '0x1b64D1839362A4B5ABF0DccAb8c06F362d76152D',
+    address: '0x9C735089059689803F507DAAad78c6970468124d',
     blockNumber: 20875039,
   },
 };

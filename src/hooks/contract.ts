@@ -4,6 +4,7 @@ import { useActiveWeb3React } from '.';
 import { markets } from '../config';
 import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { MARKET_INTERFACE } from '../constants/abis/RubiconMarket';
+import { useBlockNumber } from '../state/application/hooks';
 import { selectQuoteToken } from '../state/quotes/actions';
 import { useSelectedQuote } from '../state/quotes/hooks';
 import { useSelectedToken } from '../state/tokens/hooks';
@@ -39,15 +40,17 @@ export function useBestOffers(): [
 
   const contract = useMarketContract()!;
 
+  const block = useBlockNumber();
+
   useEffect(() => {
     const fetchData = async () => {
-      const buy = await getBestOffer(
+      const sell = await getBestOffer(
         contract,
         getTokenAddress(selectedQuote, chainId!)!,
         getTokenAddress(selectedToken, chainId!)!,
       );
 
-      const sell = await getBestOffer(
+      const buy = await getBestOffer(
         contract,
         getTokenAddress(selectedToken, chainId!)!,
         getTokenAddress(selectedQuote, chainId!)!,
@@ -59,7 +62,7 @@ export function useBestOffers(): [
     };
 
     fetchData();
-  }, [contract, selectedToken, selectQuoteToken]);
+  }, [contract, selectedToken, selectQuoteToken, block]);
 
   return [result, loading];
 }

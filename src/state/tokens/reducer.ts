@@ -5,6 +5,7 @@ import {
   fetchTokenTimeHistory,
   selectTimeHistory,
   selectToken,
+  updateOrderBook,
 } from './actions';
 
 export interface TokensState {
@@ -67,29 +68,41 @@ export default createReducer(initialState, (builder) =>
       };
     })
     .addCase(fetchTokenTimeHistory.fulfilled, (state, action) => {
-      const selectedToken = state.tokens.find(
-        (t) => t.ticker === state.selected,
-      )!;
-      const newTokens = state.tokens.filter((t) => t.ticker !== state.selected);
       return {
         ...state,
         timeHistoryLoading: false,
-        tokens: [
-          ...newTokens,
-          {
-            ...selectedToken,
-            prices: {
-              ...selectedToken.prices,
-              [state.selectedTimeHistory]: action.payload,
-            },
-          },
-        ],
+        tokens: state.tokens.map((t) =>
+          t.ticker === state.selected
+            ? {
+                ...t,
+                prices: {
+                  ...t.prices,
+                  [state.selectedTimeHistory]: action.payload,
+                },
+              }
+            : t,
+        ),
       };
     })
     .addCase(fetchTokenTimeHistory.rejected, (state, action) => {
       return {
         ...state,
         timeHistoryLoading: false,
+      };
+    })
+    .addCase(updateOrderBook, (state, action) => {
+      const token = action.payload[0];
+      return {
+        ...state,
+        tokens: state.tokens.map((t) =>
+          t.ticker === token.ticker
+            ? {
+                ...t,
+                bids: action.payload[1].buys,
+                asks: action.payload[1].sells,
+              }
+            : t,
+        ),
       };
     }),
 );

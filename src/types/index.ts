@@ -48,9 +48,14 @@ export interface UserToken extends Token {
 }
 
 export interface ContractOffer {
+  payAmount: number;
+  payGem: string;
+  buyAmount: number;
+  buyGem: string;
   baseAddress: string;
   baseAmount: number;
   quoteAddress: string;
   quoteAmount: number;
+  id: number;
   price: number; // baseAmount / quoteAmount
 }

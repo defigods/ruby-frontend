@@ -3,10 +3,15 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { useWebSocket } from '../../components/SocketProvider';
 import { useActiveWeb3React } from '../../hooks';
-import { TimeHistoryEntry, Token } from '../../types';
+import { TimeHistoryEntry, Token, TokenTrade } from '../../types';
+import { findTokenByAddress, getTokenAddress } from '../../utils';
 import { useIsQuotePending, useSelectedQuote } from '../quotes/hooks';
-import { fetchTokenList, fetchTokenTimeHistory } from './actions';
-import { useSelectedTimeHistory, useSelectedToken } from './hooks';
+import {
+  fetchTokenList,
+  fetchTokenTimeHistory,
+  updateOrderBook,
+} from './actions';
+import { useSelectedTimeHistory, useSelectedToken, useTokens } from './hooks';
 
 export default function (): null {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,10 +56,39 @@ export default function (): null {
     }
   }, [dispatch, chainId, quoteTicker, selectedToken, timeHistory]);
 
-  // // load in the tokens
-  // useEffect(() => {
-  //   fetchTokens();
-  // }, [fetchTokens, websocket.loading]);
+  const tokens = useTokens();
+
+  useEffect(() => {
+    if (!selectedToken || !quoteTicker) {
+      return;
+    }
+
+    const quoteAddress = getTokenAddress(quoteTicker, chainId!);
+
+    websocket.socket?.on(
+      'UPDATE_ORDER_BOOK',
+      (
+        baseAddress: string,
+        _quoteAddress: string,
+        orderBook: { buys: TokenTrade[]; sells: TokenTrade[] },
+      ) => {
+        if (quoteAddress !== _quoteAddress) {
+          return; // don't update if we aren't using this currency
+        }
+
+        const toUpdate = findTokenByAddress(baseAddress, tokens);
+        if (!toUpdate) {
+          return; // shouldn't happen... but type safety
+        }
+
+        dispatch(updateOrderBook([toUpdate, orderBook]));
+      },
+    );
+
+    return () => {
+      websocket.socket?.off('UPDATE_ORDER_BOOK');
+    };
+  }, [dispatch, chainId, quoteTicker, selectedToken]);
 
   return null;
 }

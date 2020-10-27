@@ -95,7 +95,7 @@ export default function ({ data, onHover }: LineChartProps) {
     const maxX = prices.length;
 
     const average =
-      prices.reduce((prev, curr) => (curr += prev)) / prices.length;
+      prices.reduce((prev, curr) => (curr += prev), 0) / prices.length;
     const yAverage = height - ((average - minY) / (maxY - minY + 1)) * height;
 
     return [
