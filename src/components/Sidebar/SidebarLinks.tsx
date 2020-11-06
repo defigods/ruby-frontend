@@ -2,6 +2,10 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { darken } from 'polished';
+import { getTokenAddress, useContract } from '../../utils';
+import { useSelectedQuote } from '../../state/quotes/hooks';
+import { useActiveWeb3React } from '../../hooks';
+import { DAI_INTERFACE } from '../../constants/abis/dai';
 
 const Wrapper = styled.div`
   display: flex;
@@ -51,6 +55,18 @@ const StyledNavLink = styled(NavLink).attrs({
 `;
 
 export default function () {
+  const quote = useSelectedQuote()!;
+  const { chainId } = useActiveWeb3React();
+
+  const quoteAddress = getTokenAddress(quote, chainId!);
+
+  const contract = useContract(quoteAddress, DAI_INTERFACE)!;
+
+  function faucet(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    event.stopPropagation();
+    contract.functions.faucet().then(console.log);
+  }
+
   return (
     <Wrapper>
       <StyledNavLink to="/portfolio">
@@ -64,6 +80,9 @@ export default function () {
       <StyledNavLink to="/history">
         History
         <ActiveDot />
+      </StyledNavLink>
+      <StyledNavLink to="/faucet" onClick={faucet}>
+        Faucet
       </StyledNavLink>
     </Wrapper>
   );

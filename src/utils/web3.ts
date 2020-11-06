@@ -5,10 +5,9 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { useMemo } from 'react';
 import { useActiveWeb3React } from '../hooks';
 import { ContractOffer } from '../types';
-import { formatBytes32String, formatEther, parseUnits } from 'ethers/lib/utils';
+import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { markets } from '../config';
 import { MaxUint256 } from '@ethersproject/constants';
-import { parse } from 'path';
 
 export async function executeTrade(
   contract: Contract,

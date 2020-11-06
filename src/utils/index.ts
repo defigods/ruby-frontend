@@ -59,7 +59,7 @@ export function getPercentChange(
 }
 
 export function getTokenAddress(token: Token | QuoteToken, chainId: number) {
-  return token.addresses.find((t) => t.chainId === chainId)?.value;
+  return token?.addresses.find((t) => t.chainId === chainId)?.value;
 }
 
 export * from './debounce';
