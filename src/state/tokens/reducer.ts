@@ -6,6 +6,7 @@ import {
   selectTimeHistory,
   selectToken,
   updateOrderBook,
+  updatePrice,
 } from './actions';
 
 export interface TokensState {
@@ -100,6 +101,31 @@ export default createReducer(initialState, (builder) =>
                 ...t,
                 bids: action.payload[1].buys,
                 asks: action.payload[1].sells,
+              }
+            : t,
+        ),
+      };
+    })
+    .addCase(updatePrice, (state, action) => {
+      const token = action.payload[0];
+      const price = action.payload[1];
+      return {
+        ...state,
+        tokens: state.tokens.map((t) =>
+          t.ticker === token.ticker
+            ? {
+                ...t,
+                currentPrice: price,
+                prices: Object.keys(t.prices).reduce((accum, next) => {
+                  const val = next as TimeHistory;
+                  return {
+                    ...accum,
+                    [val]: {
+                      ...t.prices[val],
+                      [Date.now()]: price,
+                    },
+                  };
+                }, {}),
               }
             : t,
         ),

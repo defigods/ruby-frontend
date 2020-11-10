@@ -47,13 +47,17 @@ export function getPercentChange(
     return [0, 0];
   }
 
+  const sortedPrices = getSortedPrices(token.prices[timeHistory]!);
+
   const base = atTimestamp
     ? token.prices[timeHistory]![atTimestamp]
-    : token.prices[timeHistory]![
-        Number(Object.keys(token.prices[timeHistory]!)[0])
-      ];
+    : sortedPrices[0];
 
   const difference = token.currentPrice - base;
+
+  if (token.currentPrice === 0) {
+    return [difference, difference === 0 ? 0 : -1];
+  }
 
   return [difference, difference / token.currentPrice];
 }

@@ -92,7 +92,7 @@ export default function ({ data, onHover }: LineChartProps) {
 
     const maxY = Math.max(...prices);
     const minY = Math.min(...prices);
-    const maxX = prices.length;
+    const maxX = prices.length - 1;
 
     const average =
       prices.reduce((prev, curr) => (curr += prev), 0) / prices.length;
@@ -118,7 +118,7 @@ export default function ({ data, onHover }: LineChartProps) {
     undefined,
   );
 
-  const rawValues = Object.values(data || {});
+  const rawValues = getSortedPrices(data || {});
   const upwardsTrend =
     rawValues.length > 1
       ? rawValues[0] < rawValues[rawValues.length - 1]

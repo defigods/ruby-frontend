@@ -79,7 +79,7 @@ export default function ({ timestamp }: HeaderViewProps) {
           decimals={4}
         />
         <SubtitleWrapper>
-          <DifferenceWrapper upwardsTrend={absoluteDifference >= 0}>
+          <DifferenceWrapper upwardsTrend={absoluteDifference > 0}>
             {absoluteDifference > 0 ? '+' : ''}
             {absoluteDifference.toFixed(2)} ({(percentChange * 100).toFixed(2)}
             %)

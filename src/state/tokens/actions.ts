@@ -34,6 +34,7 @@ export const updateOrderBook = createAction<
     },
   ]
 >('tokens/updateOrderBook');
+export const updatePrice = createAction<[Token, number]>('tokens/updatePrice');
 
 export const selectToken = createAction<string>('tokens/select');
 export const selectTimeHistory = createAction<TimeHistory>(
