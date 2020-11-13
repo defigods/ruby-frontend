@@ -251,9 +251,6 @@ export default function (props: TradeModalProps) {
 
   const [walletTicker, walletBalance] = useWalletBalance(props.isBuy);
 
-  const priceLabel = props.isBuy ? token?.ticker : quote?.ticker;
-  const quantityLabel = props.isBuy ? quote?.ticker : token?.ticker;
-
   const modalStyle = useModalStyle();
 
   const buttonEnabled = useButtonEnabled(
@@ -273,8 +270,8 @@ export default function (props: TradeModalProps) {
       return requestAllowance(tokenContract, chainId!);
     }
 
-    const payAmount = quantityInput;
-    const buyAmount = totalInput;
+    const payAmount = props.isBuy ? totalInput : quantityInput;
+    const buyAmount = props.isBuy ? quantityInput : totalInput;
     const payAddress = props.isBuy ? quoteAddress : tokenAddress;
     const buyAddress = props.isBuy ? tokenAddress : quoteAddress;
 
@@ -343,7 +340,7 @@ export default function (props: TradeModalProps) {
                     onChange={(e) => updateValues(e.target.value, 1)}
                   />
                 </TdInput>
-                <TdLabel>{priceLabel}</TdLabel>
+                <TdLabel>{quote?.ticker}</TdLabel>
               </Tr>
               <Tr>
                 <Th>Quantity</Th>
@@ -355,7 +352,7 @@ export default function (props: TradeModalProps) {
                     onChange={(e) => updateValues(e.target.value, 2)}
                   />
                 </TdInput>
-                <TdLabel>{quantityLabel}</TdLabel>
+                <TdLabel>{token?.ticker}</TdLabel>
               </Tr>
               <Tr>
                 <Th>Total</Th>
@@ -367,7 +364,7 @@ export default function (props: TradeModalProps) {
                     onChange={(e) => updateValues(e.target.value, 3)}
                   />
                 </TdInput>
-                <TdLabel>{priceLabel}</TdLabel>
+                <TdLabel>{quote?.ticker}</TdLabel>
               </Tr>
             </tbody>
           </Table>
