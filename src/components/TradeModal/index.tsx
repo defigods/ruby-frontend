@@ -255,7 +255,7 @@ export default function (props: TradeModalProps) {
 
   const buttonEnabled = useButtonEnabled(
     walletBalance,
-    quantityInput,
+    props.isBuy ? totalInput : quantityInput,
     allowance,
   );
   const buttonText = useButtonText(props.isBuy, walletBalance, allowance);
