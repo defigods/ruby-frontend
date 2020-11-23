@@ -16,6 +16,7 @@ import {
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { BigNumber } from '@ethersproject/bignumber';
+import { parseUnits } from 'ethers/lib/utils';
 
 interface TradeModalProps {
   isOpen: boolean;
@@ -209,7 +210,7 @@ function useButtonEnabled(
     return true;
   }
 
-  const inputBN = BigNumber.from(input || 0);
+  const inputBN = parseUnits(input || '0');
 
   if (inputBN.isZero()) {
     return false;
@@ -344,7 +345,7 @@ export default function (props: TradeModalProps) {
                     onChange={(e) => updateValues(e.target.value, 1)}
                   />
                 </TdInput>
-                <TdLabel>{quote?.ticker}</TdLabel>
+                <TdLabel>{'USD'}</TdLabel>
               </Tr>
               <Tr>
                 <Th>Quantity</Th>
@@ -368,7 +369,7 @@ export default function (props: TradeModalProps) {
                     onChange={(e) => updateValues(e.target.value, 3)}
                   />
                 </TdInput>
-                <TdLabel>{quote?.ticker}</TdLabel>
+                <TdLabel>{'USD'}</TdLabel>
               </Tr>
             </tbody>
           </Table>
