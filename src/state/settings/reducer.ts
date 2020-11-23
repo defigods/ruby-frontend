@@ -6,7 +6,7 @@ export interface SettingsState {
 }
 
 const initialState: SettingsState = {
-  darkMode: false,
+  darkMode: true,
 };
 
 export default createReducer(initialState, (builder) =>
