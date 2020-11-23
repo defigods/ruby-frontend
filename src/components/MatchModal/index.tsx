@@ -1,4 +1,5 @@
-import { min } from 'moment';
+import { BigNumber } from '@ethersproject/bignumber';
+import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { darken } from 'polished';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { X } from 'react-feather';
@@ -14,7 +15,12 @@ import { useTokenAllowance, useTokenBalances } from '../../hooks/wallet';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import { ContractOffer, QuoteToken, Token } from '../../types';
-import { executeMatch, getTokenAddress, requestAllowance } from '../../utils';
+import {
+  executeMatch,
+  formatBN,
+  getTokenAddress,
+  requestAllowance,
+} from '../../utils';
 import Loader from '../Loader';
 
 interface TradeModalProps {
@@ -216,14 +222,14 @@ const Price = styled.span<{ isBuy: boolean }>`
     isBuy ? theme.text.green : theme.text.red} !important;
 `;
 
-function useWalletBalance(isBuySelected: boolean): [string, number] {
+function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
   const [balances, _] = useTokenBalances();
 
   return isBuySelected
-    ? [quote.ticker, balances[quote.ticker] || 0]
-    : [token.ticker, balances[token.ticker] || 0];
+    ? ['USD', balances[quote.ticker] || BigNumber.from(0)]
+    : [token.ticker, balances[token.ticker] || BigNumber.from(0)];
 }
 
 function useModalStyle(): Modal.Styles {
@@ -250,44 +256,51 @@ function useModalStyle(): Modal.Styles {
 }
 
 function useButtonEnabled(
-  walletBalance: number,
+  walletBalance: BigNumber,
   input: string,
-  allowance: number,
-  maxAmount: number,
+  allowance: BigNumber,
+  maxAmount: BigNumber,
 ) {
-  if (walletBalance === 0) {
+  if (walletBalance.isZero()) {
     return false;
   }
 
-  if (allowance === 0) {
+  if (allowance.isZero()) {
     return true;
   }
 
-  if (isNaN(Number(input))) {
+  const inputBN = parseUnits(input || '0');
+
+  if (inputBN.isZero()) {
     return false;
   }
 
-  if (Number(input) === 0) {
-    return false;
-  }
-
-  return walletBalance >= Number(input) && Number(input) <= maxAmount;
+  return walletBalance.gte(inputBN) && maxAmount.gte(inputBN);
 }
 
 function useButtonText(
   isBuy: boolean,
-  walletBalance: number,
-  allowance: number,
+  walletBalance: BigNumber,
+  allowance: BigNumber,
 ) {
-  if (walletBalance === 0) {
+  if (walletBalance.isZero()) {
     return isBuy ? 'No funds available' : 'No supply available';
   }
 
-  if (allowance === 0) {
+  if (allowance.isZero()) {
     return 'Enable';
   }
 
   return isBuy ? 'Buy' : 'Sell';
+}
+
+function unsafeMath(
+  bn: BigNumber,
+  n: number,
+  fn: (n1: number, n2: number) => number,
+): BigNumber {
+  const parsed = Number(formatEther(bn));
+  return parseUnits(`${fn(parsed, n).toFixed(18)}`);
 }
 
 function useCalculatedSection(
@@ -302,19 +315,19 @@ function useCalculatedSection(
     return null;
   }
 
+  const amount = parseUnits(input || '0');
   const quantity = buttonEnabled
     ? isBuy
-      ? Number(input) / offer.price
-      : Number(input) * offer.price
+      ? unsafeMath(amount, offer.price, (n1, n2) => n1 / n2)
+      : unsafeMath(amount, offer.price, (n1, n2) => n1 * n2)
     : isBuy
     ? offer.baseAmount
     : offer.quoteAmount;
   const total = buttonEnabled
-    ? Number(input)
+    ? amount
     : isBuy
     ? offer.quoteAmount
     : offer.baseAmount;
-
   return (
     <>
       <SectionItem>
@@ -325,14 +338,14 @@ function useCalculatedSection(
       <SectionItem>
         <span>Quantity</span>
         <span>
-          {quantity.toFixed(4)} {isBuy ? token.ticker : quote.ticker}
+          {formatBN(quantity)} {isBuy ? token.ticker : 'USD'}
         </span>
       </SectionItem>
       <Line />
       <SectionItem>
         <span>Total</span>
         <span>
-          {total.toFixed(4)} {isBuy ? quote.ticker : token.ticker}
+          {formatBN(total)} {isBuy ? 'USD' : token.ticker}
         </span>
       </SectionItem>
     </>
@@ -373,7 +386,7 @@ export default function (props: TradeModalProps) {
         allowance,
         (isBuySelected
           ? currentOffer?.quoteAmount
-          : currentOffer?.baseAmount) || 0,
+          : currentOffer?.baseAmount) || BigNumber.from(0),
       ),
     [isBuySelected, walletBalance, input, allowance, currentOffer],
   );
@@ -386,12 +399,14 @@ export default function (props: TradeModalProps) {
 
   const maxCallback = useCallback(() => {
     if (!currentOffer) return;
-    return setInput(
-      `${Math.min(
-        isBuySelected ? currentOffer.quoteAmount : currentOffer.baseAmount,
-        walletBalance,
-      )}`,
-    );
+    const offerValue = isBuySelected
+      ? currentOffer.quoteAmount
+      : currentOffer.baseAmount;
+    if (offerValue.lt(walletBalance)) {
+      setInput(formatEther(offerValue));
+    } else {
+      setInput(formatEther(walletBalance));
+    }
   }, [currentOffer, walletBalance, setInput, isBuySelected]);
 
   const executeClick = useCallback(async () => {
@@ -399,14 +414,15 @@ export default function (props: TradeModalProps) {
       return;
     }
 
-    if (allowance === 0) {
+    if (allowance.isZero()) {
       return requestAllowance(tokenContract, chainId!);
     }
 
-    const toBuy = Number(input);
+    const toBuy = parseUnits(input || '0');
+    if (toBuy.isZero()) return;
     const maxAmount = isBuySelected
-      ? toBuy / currentOffer.price
-      : toBuy * currentOffer.price;
+      ? unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 / n2)
+      : unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 * n2);
 
     // TODO: execute the trade here :D
     executeMatch(marketContract, currentOffer, maxAmount);
@@ -425,6 +441,17 @@ export default function (props: TradeModalProps) {
       ),
     [currentOffer, token, quote, input, isBuySelected, buttonEnabled],
   );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    try {
+      parseUnits(value);
+      setInput(value);
+    } catch (ex) {
+      // ignore the exception, don't update input
+    }
+  };
 
   return (
     <Modal
@@ -447,7 +474,7 @@ export default function (props: TradeModalProps) {
               autoFocus={true}
               type="number"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => handleInputChange(e)}
             />
             <MaxButton onClick={maxCallback}>Max</MaxButton>
           </AmountInputWrapper>
@@ -479,7 +506,7 @@ export default function (props: TradeModalProps) {
               <WalletBalanceWrapper>
                 <WalletBalanceLabel>Wallet Balance</WalletBalanceLabel>
                 <WalletBalance>
-                  {walletBalance.toFixed(4)} {walletTicker}
+                  {formatBN(walletBalance)} {walletTicker}
                 </WalletBalance>
               </WalletBalanceWrapper>
             </InnerContentWrapper>

@@ -22,7 +22,11 @@ const Body = styled.p<{ useClipped: boolean }>`
   font-size: 12px;
   letter-spacing: 0.04rem;
   max-height: ${({ useClipped }) => (useClipped ? MAX_HEIGHT + 'px' : 'none')};
-  overflow: ${({ useClipped }) => (!useClipped ? 'scroll' : 'hidden')};
+  overflow-y: ${({ useClipped }) => (!useClipped ? 'scroll' : 'hidden')};
+
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
 
   color: ${({ theme }) => theme.text.secondary};
 `;

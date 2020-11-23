@@ -12,9 +12,9 @@ import { markets } from '../config';
 import { useTokenContract } from './contract';
 import { useBlockNumber } from '../state/application/hooks';
 
-export function useTokenAllowance(token: string): [number, boolean] {
+export function useTokenAllowance(token: string): [BigNumber, boolean] {
   const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState(0);
+  const [result, setResult] = useState<BigNumber>(BigNumber.from(0));
 
   const { account: owner, chainId } = useActiveWeb3React();
   const spender = markets[chainId!].address;
@@ -24,7 +24,7 @@ export function useTokenAllowance(token: string): [number, boolean] {
   useEffect(() => {
     const fetchData = async () => {
       const result = await tokenContract?.functions.allowance(owner, spender);
-      const formatted = Number(formatEther(result[0]));
+      const formatted = result[0] as BigNumber;
       setResult(formatted);
       setLoading(false);
     };
@@ -35,14 +35,14 @@ export function useTokenAllowance(token: string): [number, boolean] {
   return [result, loading];
 }
 
-export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
+export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
   const tokens = useTokens();
   const quotes = useQuotes();
   const tokensLoading = useIsTokenPending();
   const { chainId, account, library } = useActiveWeb3React();
 
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<{ [ticker: string]: number }>({});
+  const [results, setResults] = useState<{ [ticker: string]: BigNumber }>({});
 
   const contracts = useMemo(() => {
     if (!library || !chainId || tokensLoading) return [];
@@ -80,9 +80,9 @@ export function useTokenBalances(): [{ [ticker: string]: number }, boolean] {
             const amount = (
               await contract[1]?.functions.balanceOf(account)
             )[0] as BigNumber;
-            return [contract[0], Number(formatEther(amount))];
+            return [contract[0], amount];
           }),
-      )) as Pair<string, number>[];
+      )) as Pair<string, BigNumber>[];
       setResults(
         results.reduce((accum, next) => {
           return {

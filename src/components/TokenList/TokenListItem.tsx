@@ -102,7 +102,7 @@ export default function (props: TokenListItemProps) {
       </ItemWrapper>
       <ItemWrapper>
         <PriceWrapper upwardsTrend={upwardsTrend}>
-          ${props.currentPrice.toFixed(4)}
+          ${props.currentPrice.toFixed(2)}
         </PriceWrapper>
       </ItemWrapper>
     </Wrapper>

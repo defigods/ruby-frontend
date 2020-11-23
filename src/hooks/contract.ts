@@ -1,5 +1,5 @@
 import { Contract } from '@ethersproject/contracts';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useActiveWeb3React } from '.';
 import { markets } from '../config';
 import { ERC20_INTERFACE } from '../constants/abis/erc20';

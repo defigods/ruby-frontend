@@ -1,5 +1,6 @@
-import { getAddress } from 'ethers/lib/utils';
+import { formatEther, getAddress } from 'ethers/lib/utils';
 import { QuoteToken, TimeHistory, Token } from '../types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export function isAddress(value: any): string | false {
   try {
@@ -64,6 +65,31 @@ export function getPercentChange(
 
 export function getTokenAddress(token: Token | QuoteToken, chainId: number) {
   return token?.addresses.find((t) => t.chainId === chainId)?.value;
+}
+
+export function formatBN(bigNumber: BigNumber, decimals = 4): string {
+  const temp = formatEther(bigNumber);
+
+  const result = Number(temp).toFixed(decimals);
+  const test = '0.' + '0'.repeat(decimals);
+
+  if (test === result) {
+    return '<' + result;
+  } else {
+    return result;
+  }
+}
+
+export function sortBigNumbers(
+  a: BigNumber,
+  b: BigNumber,
+  ascending = true,
+): number {
+  if (a.sub(b).gt(0)) {
+    return ascending ? 1 : -1;
+  } else {
+    return ascending ? -1 : 1;
+  }
 }
 
 export * from './debounce';

@@ -8,8 +8,14 @@ import { useMarketContract, useTokenContract } from '../../hooks/contract';
 import { useTokenAllowance, useTokenBalances } from '../../hooks/wallet';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
-import { executeTrade, getTokenAddress, requestAllowance } from '../../utils';
+import {
+  executeTrade,
+  formatBN,
+  getTokenAddress,
+  requestAllowance,
+} from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
+import { BigNumber } from '@ethersproject/bignumber';
 
 interface TradeModalProps {
   isOpen: boolean;
@@ -157,14 +163,14 @@ const Input = styled.input`
   }
 `;
 
-function useWalletBalance(isBuySelected: boolean): [string, number] {
+function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
   const [balances, _] = useTokenBalances();
 
   return isBuySelected
-    ? [quote.ticker, balances[quote.ticker] || 0]
-    : [token.ticker, balances[token.ticker] || 0];
+    ? ['USD', balances[quote.ticker] || BigNumber.from(0)]
+    : [token.ticker, balances[token.ticker] || BigNumber.from(0)];
 }
 
 function useModalStyle(): Modal.Styles {
@@ -191,38 +197,36 @@ function useModalStyle(): Modal.Styles {
 }
 
 function useButtonEnabled(
-  walletBalance: number,
+  walletBalance: BigNumber,
   input: string,
-  allowance: number,
+  allowance: BigNumber,
 ) {
-  if (walletBalance === 0) {
+  if (walletBalance.isZero()) {
     return false;
   }
 
-  if (allowance === 0) {
+  if (allowance.isZero()) {
     return true;
   }
 
-  if (isNaN(Number(input))) {
-    return false;
-  }
+  const inputBN = BigNumber.from(input || 0);
 
-  if (Number(input) === 0) {
+  if (inputBN.isZero()) {
     return false;
   }
-  return walletBalance >= Number(input);
+  return walletBalance.gte(inputBN);
 }
 
 function useButtonText(
   isBuy: boolean,
-  walletBalance: number,
-  allowance: number,
+  walletBalance: BigNumber,
+  allowance: BigNumber,
 ) {
-  if (walletBalance === 0) {
+  if (walletBalance.isZero()) {
     return isBuy ? 'No funds available' : 'No supply available';
   }
 
-  if (allowance === 0) {
+  if (allowance.isZero()) {
     return 'Enable';
   }
 
@@ -266,7 +270,7 @@ export default function (props: TradeModalProps) {
       return;
     }
 
-    if (allowance === 0) {
+    if (allowance.isZero()) {
       return requestAllowance(tokenContract, chainId!);
     }
 
@@ -374,7 +378,7 @@ export default function (props: TradeModalProps) {
           <WalletBalanceWrapper>
             <WalletBalanceLabel>Wallet Balance</WalletBalanceLabel>
             <WalletBalance>
-              {walletBalance.toFixed(4)} {walletTicker}
+              {formatBN(walletBalance)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
         </InnerContentWrapper>

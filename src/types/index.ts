@@ -1,3 +1,5 @@
+import { BigNumber } from '@ethersproject/bignumber';
+
 export enum TimeHistory {
   ONE_DAY = '1 day|1d',
   ONE_WEEK = '1 week|1w',
@@ -43,19 +45,17 @@ export interface Token {
 
 export interface UserToken extends Token {
   quantity: number;
-  // purchases: [timestamp, number][]
-  // etc
 }
 
 export interface ContractOffer {
-  payAmount: number;
+  payAmount: BigNumber;
   payGem: string;
-  buyAmount: number;
+  buyAmount: BigNumber;
   buyGem: string;
   baseAddress: string;
-  baseAmount: number;
+  baseAmount: BigNumber;
   quoteAddress: string;
-  quoteAmount: number;
+  quoteAmount: BigNumber;
   id: number;
   price: number; // baseAmount / quoteAmount
 }

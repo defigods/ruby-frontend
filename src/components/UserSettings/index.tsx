@@ -3,8 +3,8 @@ import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 import { AppDispatch } from '../../state';
-import { toggleDarkMode } from '../../state/user/actions';
-import { useDarkMode } from '../../state/user/hooks';
+import { toggleDarkMode } from '../../state/settings/actions';
+import { useDarkMode } from '../../state/settings/hooks';
 import Toggle from '../Toggle';
 
 interface UserSettingsProps {

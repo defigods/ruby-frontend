@@ -1,3 +1,4 @@
+import { formatEther } from 'ethers/lib/utils';
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
@@ -27,7 +28,7 @@ export default function (): null {
         if (!token) return undefined;
         return {
           ...token,
-          quantity: userTokens[ticker],
+          quantity: Number(formatEther(userTokens[ticker])),
         };
       })
       .filter((t) => t !== undefined) as UserToken[];

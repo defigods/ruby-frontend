@@ -4,8 +4,9 @@ import application from './application/reducer';
 import tokens from './tokens/reducer';
 import user from './user/reducer';
 import quotes from './quotes/reducer';
+import settings from './settings/reducer';
 
-const PERSISTENT_KEYS: string[] = ['user'];
+const PERSISTENT_KEYS: string[] = ['settings'];
 
 const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const store = configureStore({
     tokens,
     user,
     quotes,
+    settings,
   },
   middleware: [
     ...getDefaultMiddleware({ thunk: false }),

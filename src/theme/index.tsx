@@ -4,7 +4,7 @@ import {
   DefaultTheme,
   ThemeProvider as StyledComponentsThemeProvider,
 } from 'styled-components';
-import { useDarkMode } from '../state/user/hooks';
+import { useDarkMode } from '../state/settings/hooks';
 
 declare module 'styled-components' {
   export interface DefaultTheme {

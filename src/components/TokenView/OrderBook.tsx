@@ -40,6 +40,9 @@ const BodyWrapper = styled.div`
   justify-content: space-around;
   // height: 100%;
   overflow-y: scroll;
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
 `;
 
 const BodyChild = styled.div`
@@ -91,8 +94,8 @@ export default function () {
   const token = useSelectedToken();
 
   if (!token) return null;
-  const bids = [...token.bids].sort((a, b) => a.price - b.price);
-  const asks = [...token.asks].sort((a, b) => b.price - a.price);
+  const bids = [...token.bids].sort((a, b) => b.price - a.price);
+  const asks = [...token.asks].sort((a, b) => a.price - b.price);
   return (
     <Wrapper>
       <HeaderWrapper>

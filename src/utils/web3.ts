@@ -30,11 +30,15 @@ export async function executeTrade(
 export async function executeMatch(
   contract: Contract,
   offer: ContractOffer,
-  maxAmount: number,
+  maxAmount: BigNumber,
 ) {
-  contract.functions.buy(offer.id, parseUnits(`${maxAmount}`, 18)).then(() => {
-    console.log('matched order');
-  });
+  console.log(offer, contract);
+  contract.functions
+    .buy(offer.id, maxAmount)
+    .then(() => {
+      console.log('matched order');
+    })
+    .catch(console.log);
 }
 
 export async function requestAllowance(contract: Contract, chainId: number) {
@@ -119,9 +123,9 @@ export async function getBestOffer(
   )) as number;
 
   const offer = await contract.functions.getOffer(offerId);
-  const payAmount = Number(formatEther(offer[0] as BigNumber));
+  const payAmount = offer[0] as BigNumber;
   const payGem = offer[1];
-  const buyAmount = Number(formatEther(offer[2] as BigNumber));
+  const buyAmount = offer[2] as BigNumber;
   const buyGem = offer[3];
 
   const baseAddress = isBuy ? buyGem : payGem;
@@ -130,11 +134,13 @@ export async function getBestOffer(
   const quoteAddress = isBuy ? payGem : buyGem;
   const quoteAmount = isBuy ? payAmount : buyAmount;
 
-  const price = quoteAmount / baseAmount;
-
-  if (baseAmount === 0 || quoteAmount === 0) {
+  if (baseAmount.isZero() || quoteAmount.isZero()) {
     return undefined;
   }
+
+  // If you want to know why this is... ask mason
+  const price =
+    Number(formatEther(quoteAmount)) / Number(formatEther(baseAmount));
 
   return {
     payAmount,
