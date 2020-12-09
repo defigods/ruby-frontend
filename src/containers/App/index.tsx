@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from '../../components/Sidebar';
 import Web3Wrapper from '../../components/Web3Wrapper';
@@ -26,7 +26,7 @@ const BodyWrapper = styled.div`
 export default function () {
   return (
     <Suspense fallback={null}>
-      <HashRouter>
+      <BrowserRouter>
         <Web3Wrapper>
           <AppWrapper>
             <Sidebar />
@@ -40,7 +40,7 @@ export default function () {
             </BodyWrapper>
           </AppWrapper>
         </Web3Wrapper>
-      </HashRouter>
+      </BrowserRouter>
     </Suspense>
   );
 }
