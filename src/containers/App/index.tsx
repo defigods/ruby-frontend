@@ -3,7 +3,7 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from '../../components/Sidebar';
 import Web3Wrapper from '../../components/Web3Wrapper';
-import Portfolio from '../Portfolio';
+import Trade from '../Trade';
 
 const AppWrapper = styled.div`
   display: flex;
@@ -32,10 +32,10 @@ export default function () {
             <Sidebar />
             <BodyWrapper>
               <Switch>
-                <Route exact strict path="/portfolio" component={Portfolio} />
-                <Route exact strict path="/trade" component={Portfolio} />
-                <Route exact strict path="/history" component={Portfolio} />
-                <Redirect to="/portfolio" />
+                <Route exact strict path="/portfolio" component={Trade} />
+                <Route exact strict path="/trade" component={Trade} />
+                <Route exact strict path="/history" component={Trade} />
+                <Redirect to="/trade" />
               </Switch>
             </BodyWrapper>
           </AppWrapper>
