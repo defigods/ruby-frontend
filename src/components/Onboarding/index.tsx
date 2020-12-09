@@ -21,13 +21,6 @@ import logo from '../../assets/img/logo-color.png';
 import mmLogo from '../../assets/img/metamask.svg';
 import { injected } from '../../connectors';
 
-
-interface OnboardingModalProps {
-  isOpen: boolean;
-  hasWallet: boolean;
-  onRequestClose: () => void;
-}
-
 Modal.setAppElement('#root');
 
 const MainButton = styled.div<{ disabled: boolean }>`
@@ -53,7 +46,6 @@ const MainButton = styled.div<{ disabled: boolean }>`
     opacity: 0.8;
   }
 `;
-
 
 const LogoWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
@@ -91,7 +83,6 @@ const MM = styled.img`
   border-radius: 10px;
   border: 0.5px solid black;
 `;
-
 
 function useModalStyle(): Modal.Styles {
   const theme = useContext(ThemeContext);
@@ -139,13 +130,10 @@ function useButtonText(
   return isBuy ? 'Buy' : 'Sell';
 }
 
-
-
-export default function (props: OnboardingModalProps) {
-
+export default function () {
   const modalStyle = useModalStyle();
   const buttonEnabled = true;
-  const hasWallet = props.hasWallet;
+  const hasWallet = true;
   const { active, activate } = useActiveWeb3React();
 
   function connectToApp() {
@@ -161,50 +149,37 @@ export default function (props: OnboardingModalProps) {
     <>
       {hasWallet ? (
         // Already has Web3 wallet
-        <Modal
-            isOpen={props.isOpen}
-            style={modalStyle}
-            onRequestClose={props.onRequestClose}
-          >
-            <LogoWrapper>
-              <Logo src={logo} alt="logo" />
-            </LogoWrapper>
-            <TextWrapper>
-              <h2>
-                Welcome to Rubicon
-              </h2>
-              <p>
-                Please connect your browser wallet to begin trading.
-              </p>
-            </TextWrapper>
-            <MainButton disabled={!buttonEnabled} onClick={connectToApp}>
-              CONNECT
-            </MainButton>
-          </Modal>
-          ) : (
-            <Modal
-              isOpen={props.isOpen}
-              style={modalStyle}
-              onRequestClose={props.onRequestClose} >
-              <LogoWrapper>
-                <Logo src={logo} alt="logo" />
-              </LogoWrapper>
-              <TextWrapper>
-                <h2>
-                  Welcome to Rubicon
-                </h2>
-                <p>
-                  To trade on Rubicon and connect to the Ethereum blockchain, please install a browser wallet.
-                </p>
-                <WalletOptionWrapper>
-                  <a href={"https://metamask.io/"}>
-                    <MM src={mmLogo} alt="Metamask" />
-                  </a>
-                </WalletOptionWrapper>
-              </TextWrapper>
-            </Modal>
-          )
-        }
+        <Modal isOpen={true} style={modalStyle}>
+          <LogoWrapper>
+            <Logo src={logo} alt="logo" />
+          </LogoWrapper>
+          <TextWrapper>
+            <h2>Welcome to Rubicon</h2>
+            <p>Please connect your browser wallet to begin trading.</p>
+          </TextWrapper>
+          <MainButton disabled={!buttonEnabled} onClick={connectToApp}>
+            CONNECT
+          </MainButton>
+        </Modal>
+      ) : (
+        <Modal isOpen={true} style={modalStyle}>
+          <LogoWrapper>
+            <Logo src={logo} alt="logo" />
+          </LogoWrapper>
+          <TextWrapper>
+            <h2>Welcome to Rubicon</h2>
+            <p>
+              To trade on Rubicon and connect to the Ethereum blockchain, please
+              install a browser wallet.
+            </p>
+            <WalletOptionWrapper>
+              <a href={'https://metamask.io/'}>
+                <MM src={mmLogo} alt="Metamask" />
+              </a>
+            </WalletOptionWrapper>
+          </TextWrapper>
+        </Modal>
+      )}
     </>
   );
 }

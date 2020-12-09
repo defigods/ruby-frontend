@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useActiveWeb3React } from '../../hooks';
 import {
   useSelectedTimeHistory,
   useSelectedToken,
@@ -62,6 +63,8 @@ const TradeButton = styled.div`
 `;
 
 export default function () {
+  const { account } = useActiveWeb3React();
+
   const selectedToken = useSelectedToken();
 
   const selectedTimeHistory = useSelectedTimeHistory();
@@ -107,15 +110,19 @@ export default function () {
           Sell
         </TradeButton>
       </TradeWrapper>
-      <MatchModal
-        isOpen={matchOpen}
-        onRequestClose={() => setModalsOpen([false, false, false])}
-      />
-      <TradeModal
-        isOpen={buyOpen || sellOpen}
-        isBuy={buyOpen}
-        onRequestClose={() => setModalsOpen([false, false, false])}
-      />
+      {!!account && (
+        <>
+          <MatchModal
+            isOpen={matchOpen}
+            onRequestClose={() => setModalsOpen([false, false, false])}
+          />
+          <TradeModal
+            isOpen={buyOpen || sellOpen}
+            isBuy={buyOpen}
+            onRequestClose={() => setModalsOpen([false, false, false])}
+          />
+        </>
+      )}
     </Wrapper>
   );
 }

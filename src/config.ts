@@ -5,6 +5,8 @@ export const websocket = {
       : 'localhost:3000',
 };
 
+export const DEFAULT_CHAIN = 42;
+
 export const markets: Record<
   number,
   { address: string; blockNumber: number }

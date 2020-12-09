@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { useWebSocket } from '../../components/SocketProvider';
+import { DEFAULT_CHAIN } from '../../config';
 import { useActiveWeb3React } from '../../hooks';
 import { TimeHistoryEntry, Token, TokenTrade } from '../../types';
 import { findTokenByAddress, getTokenAddress } from '../../utils';
@@ -9,6 +10,7 @@ import { useIsQuotePending, useSelectedQuote } from '../quotes/hooks';
 import {
   fetchTokenList,
   fetchTokenTimeHistory,
+  selectToken,
   updateOrderBook,
   updatePrice,
 } from './actions';
@@ -22,13 +24,14 @@ export default function (): null {
   const quoteTicker = useSelectedQuote();
 
   useEffect(() => {
-    if (websocket.loading || !chainId || quotesLoading || !quoteTicker) return;
+    if (websocket.loading || quotesLoading || !quoteTicker) return;
     dispatch(fetchTokenList.pending());
     websocket.socket?.emit(
       'LOAD_TOKENS',
-      chainId,
+      chainId || DEFAULT_CHAIN,
       quoteTicker.ticker,
       (tokens: Token[]) => {
+        if (tokens[0]) dispatch(selectToken(tokens[0].ticker));
         dispatch(fetchTokenList.fulfilled(tokens));
       },
     );
