@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
 import TokenList from '../../components/TokenList';
 import TokenView from '../../components/TokenView';
+import Onboarding from '../../components/Onboarding';
 import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
 import { useIsTokenSelected } from '../../state/tokens/hooks';
@@ -22,6 +23,9 @@ export default function () {
   const userTokens = useUserTokens();
   const userPending = useIsUserTokenPending();
   const tokenSelected = useIsTokenSelected();
+
+  const [[isOpen], setOnboardingOpen] = useState([true])
+
 
   useEffect(() => {
     if (!tokenSelected && userTokens.length > 0) {
@@ -43,6 +47,11 @@ export default function () {
         </LoaderWrapper>
       ) : (
         <>
+          <Onboarding
+            isOpen={isOpen}
+            hasWallet={true}
+            onRequestClose={() => setOnboardingOpen([false])}
+          />
           <TokenList data={data} />
           <TokenView />
         </>
