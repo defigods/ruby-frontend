@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
-import { BigNumber } from '@ethersproject/bignumber';
 
 interface LineChartProps {
   /**

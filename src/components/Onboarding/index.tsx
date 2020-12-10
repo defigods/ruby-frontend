@@ -1,33 +1,19 @@
-import { darken } from 'polished';
-import React, { useCallback, useContext, useState } from 'react';
-import { X } from 'react-feather';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import styled, { ThemeContext } from 'styled-components';
-import { useActiveWeb3React, useEagerConnect } from '../../hooks';
-import { useMarketContract, useTokenContract } from '../../hooks/contract';
-import { useTokenAllowance, useTokenBalances } from '../../hooks/wallet';
-import { useSelectedQuote } from '../../state/quotes/hooks';
-import { useSelectedToken } from '../../state/tokens/hooks';
-import {
-  executeTrade,
-  formatBN,
-  getTokenAddress,
-  requestAllowance,
-} from '../../utils';
-import Loader, { LoaderWrapper } from '../Loader';
-import { BigNumber } from '@ethersproject/bignumber';
-import { parseUnits } from 'ethers/lib/utils';
-import logo from '../../assets/img/logo-color.png';
+import { useActiveWeb3React } from '../../hooks';
+import Loader from '../Loader';
 import mmLogo from '../../assets/img/metamask.svg';
+import logo from '../../assets/img/logo-color.png';
 import { injected } from '../../connectors';
+import { useWebSocket } from '../SocketProvider';
+import { NoEthereumProviderError } from '@web3-react/injected-connector';
 
 Modal.setAppElement('#root');
 
-const MainButton = styled.div<{ disabled: boolean }>`
-  background-color: ${({ theme, disabled }) =>
-    disabled ? theme.colors.secondary : theme.colors.tertiary};
-  color: ${({ theme, disabled }) =>
-    disabled ? theme.text.secondary : theme.text.againstRed};
+const MainButton = styled.div`
+  background-color: ${({ theme }) => theme.colors.tertiary};
+  color: ${({ theme }) => theme.text.againstRed};
   width: 80%;
   border-radius: 4px;
   font-weight: 600;
@@ -87,13 +73,6 @@ const MM = styled.img`
 function useModalStyle(): Modal.Styles {
   const theme = useContext(ThemeContext);
 
-  // const executeClick = useCallback(async () => {
-  //   if (!buttonEnabled) {
-  //     return;
-  //   }
-  //
-  // }, 'test');
-
   return {
     content: {
       maxHeight: '95%',
@@ -114,58 +93,54 @@ function useModalStyle(): Modal.Styles {
   };
 }
 
-function useButtonText(
-  isBuy: boolean,
-  walletBalance: BigNumber,
-  allowance: BigNumber,
-) {
-  if (walletBalance.isZero()) {
-    return isBuy ? 'No funds available' : 'No supply available';
-  }
-
-  if (allowance.isZero()) {
-    return 'Enable';
-  }
-
-  return isBuy ? 'Buy' : 'Sell';
-}
-
 export default function () {
   const modalStyle = useModalStyle();
-  const buttonEnabled = true;
-  const hasWallet = true;
   const { active, activate } = useActiveWeb3React();
 
-  function connectToApp() {
+  const [hasWallet, setHasWallet] = useState(true);
+  const [hasTried, setHasTried] = useState(false);
+
+  const websocket = useWebSocket();
+
+  const connect = useCallback(() => {
     // LOGIC to connect to wallet
     // User should see the modal overlaying the main app
+    setHasTried(true);
     activate(injected, undefined, true).catch((err) => {
       console.error(`Failed to activate account`, err);
+      if (err instanceof NoEthereumProviderError) {
+        setHasWallet(false);
+      }
     });
-    console.log('Connect Clicked');
-  }
+  }, [activate]);
 
-  return (
-    <>
-      {hasWallet ? (
-        // Already has Web3 wallet
-        <Modal isOpen={true} style={modalStyle}>
-          <LogoWrapper>
-            <Logo src={logo} alt="logo" />
-          </LogoWrapper>
+  useEffect(() => {
+    if (!hasTried) {
+      connect();
+    }
+  }, [hasTried, connect]);
+
+  function renderModal() {
+    if (websocket.loading || (!hasTried && !active)) {
+      return (
+        <TextWrapper>
+          <Loader size="100px" />
+        </TextWrapper>
+      );
+    } else if (hasTried && !active && hasWallet) {
+      return (
+        <>
           <TextWrapper>
             <h2>Welcome to Rubicon</h2>
             <p>Please connect your browser wallet to begin trading.</p>
           </TextWrapper>
-          <MainButton disabled={!buttonEnabled} onClick={connectToApp}>
-            CONNECT
-          </MainButton>
-        </Modal>
-      ) : (
-        <Modal isOpen={true} style={modalStyle}>
-          <LogoWrapper>
-            <Logo src={logo} alt="logo" />
-          </LogoWrapper>
+          <MainButton onClick={connect}>CONNECT</MainButton>
+        </>
+      );
+    } else {
+      // they don't have an extension
+      return (
+        <>
           <TextWrapper>
             <h2>Welcome to Rubicon</h2>
             <p>
@@ -173,13 +148,26 @@ export default function () {
               install a browser wallet.
             </p>
             <WalletOptionWrapper>
-              <a href={'https://metamask.io/'}>
+              <a
+                href={'https://metamask.io/'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <MM src={mmLogo} alt="Metamask" />
               </a>
             </WalletOptionWrapper>
           </TextWrapper>
-        </Modal>
-      )}
-    </>
+        </>
+      );
+    }
+  }
+
+  return (
+    <Modal isOpen={true} style={modalStyle}>
+      <LogoWrapper>
+        <Logo src={logo} alt="logo" />
+      </LogoWrapper>
+      {renderModal()}
+    </Modal>
   );
 }

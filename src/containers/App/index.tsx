@@ -1,13 +1,13 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import Loader from '../../components/Loader';
 import Sidebar from '../../components/Sidebar';
-import Web3Wrapper from '../../components/Web3Wrapper';
-import { useActiveWeb3React } from '../../hooks';
+import { useActiveWeb3React, useEagerConnect } from '../../hooks';
 import Trade from '../Trade';
 import Portfolio from '../Portfolio';
 import Onboarding from '../../components/Onboarding';
+import { useWebSocket } from '../../components/SocketProvider';
+import Loader, { LoaderWrapper } from '../../components/Loader';
 
 const AppWrapper = styled.div`
   display: flex;
@@ -29,30 +29,44 @@ const BodyWrapper = styled.div`
 
 export default function () {
   const { account } = useActiveWeb3React();
+  const websocket = useWebSocket();
+  const hasTried = useEagerConnect();
+
   return (
     <Suspense fallback={null}>
       <BrowserRouter>
-        {/* <Web3Wrapper> */}
         <AppWrapper>
           <Sidebar />
           <BodyWrapper>
-            {!!account ? (
-              <Switch>
-                <Route exact strict path="/portfolio" component={Portfolio} />
-                <Route exact strict path="/trade" component={Trade} />
-                <Route exact strict path="/history" component={Trade} />
-                <Redirect to="/trade" />
-              </Switch>
+            {websocket.loading || !hasTried ? (
+              <LoaderWrapper style={{ height: '100vh' }}>
+                <Loader size="100px" />
+              </LoaderWrapper>
             ) : (
               <Switch>
-                <Onboarding />
-                <Route exact strict path="/no-wallet" component={Trade} />
-                <Redirect to="/no-wallet" />
+                {!!account ? (
+                  <>
+                    <Route
+                      exact
+                      strict
+                      path="/portfolio"
+                      component={Portfolio}
+                    />
+                    <Route exact strict path="/trade" component={Trade} />
+                    <Route exact strict path="/history" component={Trade} />
+                    <Redirect to="/trade" />
+                  </>
+                ) : (
+                  <>
+                    <Onboarding />
+                    <Route exact strict path="/no-wallet" component={Trade} />
+                    <Redirect to="/no-wallet" />
+                  </>
+                )}
               </Switch>
             )}
           </BodyWrapper>
         </AppWrapper>
-        {/* </Web3Wrapper> */}
       </BrowserRouter>
     </Suspense>
   );

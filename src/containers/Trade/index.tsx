@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
 import TokenList from '../../components/TokenList';
 import TokenView from '../../components/TokenView';
-import Onboarding from '../../components/Onboarding';
 import { useTokens, useIsTokenPending } from '../../state/tokens/hooks';
 
 const LoaderWrapper = styled.div`
