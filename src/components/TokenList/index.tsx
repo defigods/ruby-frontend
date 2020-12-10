@@ -7,7 +7,7 @@ import TokenListItem from './TokenListItem';
 
 interface TokenListProps {
   data: (Token & { title: string; subtitle: string })[];
-  searchBar: boolean;
+  searchBar?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -41,7 +41,7 @@ const NoSearchBarHeader = styled.div`
 
 export default function (props: TokenListProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
-  const searchBar = props.searchBar;
+  const searchBar = props.searchBar ?? true;
 
   const filteredData = search
     ? props.data.filter((item) => {
@@ -57,40 +57,25 @@ export default function (props: TokenListProps) {
   });
 
   return (
-    <>
-      {searchBar ?
-        (
-          <Wrapper>
-            <SearchBar
-              placeholder="Search by token or company name"
-              onSearch={(s) => setSearch(s)}
-            ></SearchBar>
-            {sortedData.map((item) => (
-              <TokenListItem {...item} key={item.title} />
-            ))}
-            {sortedData.length === 0 && (
-              <Warning>
-                <AlertCircle size={12} style={{ marginRight: 5 }} />
-                No tokens found
-              </Warning>
-            )}
-          </Wrapper>
-        ) : (
-          <Wrapper>
-            <NoSearchBarHeader>
-              Your Tokens
-            </NoSearchBarHeader>
-            {sortedData.map((item) => (
-              <TokenListItem {...item} key={item.title} />
-            ))}
-            {sortedData.length === 0 && (
-              <Warning>
-                <AlertCircle size={12} style={{ marginRight: 5 }} />
-                No tokens found
-              </Warning>
-            )}
-          </Wrapper>
+    <Wrapper>
+      {searchBar ? (
+        <SearchBar
+          placeholder="Search by token or company name"
+          onSearch={(s) => setSearch(s)}
+        ></SearchBar>
+      ) : (
+        <NoSearchBarHeader>Your Tokens</NoSearchBarHeader>
       )}
-    </>
+
+      {sortedData.map((item) => (
+        <TokenListItem {...item} key={item.title} />
+      ))}
+      {sortedData.length === 0 && (
+        <Warning>
+          <AlertCircle size={12} style={{ marginRight: 5 }} />
+          No tokens found
+        </Warning>
+      )}
+    </Wrapper>
   );
 }

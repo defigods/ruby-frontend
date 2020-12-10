@@ -31,7 +31,7 @@ export default function () {
         </LoaderWrapper>
       ) : (
         <>
-          <TokenList data={data} searchBar={true} />
+          <TokenList data={data} />
           <TokenView />
         </>
       )}
