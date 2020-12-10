@@ -2,10 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
 import TokenList from '../../components/TokenList';
-import TokenView from '../../components/TokenView';
+import HistoryPastTrades from '../../components/HistoryPastTrades';
 import { useTokens, useIsTokenPending } from '../../state/tokens/hooks';
 
-const LoaderWrapper = styled.div`
+const HistoryTokenWrapper = styled.div`
   height: 100vh;
   width: 100%;
   justify-content: center;
@@ -25,16 +25,8 @@ export default function () {
 
   return (
     <>
-      {tokensPending ? (
-        <LoaderWrapper>
-          <Loader size="50px" />
-        </LoaderWrapper>
-      ) : (
-        <>
-          <TokenList data={data} searchBar={true} />
-          <TokenView />
-        </>
-      )}
+      <TokenList data={data} searchBar={false} />
+      <HistoryPastTrades />
     </>
   );
 }
