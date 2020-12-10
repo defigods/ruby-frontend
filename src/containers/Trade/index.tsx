@@ -1,13 +1,9 @@
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
 import TokenList from '../../components/TokenList';
 import TokenView from '../../components/TokenView';
-import { AppDispatch } from '../../state';
-import { selectToken } from '../../state/tokens/actions';
-import { useIsTokenSelected } from '../../state/tokens/hooks';
-import { useIsUserTokenPending, useUserTokens } from '../../state/user/hooks';
+import { useTokens, useIsTokenPending } from '../../state/tokens/hooks';
 
 const LoaderWrapper = styled.div`
   height: 100vh;
@@ -18,26 +14,18 @@ const LoaderWrapper = styled.div`
 `;
 
 export default function () {
-  const dispatch = useDispatch<AppDispatch>();
-  const userTokens = useUserTokens();
-  const userPending = useIsUserTokenPending();
-  const tokenSelected = useIsTokenSelected();
+  const tokens = useTokens();
+  const tokensPending = useIsTokenPending();
 
-  useEffect(() => {
-    if (!tokenSelected && userTokens.length > 0) {
-      dispatch(selectToken(userTokens[0].ticker));
-    }
-  }, [tokenSelected, userTokens, dispatch]);
-
-  const data = userTokens.map((t) => ({
+  const data = tokens.map((t) => ({
     ...t,
     title: t.ticker,
-    subtitle: `${t.quantity.toFixed(2)} TOKENS`,
+    subtitle: ``, // TODO: Fix this?
   }));
 
   return (
     <>
-      {userPending ? (
+      {tokensPending ? (
         <LoaderWrapper>
           <Loader size="50px" />
         </LoaderWrapper>

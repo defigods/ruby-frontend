@@ -6,6 +6,7 @@ import SidebarLinks from './SidebarLinks';
 import SidebarTotal from './SidebarTotal';
 import SidebarUser from './SidebarUser';
 import UserSettings from '../UserSettings';
+import { useActiveWeb3React } from '../../hooks';
 
 // TODO: optimize for mobile
 const Wrapper = styled.div`
@@ -40,6 +41,7 @@ const ContentWrapper = styled.div`
 
 export default function () {
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
+  const { account } = useActiveWeb3React();
 
   return (
     <Wrapper>
@@ -52,7 +54,7 @@ export default function () {
         <SidebarTotal />
         <SidebarLinks />
       </ContentWrapper>
-      <SidebarUser onOpen={() => setUserSettingsOpen(true)} />
+      {!!account && <SidebarUser onOpen={() => setUserSettingsOpen(true)} />}
       <UserSettings
         isOpen={userSettingsOpen}
         onRequestClose={() => setUserSettingsOpen(false)}

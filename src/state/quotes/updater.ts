@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { useWebSocket } from '../../components/SocketProvider';
+import { DEFAULT_CHAIN } from '../../config';
 import { useActiveWeb3React } from '../../hooks';
 import { QuoteToken } from '../../types';
 import { fetchQuoteList, selectQuoteToken } from './actions';
@@ -12,11 +13,11 @@ export default function (): null {
   const websocket = useWebSocket();
 
   useEffect(() => {
-    if (websocket.loading || !chainId) return;
+    if (websocket.loading) return;
     dispatch(fetchQuoteList.pending());
     websocket.socket?.emit(
       'LOAD_QUOTE_TOKENS',
-      chainId,
+      chainId || DEFAULT_CHAIN,
       (quotes: QuoteToken[]) => {
         dispatch(selectQuoteToken(quotes[0].ticker));
         dispatch(fetchQuoteList.fulfilled(quotes));
