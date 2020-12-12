@@ -167,7 +167,7 @@ const Input = styled.input`
 function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
-  const [balances, _] = useTokenBalances();
+  const [balances] = useTokenBalances();
 
   return isBuySelected
     ? ['USD', balances[quote.ticker] || BigNumber.from(0)]
@@ -234,7 +234,7 @@ function useButtonText(
   return isBuy ? 'Buy' : 'Sell';
 }
 
-export default function (props: TradeModalProps) {
+export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
 
@@ -244,26 +244,24 @@ export default function (props: TradeModalProps) {
   const quoteAddress = getTokenAddress(quote, chainId!)!;
 
   const [allowance, isAllowanceLoading] = useTokenAllowance(
-    props.isBuy ? quoteAddress : tokenAddress,
+    isBuy ? quoteAddress : tokenAddress,
   );
-  const tokenContract = useTokenContract(
-    props.isBuy ? quoteAddress : tokenAddress,
-  )!;
+  const tokenContract = useTokenContract(isBuy ? quoteAddress : tokenAddress)!;
 
   const [priceInput, setPriceInput] = useState('');
   const [quantityInput, setQuantityInput] = useState('');
   const [totalInput, setTotalInput] = useState('');
 
-  const [walletTicker, walletBalance] = useWalletBalance(props.isBuy);
+  const [walletTicker, walletBalance] = useWalletBalance(isBuy);
 
   const modalStyle = useModalStyle();
 
   const buttonEnabled = useButtonEnabled(
     walletBalance,
-    props.isBuy ? totalInput : quantityInput,
+    isBuy ? totalInput : quantityInput,
     allowance,
   );
-  const buttonText = useButtonText(props.isBuy, walletBalance, allowance);
+  const buttonText = useButtonText(isBuy, walletBalance, allowance);
   const marketContract = useMarketContract()!;
 
   const executeClick = useCallback(async () => {
@@ -275,23 +273,26 @@ export default function (props: TradeModalProps) {
       return requestAllowance(tokenContract, chainId!);
     }
 
-    const payAmount = props.isBuy ? totalInput : quantityInput;
-    const buyAmount = props.isBuy ? quantityInput : totalInput;
-    const payAddress = props.isBuy ? quoteAddress : tokenAddress;
-    const buyAddress = props.isBuy ? tokenAddress : quoteAddress;
+    const payAmount = isBuy ? totalInput : quantityInput;
+    const buyAmount = isBuy ? quantityInput : totalInput;
+    const payAddress = isBuy ? quoteAddress : tokenAddress;
+    const buyAddress = isBuy ? tokenAddress : quoteAddress;
 
     // TODO: execute the trade here :D
     executeTrade(marketContract, payAmount, payAddress, buyAmount, buyAddress);
-    props.onRequestClose();
+    onRequestClose();
   }, [
     allowance,
     buttonEnabled,
     marketContract,
     totalInput,
     quantityInput,
-    props.isBuy,
+    isBuy,
     tokenAddress,
     quoteAddress,
+    chainId,
+    onRequestClose,
+    tokenContract,
   ]);
 
   function updateValues(value: string, type: number) {
@@ -315,14 +316,10 @@ export default function (props: TradeModalProps) {
   }
 
   return (
-    <Modal
-      isOpen={props.isOpen}
-      style={modalStyle}
-      onRequestClose={props.onRequestClose}
-    >
+    <Modal isOpen={isOpen} style={modalStyle} onRequestClose={onRequestClose}>
       <Header>
         {token.name}
-        <StyledExit onClick={props.onRequestClose} size={30} />
+        <StyledExit onClick={onRequestClose} size={30} />
       </Header>
       {isAllowanceLoading ? (
         <InnerContentWrapper>
@@ -332,7 +329,7 @@ export default function (props: TradeModalProps) {
         </InnerContentWrapper>
       ) : (
         <InnerContentWrapper>
-          <SectionTitle>{props.isBuy ? 'Buy' : 'Sell'} Offer</SectionTitle>
+          <SectionTitle>{isBuy ? 'Buy' : 'Sell'} Offer</SectionTitle>
           <Table>
             <tbody>
               <Tr>

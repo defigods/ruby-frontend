@@ -3,11 +3,10 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { useEffect, useMemo, useState } from 'react';
-import { getContract, getTokenAddress, requestAllowance } from '../utils';
+import { getContract, getTokenAddress } from '../utils';
 import { useActiveWeb3React } from '.';
 import { Pair } from '../types';
 import { useQuotes } from '../state/quotes/hooks';
-import { formatEther } from 'ethers/lib/utils';
 import { markets } from '../config';
 import { useTokenContract } from './contract';
 import { useBlockNumber } from '../state/application/hooks';
@@ -20,6 +19,7 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
   const spender = markets[chainId!].address;
 
   const tokenContract = useTokenContract(token);
+  const blockNumber = useBlockNumber();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +30,7 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
     };
     setLoading(true);
     fetchData();
-  }, [token, owner, spender, tokenContract]);
+  }, [token, owner, spender, tokenContract, blockNumber]);
 
   return [result, loading];
 }

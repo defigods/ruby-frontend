@@ -225,7 +225,7 @@ const Price = styled.span<{ isBuy: boolean }>`
 function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
-  const [balances, _] = useTokenBalances();
+  const [balances] = useTokenBalances();
 
   return isBuySelected
     ? ['USD', balances[quote.ticker] || BigNumber.from(0)]
@@ -352,7 +352,7 @@ function useCalculatedSection(
   );
 }
 
-export default function (props: TradeModalProps) {
+export default function ({ isOpen, onRequestClose }: TradeModalProps) {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
 
@@ -364,7 +364,7 @@ export default function (props: TradeModalProps) {
   const [isBuySelected, toggleBuySelected] = useState(true);
   const [input, setInput] = useState('');
 
-  const [allowance, isAllowanceLoading] = useTokenAllowance(
+  const [allowance] = useTokenAllowance(
     isBuySelected ? quoteAddress : tokenAddress,
   );
   const tokenContract = useTokenContract(
@@ -426,8 +426,18 @@ export default function (props: TradeModalProps) {
 
     // TODO: execute the trade here :D
     executeMatch(marketContract, currentOffer, maxAmount);
-    props.onRequestClose();
-  }, [allowance, buttonEnabled, marketContract, currentOffer, input]);
+    onRequestClose();
+  }, [
+    allowance,
+    buttonEnabled,
+    marketContract,
+    currentOffer,
+    input,
+    chainId,
+    isBuySelected,
+    onRequestClose,
+    tokenContract,
+  ]);
 
   const calculatedSection = useMemo(
     () =>
@@ -454,14 +464,10 @@ export default function (props: TradeModalProps) {
   };
 
   return (
-    <Modal
-      isOpen={props.isOpen}
-      style={modalStyle}
-      onRequestClose={props.onRequestClose}
-    >
+    <Modal isOpen={isOpen} style={modalStyle} onRequestClose={onRequestClose}>
       <Header>
         {token.name}
-        <StyledExit onClick={props.onRequestClose} size={30} />
+        <StyledExit onClick={onRequestClose} size={30} />
       </Header>
       {loadingOffers ? (
         <Loader />

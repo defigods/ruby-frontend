@@ -35,7 +35,14 @@ export default function (): null {
         dispatch(fetchTokenList.fulfilled(tokens));
       },
     );
-  }, [dispatch, websocket.loading, chainId, quoteTicker, quotesLoading]);
+  }, [
+    dispatch,
+    websocket.loading,
+    chainId,
+    quoteTicker,
+    quotesLoading,
+    websocket.socket,
+  ]);
 
   const selectedToken = useSelectedToken();
   const timeHistory = useSelectedTimeHistory();
@@ -58,7 +65,14 @@ export default function (): null {
         },
       );
     }
-  }, [dispatch, chainId, quoteTicker, selectedToken, timeHistory]);
+  }, [
+    dispatch,
+    chainId,
+    quoteTicker,
+    selectedToken,
+    timeHistory,
+    websocket.socket,
+  ]);
 
   const tokens = useTokens();
 
@@ -119,7 +133,7 @@ export default function (): null {
       websocket.socket?.off('UPDATE_ORDER_BOOK');
       websocket.socket?.off('UPDATE_PRICE');
     };
-  }, [dispatch, chainId, quoteTicker, selectedToken, chainId]);
+  }, [dispatch, chainId, quoteTicker, selectedToken, websocket.socket, tokens]);
 
   return null;
 }
