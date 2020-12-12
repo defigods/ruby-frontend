@@ -1,5 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { UserTrades } from '../../types';
+import Loader from '../Loader';
+import PastTradeItem from './pastTradeItem';
+
+interface HistoryPastTradesProps {
+  data: [UserTrades, boolean];
+}
 
 const Wrapper = styled.div`
   width: 100%;
@@ -9,6 +16,33 @@ const Wrapper = styled.div`
   flex-direction: column;
 `;
 
+const HistoryHeader = styled.div`
+  height: 50px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const PastTradesWrapper = styled.div`
+  height: 100%;
+  padding: 10px 70px 10px 70px;
+`;
+
+const HistoryHeaderItem = styled.div`
+  padding: 15px 110px 15px 110px;
+`;
+
+const NoSearchBarHeader = styled.div`
+  // position: relative;
+  // display: flex;
+  align-items: center;
+  width: 100%;
+  height: 55px;
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+`;
 
 //TODO: Receive all data of past Trades
 // This could be a web3 call parsing through LogTakes[2] = seller and
@@ -19,10 +53,43 @@ const Wrapper = styled.div`
 
 //data passed into component should be token, BUY/Sell, Size, Tx hash
 
-export default function () {
+//take in data - ******make sure data[1] is false*****
+//Map array -> PastTradeItem
+
+export default function (props: HistoryPastTradesProps) {
+  console.log('data prop', props.data);
+
+  const [pastTradesData, loadingHistory] = props.data;
+
+  console.log('pastTradesData', pastTradesData);
+  console.log('pastTradesData[0', pastTradesData['STARK']);
+
+  //turn pastTradesData into an array to then map -> Past Trade Item below
+  // sortedData;
+
   return (
     <Wrapper>
-      Past Trades
+      <NoSearchBarHeader>Trade History</NoSearchBarHeader>
+      <HistoryHeader>
+        <HistoryHeaderItem>Token</HistoryHeaderItem>
+        <HistoryHeaderItem>Action</HistoryHeaderItem>
+        <HistoryHeaderItem>Size</HistoryHeaderItem>
+        <HistoryHeaderItem>Details</HistoryHeaderItem>
+      </HistoryHeader>
+
+      {loadingHistory ? (
+        <Loader />
+      ) : (
+        <PastTradesWrapper>
+          {/* Need to map the sorted Data to each past Trade Items */}
+          <PastTradeItem
+            token={'Test'}
+            action={'Buy'}
+            size={5}
+            details={'googl.com'}
+          ></PastTradeItem>
+        </PastTradesWrapper>
+      )}
     </Wrapper>
   );
 }

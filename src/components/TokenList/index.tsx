@@ -7,11 +7,7 @@ import TokenListItem from './TokenListItem';
 
 interface TokenListProps {
   data: (Token & { title: string; subtitle: string })[];
-<<<<<<< HEAD
-  searchBar: boolean;
-=======
   searchBar?: boolean;
->>>>>>> c288856c8e7f34fc246336e9972d5ea592e41a62
 }
 
 const Wrapper = styled.div`
@@ -45,11 +41,7 @@ const NoSearchBarHeader = styled.div`
 
 export default function (props: TokenListProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
-<<<<<<< HEAD
-  const searchBar = props.searchBar;
-=======
   const searchBar = props.searchBar ?? true;
->>>>>>> c288856c8e7f34fc246336e9972d5ea592e41a62
 
   const filteredData = search
     ? props.data.filter((item) => {
@@ -65,41 +57,6 @@ export default function (props: TokenListProps) {
   });
 
   return (
-<<<<<<< HEAD
-    <>
-      {searchBar ?
-        (
-          <Wrapper>
-            <SearchBar
-              placeholder="Search by token or company name"
-              onSearch={(s) => setSearch(s)}
-            ></SearchBar>
-            {sortedData.map((item) => (
-              <TokenListItem {...item} key={item.title} />
-            ))}
-            {sortedData.length === 0 && (
-              <Warning>
-                <AlertCircle size={12} style={{ marginRight: 5 }} />
-                No tokens found
-              </Warning>
-            )}
-          </Wrapper>
-        ) : (
-          <Wrapper>
-            <NoSearchBarHeader>
-              Your Tokens
-            </NoSearchBarHeader>
-            {sortedData.map((item) => (
-              <TokenListItem {...item} key={item.title} />
-            ))}
-            {sortedData.length === 0 && (
-              <Warning>
-                <AlertCircle size={12} style={{ marginRight: 5 }} />
-                No tokens found
-              </Warning>
-            )}
-          </Wrapper>
-=======
     <Wrapper>
       {searchBar ? (
         <SearchBar
@@ -118,8 +75,7 @@ export default function (props: TokenListProps) {
           <AlertCircle size={12} style={{ marginRight: 5 }} />
           No tokens found
         </Warning>
->>>>>>> c288856c8e7f34fc246336e9972d5ea592e41a62
       )}
-    </>
+    </Wrapper>
   );
 }
