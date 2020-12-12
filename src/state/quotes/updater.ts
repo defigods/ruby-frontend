@@ -23,7 +23,7 @@ export default function (): null {
         dispatch(fetchQuoteList.fulfilled(quotes));
       },
     );
-  }, [dispatch, websocket.loading, chainId]);
+  }, [dispatch, websocket.loading, chainId, websocket.socket]);
 
   return null;
 }

@@ -5,7 +5,6 @@ import { markets } from '../config';
 import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { MARKET_INTERFACE } from '../constants/abis/RubiconMarket';
 import { useBlockNumber } from '../state/application/hooks';
-import { selectQuoteToken } from '../state/quotes/actions';
 import { useSelectedQuote } from '../state/quotes/hooks';
 import { useSelectedToken } from '../state/tokens/hooks';
 import { ContractOffer } from '../types';
@@ -62,7 +61,7 @@ export function useBestOffers(): [
     };
 
     fetchData();
-  }, [contract, selectedToken, selectQuoteToken, block]);
+  }, [contract, selectedToken, block, chainId, selectedQuote]);
 
   return [result, loading];
 }

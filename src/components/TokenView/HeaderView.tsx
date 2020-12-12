@@ -55,7 +55,7 @@ export default function ({ timestamp }: HeaderViewProps) {
 
   const [absoluteDifference, percentChange] = useMemo(() => {
     return getPercentChange(selectedToken, timestamp, selectedTimeHistory);
-  }, [selectedToken, timestamp]);
+  }, [selectedToken, timestamp, selectedTimeHistory]);
 
   const [displayPrice, setDisplayPrice] = useState(0);
   const prevDisplayPrice = usePrevious(displayPrice);
