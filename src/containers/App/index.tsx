@@ -4,6 +4,10 @@ import styled from 'styled-components';
 import Sidebar from '../../components/Sidebar';
 import { useActiveWeb3React, useEagerConnect } from '../../hooks';
 import Trade from '../Trade';
+<<<<<<< HEAD
+=======
+import Portfolio from '../Portfolio';
+>>>>>>> c288856c8e7f34fc246336e9972d5ea592e41a62
 import History from '../History';
 import Onboarding from '../../components/Onboarding';
 import { useWebSocket } from '../../components/SocketProvider';
