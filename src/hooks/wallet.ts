@@ -20,6 +20,7 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
   const spender = markets[chainId!].address;
 
   const tokenContract = useTokenContract(token);
+  const blockNumber = useBlockNumber();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +31,7 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
     };
     setLoading(true);
     fetchData();
-  }, [token, owner, spender, tokenContract]);
+  }, [token, owner, spender, tokenContract, blockNumber]);
 
   return [result, loading];
 }

@@ -47,6 +47,23 @@ export interface UserToken extends Token {
   quantity: number;
 }
 
+export type UserTrade = {
+  id: string;
+  isBuy: boolean;
+  payGem: string;
+  buyGem: string;
+  payAmount: number;
+  buyAmount: number;
+  timestamp: number;
+};
+
+export type UserTrades = {
+  [ticker: string]: {
+    buys: UserTrade[];
+    sells: UserTrade[];
+  };
+};
+
 export interface ContractOffer {
   payAmount: BigNumber;
   payGem: string;
