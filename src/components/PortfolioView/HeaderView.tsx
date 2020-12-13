@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CountUp from 'react-countup';
 import styled from 'styled-components';
-import {
-  useSelectedTimeHistory,
-  useSelectedToken,
-} from '../../state/tokens/hooks';
-import { getTokenPercentChange, usePrevious } from '../../utils';
+import { useActiveWeb3React } from '../../hooks';
+import { useUserTotal } from '../../state/user/hooks';
+import { TimeHistoryEntry } from '../../types';
+import { getPercentChange, shortenAddress, usePrevious } from '../../utils';
 
 interface HeaderViewProps {
   timestamp?: number;
+  entry?: TimeHistoryEntry;
 }
 
 const Wrapper = styled.div`
@@ -47,26 +47,22 @@ const StyledCountUp = styled(CountUp)`
   font-size: 35px;
 `;
 
-export default function ({ timestamp }: HeaderViewProps) {
-  const selectedToken = useSelectedToken()!; // will always be defined here
-  const selectedTimeHistory = useSelectedTimeHistory();
+export default function ({ timestamp, entry }: HeaderViewProps) {
+  const { account } = useActiveWeb3React();
+  const userTotal = useUserTotal();
 
   // TODO: create a loading thing if the prices r being loaded
 
   const [absoluteDifference, percentChange] = useMemo(() => {
-    return getTokenPercentChange(selectedToken, timestamp, selectedTimeHistory);
-  }, [selectedToken, timestamp, selectedTimeHistory]);
+    return getPercentChange(entry, userTotal, timestamp);
+  }, [entry, timestamp, userTotal]);
 
   const [displayPrice, setDisplayPrice] = useState(0);
   const prevDisplayPrice = usePrevious(displayPrice);
 
   useEffect(() => {
-    setDisplayPrice(
-      timestamp
-        ? selectedToken.prices[selectedTimeHistory]![timestamp]
-        : selectedToken.currentPrice,
-    );
-  }, [selectedToken, timestamp, selectedTimeHistory]);
+    setDisplayPrice(timestamp ? entry![timestamp] : userTotal);
+  }, [entry, timestamp, userTotal]);
 
   return (
     <Wrapper>
@@ -76,7 +72,7 @@ export default function ({ timestamp }: HeaderViewProps) {
           start={prevDisplayPrice}
           prefix="$"
           separator=","
-          decimals={4}
+          decimals={2}
         />
         <SubtitleWrapper>
           <DifferenceWrapper upwardsTrend={absoluteDifference > 0}>
@@ -88,8 +84,8 @@ export default function ({ timestamp }: HeaderViewProps) {
         </SubtitleWrapper>
       </ChildWrapper>
       <ChildWrapper>
-        <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
-        <SubtitleWrapper>{selectedToken.name} | Equity Token</SubtitleWrapper>
+        <TitleWrapper>Portfolio</TitleWrapper>
+        <SubtitleWrapper>{shortenAddress(account!)}</SubtitleWrapper>
       </ChildWrapper>
     </Wrapper>
   );

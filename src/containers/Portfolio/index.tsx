@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
+import PortfolioView from '../../components/PortfolioView';
 import TokenList from '../../components/TokenList';
-import TokenView from '../../components/TokenView';
 import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
 import { useIsTokenSelected } from '../../state/tokens/hooks';
@@ -44,7 +44,7 @@ export default function () {
       ) : (
         <>
           <TokenList data={data} />
-          <TokenView />
+          <PortfolioView />
         </>
       )}
     </>

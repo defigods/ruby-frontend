@@ -9,11 +9,11 @@ import React, {
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
 import moment from 'moment';
 import { getSortedPrices, useDebounce } from '../../utils';
-import { useTimeHistoryLoading } from '../../state/tokens/hooks';
 import Loader, { LoaderWrapper } from '../Loader';
 
 interface LineChartProps {
   data?: { [timestamp: number]: number };
+  loading: boolean;
   onHover: (timestamp?: number) => void;
 }
 
@@ -57,7 +57,7 @@ const StyledTextLabel = styled.text`
   padding-bottom: 5px;
 `;
 
-export default function ({ data, onHover }: LineChartProps) {
+export default function ({ data, onHover, loading }: LineChartProps) {
   const [rect, setRect] = useState<DOMRect | undefined>(undefined);
   const [[mouseX, mouseY], setMouseCoordinates] = useState([0, 0]);
   const [windowState, setWindowSize] = useState([0, 0]);
@@ -194,9 +194,7 @@ export default function ({ data, onHover }: LineChartProps) {
     onHover(hovering ? hoveredTimestamp : undefined);
   }, [hoveredTimestamp, hovering, onHover]);
 
-  const timeHistoryLoading = useTimeHistoryLoading();
-
-  if (timeHistoryLoading) {
+  if (loading) {
     return (
       <Wrapper>
         <LoaderWrapper>

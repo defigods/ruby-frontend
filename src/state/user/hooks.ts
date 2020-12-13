@@ -6,6 +6,12 @@ export function useUserTokens(): UserToken[] {
   return useSelector((state: AppState) => state.user.tokens);
 }
 
+export function useUserToken(ticker: string): UserToken | undefined {
+  return useSelector((state: AppState) =>
+    state.user.tokens.find((t) => t.ticker === ticker),
+  );
+}
+
 export function useIsUserTokenPending(): boolean {
   return useSelector((state: AppState) => state.user.loading);
 }

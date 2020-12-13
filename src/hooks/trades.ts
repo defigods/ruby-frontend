@@ -10,6 +10,7 @@ import { UserTrade, UserTrades } from '../types';
 import { getTokenAddress } from '../utils';
 import { useMarketContract } from './contract';
 import { BigNumber } from '@ethersproject/bignumber';
+import { useTokenBalances } from './wallet';
 
 async function loadUserHistoricTrade(
   token: string,
@@ -115,6 +116,7 @@ async function loadUserHistoricTrade(
  */
 export function useUserTrades(): [UserTrades, boolean] {
   const tokens = useTokens();
+  const [balances, balancesLoading] = useTokenBalances();
   const quote = useSelectedQuote();
   const tokensLoading = useIsTokenPending();
   const quoteSelected = useIsQuoteSelected();
@@ -128,29 +130,43 @@ export function useUserTrades(): [UserTrades, boolean] {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (tokensLoading || !quoteSelected || !chainId) return;
+      if (tokensLoading || !quoteSelected || !chainId || balancesLoading)
+        return;
       // Loop through each token
       const quoteAddress = getTokenAddress(quote!, chainId)!;
       const results: UserTrades = {};
       for (const token of tokens) {
         const tokenAddress = getTokenAddress(token, chainId)!;
-        results[token.ticker] = await loadUserHistoricTrade(
-          token.ticker,
-          quote!.ticker,
-          tokenAddress,
-          quoteAddress,
-          account!,
-          chainId,
-          contract!,
-        );
+        results[token.ticker] = {
+          ...(await loadUserHistoricTrade(
+            token.ticker,
+            quote!.ticker,
+            tokenAddress,
+            quoteAddress,
+            account!,
+            chainId,
+            contract!,
+          )),
+          balance: Number(formatEther(balances[token.ticker] || '0')),
+        };
       }
-      console.log(results);
       setResults(results);
       setLoading(false);
     };
     setLoading(true);
     fetchData();
-  }, [tokensLoading, quoteSelected, chainId, blockNumber]);
+  }, [
+    tokensLoading,
+    quoteSelected,
+    chainId,
+    blockNumber,
+    balancesLoading,
+    account,
+    balances,
+    contract,
+    quote,
+    tokens,
+  ]);
 
   return [results, loading];
 }
