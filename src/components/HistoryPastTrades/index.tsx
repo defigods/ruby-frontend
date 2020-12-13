@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { UserTrades } from '../../types';
 import Loader from '../Loader';
 import PastTradeItem from './pastTradeItem';
+import { useUserTrades } from '../../hooks/trades';
+import { useSelectedToken } from '../../state/tokens/hooks';
+// import { useSelectedToken } from '../../hooks/tokens';
+// mport useMemo
 
 interface HistoryPastTradesProps {
   data: [UserTrades, boolean];
@@ -57,12 +61,33 @@ const NoSearchBarHeader = styled.div`
 //Map array -> PastTradeItem
 
 export default function (props: HistoryPastTradesProps) {
-  console.log('data prop', props.data);
+  const [data, loading] = useUserTrades();
+  const selectedToken = useSelectedToken();
 
-  const [pastTradesData, loadingHistory] = props.data;
+  // const [pastTradesData, loadingHistory] = props.data;
+  // console.log('pastTradesData', pastTradesData);
+  // console.log('pastTradesData[0', pastTradesData['STARK']);
 
-  console.log('pastTradesData', pastTradesData);
-  console.log('pastTradesData[0', pastTradesData['STARK']);
+  const sortedTrades = useMemo(() => {
+    // here, create the History data
+    if (!selectedToken) {
+      console.log('returning due to !selectedToken');
+
+      return [];
+    }
+    if (loading) {
+      console.log('returning due to loading');
+      return [];
+    }
+
+    const { buys, sells } = data[selectedToken.ticker];
+
+    return [...buys, ...sells].sort((a, b) => b.timestamp - a.timestamp);
+  }, [selectedToken]);
+
+  console.log(loading);
+
+  console.log(sortedTrades);
 
   //turn pastTradesData into an array to then map -> Past Trade Item below
   // sortedData;
@@ -77,17 +102,24 @@ export default function (props: HistoryPastTradesProps) {
         <HistoryHeaderItem>Details</HistoryHeaderItem>
       </HistoryHeader>
 
-      {loadingHistory ? (
+      {loading ? (
         <Loader />
       ) : (
         <PastTradesWrapper>
           {/* Need to map the sorted Data to each past Trade Items */}
-          <PastTradeItem
+          {/** obj = {id: 1, name: 5} */}
+          {/** <MyComponent {...obj} /> */}
+          {/** <MyComponent id={1} name={5} /> */}
+          {/* each trade is a user trade object below */}
+          {sortedTrades.map((trade) => (
+            <PastTradeItem data={trade} key={trade.id} />
+          ))}
+          {/* <PastTradeItem
             token={'Test'}
             action={'Buy'}
             size={5}
             details={'googl.com'}
-          ></PastTradeItem>
+          ></PastTradeItem> */}
         </PastTradesWrapper>
       )}
     </Wrapper>

@@ -55,6 +55,7 @@ export type UserTrade = {
   payAmount: number;
   buyAmount: number;
   timestamp: number;
+  transactionHash: string;
 };
 
 export type UserTrades = {

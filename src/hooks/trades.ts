@@ -30,6 +30,8 @@ async function loadUserHistoricTrade(
   );
 
   const mapToUserTrade = (events: Event[], isBuy: boolean) => {
+    console.log(events);
+
     return events.map<UserTrade>((ev) => ({
       id: ev.args!['id'] as string,
       isBuy,
@@ -38,6 +40,7 @@ async function loadUserHistoricTrade(
       payAmount: Number(formatEther(ev.args!['give_amt'] as BigNumber)),
       buyAmount: Number(formatEther(ev.args!['take_amt'] as BigNumber)),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
+      transactionHash: ev['transactionHash'] as string,
     }));
   };
 
