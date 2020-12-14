@@ -1,68 +1,59 @@
 import React from 'react';
+import { ExternalLink } from 'react-feather';
 import styled from 'styled-components';
-import externalLinkBlack from '../../assets/img/external-link-black.png';
 import { UserTrade } from '../../types';
+import moment from 'moment';
 
-interface pastTradeItemProps {
+interface PastTradeItemProps {
   data: UserTrade;
 }
 
 const Wrapper = styled.div`
-  height: 50px;
   width: 100%;
-  border: 2px solid ${({ theme }) => theme.colors.tertiary};
-  border-radius: 5px;
+  border: 1px solid ${({ theme }) => theme.colors.primary};
+  border-radius: 10px;
   padding: 10px 0 10px 0;
   margin: 10px 0 10px 0;
-  display: inline-flex;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 `;
 
 const TextItem = styled.div`
-  padding: 0px 130px 0px 130px;
+  width: 20%;
+  text-align: center;
+  color: ${({ theme }) => theme.text.primary};
 `;
 
-const TextItemStart = styled.div`
-  padding: 0px 110px 0px 40px;
+const Link = styled(ExternalLink)`
+  color: ${({ theme }) => theme.text.primary};
 `;
 
-const Etherscan = styled.img`
-  height: 40px;
-  // width: 40px;
-  padding: 0px 0px 0px 100px;
+const SizeText = styled(TextItem)<{ isBuy: boolean }>`
+  color: ${({ isBuy, theme }) => (isBuy ? theme.text.green : theme.text.red)};
 `;
 
-const TextItemEnd = styled.div`
-  padding: 0px 40px 0px 50px;
-`;
-
-export default function (props: pastTradeItemProps) {
-  const data = props.data;
-  console.log(data);
-
-  const isBuy = data['isBuy'];
-  console.log('isBuy?', data['isBuy']);
-
+export default function ({ data }: PastTradeItemProps) {
   return (
     <Wrapper>
-      {isBuy ? (
-        <>
-          <TextItemStart>{data['buyGem']}</TextItemStart>
-          <TextItem>BUY</TextItem>
-          <TextItem>+{data['buyAmount'].toFixed(2)}</TextItem>
-          <a href={'https://etherscan.io/tx/' + data['transactionHash']}>
-            <Etherscan src={externalLinkBlack}></Etherscan>
-          </a>
-        </>
-      ) : (
-        <>
-          <TextItemStart>{data['payGem']}</TextItemStart>
-          <TextItem>SELL</TextItem>
-          <TextItem>-{data['payAmount'].toFixed(2)}</TextItem>
-          <a href={'https://etherscan.io/tx/' + data['transactionHash']}>
-            <Etherscan src={externalLinkBlack}></Etherscan>
-          </a>
-        </>
-      )}
+      <TextItem style={{ fontWeight: 500 }}>
+        {data.isBuy ? data.buyGem : data.payGem}
+      </TextItem>
+      <TextItem>{data.isBuy ? 'BUY' : 'SELL'}</TextItem>
+      <SizeText isBuy={data.isBuy}>
+        {data.isBuy
+          ? `+${data.buyAmount.toFixed(2)}`
+          : `-${data.payAmount.toFixed(2)}`}
+      </SizeText>
+      <TextItem>{moment.unix(data.timestamp).fromNow()}</TextItem>
+      <TextItem>
+        <a
+          href={'https://etherscan.io/tx/' + data.transactionHash}
+          target="_blank"
+        >
+          <Link />
+        </a>
+      </TextItem>
     </Wrapper>
   );
 }

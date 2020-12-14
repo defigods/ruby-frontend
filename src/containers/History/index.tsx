@@ -29,7 +29,7 @@ export default function () {
   return (
     <>
       <TokenList data={data} searchBar={false} />
-      <HistoryPastTrades data={info} />
+      <HistoryPastTrades />
     </>
   );
 }
