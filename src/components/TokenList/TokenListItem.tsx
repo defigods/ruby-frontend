@@ -89,10 +89,6 @@ export default function (props: TokenListItemProps) {
 
   const selectedToken = useSelectedToken();
 
-  if (props.selectable == false) {
-    console.log('nonselectable');
-  }
-
   const history = useHistory();
 
   const redirect = (token: string) => {
@@ -101,53 +97,34 @@ export default function (props: TokenListItemProps) {
   };
 
   return (
-    <>
-      {props.selectable ? (
-        <Wrapper
-          selected={props.ticker === selectedToken?.ticker}
-          onClick={() => dispatch(selectToken(props.ticker))}
-        >
-          <ItemWrapper>
-            <TextWrapper>
-              <Title>{props.title}</Title>
-              <Subtitle>{props.subtitle}</Subtitle>
-            </TextWrapper>
-          </ItemWrapper>
-          <ItemWrapper>
-            <LineChart data={prices} />
-          </ItemWrapper>
-          <ItemWrapper>
-            <PriceWrapper upwardsTrend={upwardsTrend}>
-              $
-              {props.currentPrice.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </PriceWrapper>
-          </ItemWrapper>
-        </Wrapper>
-      ) : (
-        <Wrapper selected={false} onClick={() => redirect(props.ticker)}>
-          <ItemWrapper>
-            <TextWrapper>
-              <Title>{props.title}</Title>
-              <Subtitle>{props.subtitle}</Subtitle>
-            </TextWrapper>
-          </ItemWrapper>
-          <ItemWrapper>
-            <LineChart data={prices} />
-          </ItemWrapper>
-          <ItemWrapper>
-            <PriceWrapper upwardsTrend={upwardsTrend}>
-              $
-              {props.currentPrice.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </PriceWrapper>
-          </ItemWrapper>
-        </Wrapper>
-      )}
-    </>
+    <Wrapper
+      selected={
+        props.selectable ? props.ticker === selectedToken?.ticker : false
+      }
+      onClick={() =>
+        props.selectable
+          ? dispatch(selectToken(props.ticker))
+          : redirect(props.ticker)
+      }
+    >
+      <ItemWrapper>
+        <TextWrapper>
+          <Title>{props.title}</Title>
+          <Subtitle>{props.subtitle}</Subtitle>
+        </TextWrapper>
+      </ItemWrapper>
+      <ItemWrapper>
+        <LineChart data={prices} />
+      </ItemWrapper>
+      <ItemWrapper>
+        <PriceWrapper upwardsTrend={upwardsTrend}>
+          $
+          {props.currentPrice.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </PriceWrapper>
+      </ItemWrapper>
+    </Wrapper>
   );
 }
