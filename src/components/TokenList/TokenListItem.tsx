@@ -7,6 +7,7 @@ import { useSelectedToken } from '../../state/tokens/hooks';
 import { TimeHistory, Token } from '../../types';
 import { getSortedPrices } from '../../utils';
 import LineChart from './LineChart';
+import { useHistory } from 'react-router-dom';
 
 interface TokenListItemProps extends Token {
   /**
@@ -17,6 +18,8 @@ interface TokenListItemProps extends Token {
    * Subtitle of the item
    */
   subtitle: string;
+
+  selectable?: boolean;
 }
 
 const Wrapper = styled.div<{ selected: boolean }>`
@@ -86,29 +89,65 @@ export default function (props: TokenListItemProps) {
 
   const selectedToken = useSelectedToken();
 
+  if (props.selectable == false) {
+    console.log('nonselectable');
+  }
+
+  const history = useHistory();
+
+  const redirect = (token: string) => {
+    dispatch(selectToken(token));
+    history.push('/trade');
+  };
+
   return (
-    <Wrapper
-      selected={props.ticker === selectedToken?.ticker}
-      onClick={() => dispatch(selectToken(props.ticker))}
-    >
-      <ItemWrapper>
-        <TextWrapper>
-          <Title>{props.title}</Title>
-          <Subtitle>{props.subtitle}</Subtitle>
-        </TextWrapper>
-      </ItemWrapper>
-      <ItemWrapper>
-        <LineChart data={prices} />
-      </ItemWrapper>
-      <ItemWrapper>
-        <PriceWrapper upwardsTrend={upwardsTrend}>
-          $
-          {props.currentPrice.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </PriceWrapper>
-      </ItemWrapper>
-    </Wrapper>
+    <>
+      {props.selectable ? (
+        <Wrapper
+          selected={props.ticker === selectedToken?.ticker}
+          onClick={() => dispatch(selectToken(props.ticker))}
+        >
+          <ItemWrapper>
+            <TextWrapper>
+              <Title>{props.title}</Title>
+              <Subtitle>{props.subtitle}</Subtitle>
+            </TextWrapper>
+          </ItemWrapper>
+          <ItemWrapper>
+            <LineChart data={prices} />
+          </ItemWrapper>
+          <ItemWrapper>
+            <PriceWrapper upwardsTrend={upwardsTrend}>
+              $
+              {props.currentPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </PriceWrapper>
+          </ItemWrapper>
+        </Wrapper>
+      ) : (
+        <Wrapper selected={false} onClick={() => redirect(props.ticker)}>
+          <ItemWrapper>
+            <TextWrapper>
+              <Title>{props.title}</Title>
+              <Subtitle>{props.subtitle}</Subtitle>
+            </TextWrapper>
+          </ItemWrapper>
+          <ItemWrapper>
+            <LineChart data={prices} />
+          </ItemWrapper>
+          <ItemWrapper>
+            <PriceWrapper upwardsTrend={upwardsTrend}>
+              $
+              {props.currentPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </PriceWrapper>
+          </ItemWrapper>
+        </Wrapper>
+      )}
+    </>
   );
 }

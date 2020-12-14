@@ -14,7 +14,7 @@ export default function () {
 
   return (
     <>
-      <TokenList data={data} searchBar={false} />
+      <TokenList data={data} searchBar={false} selectable={true} />
       <HistoryPastTrades />
     </>
   );
