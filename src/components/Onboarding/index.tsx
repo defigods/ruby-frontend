@@ -132,7 +132,10 @@ export default function () {
         <>
           <TextWrapper>
             <h2>Welcome to Rubicon</h2>
-            <p>Please connect your browser wallet to begin trading.</p>
+            <p>
+              Please connect your browser wallet to begin trading. While Rubicon
+              is testing, please set your Metamask to "Kovan Network".
+            </p>
           </TextWrapper>
           <MainButton onClick={connect}>CONNECT</MainButton>
         </>

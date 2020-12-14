@@ -47,8 +47,9 @@ export default function ({ data }: PastTradeItemProps) {
       </SizeText>
       <TextItem>{moment.unix(data.timestamp).fromNow()}</TextItem>
       <TextItem>
+        {/* TODO: Below is for Kovan only */}
         <a
-          href={'https://etherscan.io/tx/' + data.transactionHash}
+          href={'https://kovan.etherscan.io/tx/' + data.transactionHash}
           target="_blank"
           rel="noopener noreferrer"
         >
