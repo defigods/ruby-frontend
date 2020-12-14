@@ -20,7 +20,7 @@ export default function () {
   const data = tokens.map((t) => ({
     ...t,
     title: t.ticker,
-    subtitle: ``, // TODO: Fix this?
+    subtitle: t.name,
   }));
 
   return (

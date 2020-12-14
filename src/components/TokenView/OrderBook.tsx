@@ -71,9 +71,18 @@ const Ask = (props: { baseAmount: number; price: number }) => {
   return (
     <BodyRow>
       <BodyItem style={{ color: theme.text.red }}>
-        ${props.price.toFixed(2)}
+        $
+        {props.price.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
       </BodyItem>
-      <BodyItem>{props.baseAmount.toFixed(4)}</BodyItem>
+      <BodyItem>
+        {props.baseAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 4,
+          maximumFractionDigits: 4,
+        })}
+      </BodyItem>
     </BodyRow>
   );
 };
@@ -82,9 +91,18 @@ const Bid = (props: { baseAmount: number; price: number }) => {
   const theme = useContext(ThemeContext);
   return (
     <BodyRow>
-      <BodyItem>{props.baseAmount.toFixed(4)}</BodyItem>
+      <BodyItem>
+        {props.baseAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 4,
+          maximumFractionDigits: 4,
+        })}
+      </BodyItem>
       <BodyItem style={{ color: theme.text.green }}>
-        ${props.price.toFixed(2)}
+        $
+        {props.price.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
       </BodyItem>
     </BodyRow>
   );

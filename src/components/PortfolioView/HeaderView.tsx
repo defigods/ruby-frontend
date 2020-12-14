@@ -64,16 +64,22 @@ export default function ({ timestamp, entry }: HeaderViewProps) {
     setDisplayPrice(timestamp ? entry![timestamp] : userTotal);
   }, [entry, timestamp, userTotal]);
 
+  const MemoCountUp = useMemo(() => {
+    return (
+      <StyledCountUp
+        end={displayPrice}
+        start={prevDisplayPrice}
+        prefix="$"
+        separator=","
+        decimals={2}
+      />
+    );
+  }, [displayPrice]);
+
   return (
     <Wrapper>
       <ChildWrapper>
-        <StyledCountUp
-          end={displayPrice}
-          start={prevDisplayPrice}
-          prefix="$"
-          separator=","
-          decimals={2}
-        />
+        {MemoCountUp}
         <SubtitleWrapper>
           <DifferenceWrapper upwardsTrend={absoluteDifference > 0}>
             {absoluteDifference > 0 ? '+' : ''}

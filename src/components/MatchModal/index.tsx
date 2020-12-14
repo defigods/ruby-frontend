@@ -332,7 +332,13 @@ function useCalculatedSection(
     <>
       <SectionItem>
         <span>Price</span>
-        <Price isBuy={isBuy}>${offer.price.toFixed(2)}</Price>
+        <Price isBuy={isBuy}>
+          $
+          {offer.price.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </Price>
       </SectionItem>
       <Line />
       <SectionItem>

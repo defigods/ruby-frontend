@@ -35,10 +35,6 @@ const BottomWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.colors.primary};
   height: 100%;
   overflow: hidden;
-  & > * {
-    width: calc(50% - 20px);
-    padding: 20px;
-  }
 `;
 
 export default function () {

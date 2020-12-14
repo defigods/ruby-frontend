@@ -68,16 +68,22 @@ export default function ({ timestamp }: HeaderViewProps) {
     );
   }, [selectedToken, timestamp, selectedTimeHistory]);
 
+  const MemoCountUp = useMemo(() => {
+    return (
+      <StyledCountUp
+        end={displayPrice}
+        start={prevDisplayPrice}
+        prefix="$"
+        separator=","
+        decimals={2}
+      />
+    );
+  }, [displayPrice]);
+
   return (
     <Wrapper>
       <ChildWrapper>
-        <StyledCountUp
-          end={displayPrice}
-          start={prevDisplayPrice}
-          prefix="$"
-          separator=","
-          decimals={4}
-        />
+        {MemoCountUp}
         <SubtitleWrapper>
           <DifferenceWrapper upwardsTrend={absoluteDifference > 0}>
             {absoluteDifference > 0 ? '+' : ''}

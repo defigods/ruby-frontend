@@ -32,7 +32,10 @@ export default function () {
   const data = userTokens.map((t) => ({
     ...t,
     title: t.ticker,
-    subtitle: `${t.quantity.toFixed(2)} TOKENS`,
+    subtitle: `${t.quantity.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} TOKENS`,
   }));
 
   return (
