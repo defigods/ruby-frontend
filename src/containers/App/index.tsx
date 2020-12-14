@@ -8,6 +8,7 @@ import History from '../History';
 import Onboarding from '../../components/Onboarding';
 import { useWebSocket } from '../../components/SocketProvider';
 import Loader, { LoaderWrapper } from '../../components/Loader';
+import Portfolio from '../Portfolio';
 
 const AppWrapper = styled.div`
   display: flex;
@@ -46,7 +47,12 @@ export default function () {
               <Switch>
                 {!!account ? (
                   <>
-                    <Route exact strict path="/portfolio" component={Trade} />
+                    <Route
+                      exact
+                      strict
+                      path="/portfolio"
+                      component={Portfolio}
+                    />
                     <Route exact strict path="/trade" component={Trade} />
                     <Route exact strict path="/history" component={History} />
                     <Redirect to="/trade" />

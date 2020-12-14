@@ -31,8 +31,6 @@ async function loadUserHistoricTrade(
   );
 
   const mapToUserTrade = (events: Event[], isBuy: boolean) => {
-    console.log(events);
-
     return events.map<UserTrade>((ev) => ({
       id: ev.args!['id'] as string,
       isBuy,

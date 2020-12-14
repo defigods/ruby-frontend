@@ -50,6 +50,7 @@ export default function ({ data }: PastTradeItemProps) {
         <a
           href={'https://etherscan.io/tx/' + data.transactionHash}
           target="_blank"
+          rel="noopener noreferrer"
         >
           <Link />
         </a>

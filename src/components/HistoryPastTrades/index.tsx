@@ -60,7 +60,7 @@ export default function () {
     const { buys, sells } = data[selectedToken.ticker];
 
     return [...buys, ...sells].sort((a, b) => b.timestamp - a.timestamp);
-  }, [selectedToken, loading]);
+  }, [selectedToken, loading, data]);
 
   return (
     <Wrapper>
