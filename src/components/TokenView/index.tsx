@@ -4,14 +4,15 @@ import { useActiveWeb3React } from '../../hooks';
 import {
   useSelectedTimeHistory,
   useSelectedToken,
+  useTimeHistoryLoading,
 } from '../../state/tokens/hooks';
 import MatchModal from '../MatchModal';
 import TradeModal from '../TradeModal';
 import About from './About';
 import HeaderView from './HeaderView';
-import LineChart from './LineChart';
+import LineChart from '../LineChart';
 import OrderBook from './OrderBook';
-import TimeHistorySelector from './TimeHistorySelector';
+import TimeHistorySelector from '../TimeHistorySelector';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -69,6 +70,8 @@ export default function () {
 
   const selectedTimeHistory = useSelectedTimeHistory();
 
+  const timeHistoryLoading = useTimeHistoryLoading();
+
   const [hoveredTimestamp, setHoveredTimestamp] = useState<number | undefined>(
     undefined,
   );
@@ -93,6 +96,7 @@ export default function () {
       <LineChart
         data={selectedToken.prices[selectedTimeHistory]}
         onHover={setHoveredTimestamp}
+        loading={timeHistoryLoading}
       />
       <TimeHistorySelector />
       <BottomWrapper>

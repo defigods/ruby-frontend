@@ -1,5 +1,5 @@
 import { formatEther, getAddress } from 'ethers/lib/utils';
-import { QuoteToken, TimeHistory, Token } from '../types';
+import { QuoteToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export function isAddress(value: any): string | false {
@@ -39,28 +39,36 @@ export function getSortedPrices(prices: { [timestamp: number]: number }) {
  * Calculate the percent change of a Token given a start time
  * @return [absolute difference, percent change]
  */
-export function getPercentChange(
+export function getTokenPercentChange(
   token: Token,
   atTimestamp?: number,
   timeHistory: TimeHistory = TimeHistory.ONE_DAY,
 ): [number, number] {
-  if (!token.prices[timeHistory]) {
+  return getPercentChange(
+    token.prices[timeHistory],
+    token.currentPrice,
+    atTimestamp,
+  );
+}
+
+export function getPercentChange(
+  entry: TimeHistoryEntry | undefined,
+  currentPrice: number,
+  atTimestamp?: number,
+): [number, number] {
+  if (!entry) {
     return [0, 0];
   }
 
-  const sortedPrices = getSortedPrices(token.prices[timeHistory]!);
+  const base = atTimestamp ? entry[atTimestamp] : getSortedPrices(entry)[0];
 
-  const base = atTimestamp
-    ? token.prices[timeHistory]![atTimestamp]
-    : sortedPrices[0];
+  const difference = currentPrice - base;
 
-  const difference = token.currentPrice - base;
-
-  if (token.currentPrice === 0) {
+  if (currentPrice === 0) {
     return [difference, difference === 0 ? 0 : -1];
   }
 
-  return [difference, difference / token.currentPrice];
+  return [difference, difference / currentPrice];
 }
 
 export function getTokenAddress(token: Token | QuoteToken, chainId: number) {

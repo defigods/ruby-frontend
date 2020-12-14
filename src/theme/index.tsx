@@ -21,6 +21,8 @@ declare module 'styled-components' {
       tertiary: string;
       green: string;
       red: string;
+      opaqueGreen: string;
+      opaqueRed: string;
       againstRed: string;
     };
   }
@@ -42,6 +44,9 @@ export function createTheme(darkMode: boolean): DefaultTheme {
 
       green: '#21CE99',
       red: '#BA2F2A',
+
+      opaqueGreen: 'rgba(33, 206, 153, 0.6)',
+      opaqueRed: 'rgba(186, 47, 42, 0.6)',
 
       againstRed: '#ECE9E4',
     },

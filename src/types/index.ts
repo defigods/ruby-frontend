@@ -47,6 +47,8 @@ export interface UserToken extends Token {
   quantity: number;
 }
 
+export type PortfolioData = TokenPrice;
+
 export type UserTrade = {
   id: string;
   isBuy: boolean;
@@ -62,6 +64,7 @@ export type UserTrades = {
   [ticker: string]: {
     buys: UserTrade[];
     sells: UserTrade[];
+    balance: number;
   };
 };
 
