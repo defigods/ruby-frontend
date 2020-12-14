@@ -46,7 +46,7 @@ export default function () {
         </LoaderWrapper>
       ) : (
         <>
-          <TokenList data={data} />
+          <TokenList data={data} searchBar={false} selectable={false} />
           <PortfolioView />
         </>
       )}
