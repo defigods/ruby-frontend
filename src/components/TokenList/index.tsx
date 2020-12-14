@@ -8,6 +8,7 @@ import TokenListItem from './TokenListItem';
 interface TokenListProps {
   data: (Token & { title: string; subtitle: string })[];
   searchBar?: boolean;
+  selectable?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -68,7 +69,11 @@ export default function (props: TokenListProps) {
       )}
 
       {sortedData.map((item) => (
-        <TokenListItem {...item} key={item.title} />
+        <TokenListItem
+          {...item}
+          key={item.title}
+          selectable={props.selectable}
+        />
       ))}
       {sortedData.length === 0 && (
         <Warning>

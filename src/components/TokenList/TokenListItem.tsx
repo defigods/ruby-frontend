@@ -7,6 +7,7 @@ import { useSelectedToken } from '../../state/tokens/hooks';
 import { TimeHistory, Token } from '../../types';
 import { getSortedPrices } from '../../utils';
 import LineChart from './LineChart';
+import { useHistory } from 'react-router-dom';
 
 interface TokenListItemProps extends Token {
   /**
@@ -17,6 +18,8 @@ interface TokenListItemProps extends Token {
    * Subtitle of the item
    */
   subtitle: string;
+
+  selectable?: boolean;
 }
 
 const Wrapper = styled.div<{ selected: boolean }>`
@@ -86,10 +89,23 @@ export default function (props: TokenListItemProps) {
 
   const selectedToken = useSelectedToken();
 
+  const history = useHistory();
+
+  const redirect = (token: string) => {
+    dispatch(selectToken(token));
+    history.push('/trade');
+  };
+
   return (
     <Wrapper
-      selected={props.ticker === selectedToken?.ticker}
-      onClick={() => dispatch(selectToken(props.ticker))}
+      selected={
+        props.selectable ? props.ticker === selectedToken?.ticker : false
+      }
+      onClick={() =>
+        props.selectable
+          ? dispatch(selectToken(props.ticker))
+          : redirect(props.ticker)
+      }
     >
       <ItemWrapper>
         <TextWrapper>
