@@ -105,13 +105,13 @@ export default function () {
       </BottomWrapper>
       <TradeWrapper>
         <TradeButton onClick={() => setModalsOpen([true, false, false])}>
-          Match
+          Market
         </TradeButton>
         <TradeButton onClick={() => setModalsOpen([false, true, false])}>
-          Buy
+          Limit Buy
         </TradeButton>
         <TradeButton onClick={() => setModalsOpen([false, false, true])}>
-          Sell
+          Limit Sell
         </TradeButton>
       </TradeWrapper>
       {!!account && (
