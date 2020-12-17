@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useActiveWeb3React } from '../../hooks';
 import {
   useSelectedTimeHistory,
   useSelectedToken,
   useTimeHistoryLoading,
 } from '../../state/tokens/hooks';
-import MatchModal from '../MatchModal';
 import TradeModal from '../TradeModal';
 import About from './About';
 import HeaderView from './HeaderView';
@@ -64,8 +62,6 @@ const TradeButton = styled.div`
 `;
 
 export default function () {
-  const { account } = useActiveWeb3React();
-
   const selectedToken = useSelectedToken();
 
   const selectedTimeHistory = useSelectedTimeHistory();
@@ -76,11 +72,7 @@ export default function () {
     undefined,
   );
 
-  const [[matchOpen, buyOpen, sellOpen], setModalsOpen] = useState([
-    false,
-    false,
-    false,
-  ]);
+  const [[buyOpen, sellOpen], setModalsOpen] = useState([false, false]);
 
   if (!selectedToken) {
     return (
@@ -104,28 +96,19 @@ export default function () {
         <About />
       </BottomWrapper>
       <TradeWrapper>
-        <TradeButton onClick={() => setModalsOpen([true, false, false])}>
-          Market
+        <TradeButton onClick={() => setModalsOpen([true, false])}>
+          Buy
         </TradeButton>
-        <TradeButton onClick={() => setModalsOpen([false, true, false])}>
-          Limit Buy
-        </TradeButton>
-        <TradeButton onClick={() => setModalsOpen([false, false, true])}>
-          Limit Sell
+        <TradeButton onClick={() => setModalsOpen([false, true])}>
+          Sell
         </TradeButton>
       </TradeWrapper>
-      {!!account && (
-        <>
-          <MatchModal
-            isOpen={matchOpen}
-            onRequestClose={() => setModalsOpen([false, false, false])}
-          />
-          <TradeModal
-            isOpen={buyOpen || sellOpen}
-            isBuy={buyOpen}
-            onRequestClose={() => setModalsOpen([false, false, false])}
-          />
-        </>
+      {(buyOpen || sellOpen) && (
+        <TradeModal
+          isOpen={buyOpen || sellOpen}
+          isBuy={buyOpen}
+          onRequestClose={() => setModalsOpen([false, false])}
+        />
       )}
     </Wrapper>
   );

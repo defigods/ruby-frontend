@@ -1,4 +1,5 @@
 import { AddressZero } from '@ethersproject/constants';
+import { TransactionResponse } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -6,46 +7,29 @@ import { useMemo } from 'react';
 import { useActiveWeb3React } from '../hooks';
 import { ContractOffer } from '../types';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
-import { markets } from '../config';
-import { MaxUint256 } from '@ethersproject/constants';
 
-export async function executeTrade(
+export async function executeLimitTrade(
   contract: Contract,
   payAmount: string,
   payGem: string,
   buyAmount: string,
   buyGem: string,
-) {
-  contract.functions['offer(uint256,address,uint256,address,uint256)'](
+): Promise<TransactionResponse> {
+  return contract.functions['offer(uint256,address,uint256,address,uint256)'](
     parseUnits(payAmount, 18),
     payGem,
     parseUnits(buyAmount, 18),
     buyGem,
     parseUnits('0', 18),
-  ).then(() => {
-    console.log('sent a thing');
-  });
+  );
 }
 
-export async function executeMatch(
+export async function executeMatchTrade(
   contract: Contract,
   offer: ContractOffer,
   maxAmount: BigNumber,
-) {
-  console.log(offer, contract);
-  contract.functions
-    .buy(offer.id, maxAmount)
-    .then(() => {
-      console.log('matched order');
-    })
-    .catch(console.log);
-}
-
-export async function requestAllowance(contract: Contract, chainId: number) {
-  const spender = markets[chainId].address;
-  contract.approve(spender, MaxUint256).then(() => {
-    console.log('approved');
-  });
+): Promise<TransactionResponse> {
+  return contract.functions.buy(offer.id, maxAmount);
 }
 
 export function getLibrary(provider: any): Web3Provider {

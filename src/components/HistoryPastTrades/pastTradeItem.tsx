@@ -3,6 +3,8 @@ import { ExternalLink } from 'react-feather';
 import styled from 'styled-components';
 import { UserTrade } from '../../types';
 import moment from 'moment';
+import { useActiveWeb3React } from '../../hooks';
+import { getEtherscanLink } from '../../utils';
 
 interface PastTradeItemProps {
   data: UserTrade;
@@ -34,6 +36,7 @@ const SizeText = styled(TextItem)<{ isBuy: boolean }>`
 `;
 
 export default function ({ data }: PastTradeItemProps) {
+  const { chainId } = useActiveWeb3React();
   return (
     <Wrapper>
       <TextItem style={{ fontWeight: 500 }}>
@@ -47,9 +50,8 @@ export default function ({ data }: PastTradeItemProps) {
       </SizeText>
       <TextItem>{moment.unix(data.timestamp).fromNow()}</TextItem>
       <TextItem>
-        {/* TODO: Below is for Kovan only */}
         <a
-          href={'https://kovan.etherscan.io/tx/' + data.transactionHash}
+          href={getEtherscanLink(chainId!, data.transactionHash, 'transaction')}
           target="_blank"
           rel="noopener noreferrer"
         >

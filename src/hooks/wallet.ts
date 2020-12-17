@@ -28,7 +28,7 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
       setResult(formatted);
       setLoading(false);
     };
-    setLoading(true);
+    // setLoading(true);
     fetchData();
   }, [token, owner, spender, tokenContract, blockNumber]);
 

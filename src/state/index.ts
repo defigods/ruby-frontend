@@ -6,6 +6,7 @@ import user from './user/reducer';
 import quotes from './quotes/reducer';
 import settings from './settings/reducer';
 import portfolio from './portfolio/reducer';
+import transactions from './transactions/reducer';
 
 const PERSISTENT_KEYS: string[] = ['settings'];
 
@@ -17,6 +18,7 @@ const store = configureStore({
     quotes,
     settings,
     portfolio,
+    transactions,
   },
   middleware: [
     ...getDefaultMiddleware({ thunk: false }),

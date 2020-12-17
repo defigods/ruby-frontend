@@ -1,22 +1,33 @@
 import { darken } from 'polished';
-import React, { useCallback, useContext, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { X } from 'react-feather';
 import Modal from 'react-modal';
-import styled, { ThemeContext } from 'styled-components';
+import styled, { css, ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
-import { useMarketContract, useTokenContract } from '../../hooks/contract';
-import { useTokenAllowance, useTokenBalances } from '../../hooks/wallet';
+import { useBestOffers, useMarketContract } from '../../hooks/contract';
+import { useTokenBalances } from '../../hooks/wallet';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import {
-  executeTrade,
+  executeLimitTrade,
   formatBN,
   getTokenAddress,
-  requestAllowance,
+  executeMatchTrade,
+  unsafeMath,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { BigNumber } from '@ethersproject/bignumber';
-import { parseUnits } from 'ethers/lib/utils';
+import { TransactionResponse } from '@ethersproject/providers';
+import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { ApprovalState, useApproveCallback } from '../../hooks/approval';
+import { useTransactionAdder } from '../../state/transactions/hooks';
+import TransactionModal from './TransactionModal';
 
 interface TradeModalProps {
   isOpen: boolean;
@@ -105,46 +116,41 @@ const SectionTitle = styled.span`
 `;
 
 const Table = styled.table`
-  border-collapse: separate !important;
-  border-spacing: 0;
-  border: 1px solid ${({ theme }) => darken(0.05, theme.colors.secondary)};
-  background-color: transparent;
+  border-collapse: collapse;
+  // background-color: transparent;
   width: 100%;
-  border-bottom: none;
 `;
 
 const Tr = styled.tr`
   height: inherit;
   line-height: inherit;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.text.secondary};
+  }
 `;
 
 const Th = styled.th`
-  background: ${({ theme }) => theme.colors.secondary};
-  font-size: 13px;
-  padding: 10px;
-  text-align: center;
+  font-size: 14px;
+  padding: 15px 0;
+  text-align: left;
   font-weight: 600;
   text-transform: uppercase;
   color: ${({ theme }) => theme.text.secondary};
-  border-bottom: 1px solid
-    ${({ theme }) => darken(0.05, theme.colors.secondary)};
-  border-right: 1px solid ${({ theme }) => darken(0.05, theme.colors.secondary)};
+  }
 `;
 
 const TdInput = styled.td`
   text-align: right;
-  border-right: 1px solid ${({ theme }) => darken(0.05, theme.colors.secondary)};
-  border-bottom: 1px solid
-    ${({ theme }) => darken(0.05, theme.colors.secondary)};
+  font-size: 16px;
 `;
 
 const TdLabel = styled.td`
   text-transform: uppercase;
-  font-size: 10px;
-  text-align: center;
+  font-size: 16px;
+  text-align: left;
   font-weight: 500;
-  border-bottom: 1px solid
-    ${({ theme }) => darken(0.05, theme.colors.secondary)};
+  color: ${({ theme }) => theme.text.secondary};
 `;
 
 const Input = styled.input`
@@ -152,9 +158,11 @@ const Input = styled.input`
   border: none;
   background: none;
   outline: none;
-  font-size: 15px;
+  font-size: 16px;
   text-align: right;
+  font-weight: 500;
   width: 100%;
+  padding-right: 5px;
   color: ${({ theme }) => theme.text.primary};
   -moz-appearance: textfield;
   &::-webkit-outer-spin-button,
@@ -162,6 +170,56 @@ const Input = styled.input`
     -webkit-appearance: none;
     margin: 0;
   }
+`;
+
+const PriceInput = styled(Input)<{ isMarket: boolean; isBuy: boolean }>`
+  color: ${({ theme, isMarket, isBuy }) =>
+    isMarket
+      ? isBuy
+        ? theme.text.green
+        : theme.text.red
+      : theme.text.primary};
+`;
+
+const TabGroupWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+  background-color: ${({ theme }) => theme.colors.secondary};
+`;
+
+const TabGroupSelector = styled.div<{ selected: boolean }>`
+  font-size: 11px;
+  text-transform: uppercase;
+  overflow: none;
+  padding: 8px 0;
+  cursor: pointer;
+  width: 50%;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid
+    ${({ theme }) => darken(0.05, theme.colors.secondary)};
+  color: ${({ selected, theme }) =>
+    selected ? theme.text.tertiary : theme.text.secondary};
+`;
+
+const TabGroupLine = styled.div<{ isMarket: boolean }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 4px;
+  background-color: ${({ theme }) => theme.colors.tertiary};
+  border-radius: 3px;
+  ${({ isMarket }) =>
+    isMarket
+      ? css`
+          right: 50%;
+        `
+      : css`
+          left: 50%;
+        `}
 `;
 
 function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
@@ -197,43 +255,6 @@ function useModalStyle(): Modal.Styles {
   };
 }
 
-function useButtonEnabled(
-  walletBalance: BigNumber,
-  input: string,
-  allowance: BigNumber,
-) {
-  if (walletBalance.isZero()) {
-    return false;
-  }
-
-  if (allowance.isZero()) {
-    return true;
-  }
-
-  const inputBN = parseUnits(input || '0');
-
-  if (inputBN.isZero()) {
-    return false;
-  }
-  return walletBalance.gte(inputBN);
-}
-
-function useButtonText(
-  isBuy: boolean,
-  walletBalance: BigNumber,
-  allowance: BigNumber,
-) {
-  if (walletBalance.isZero()) {
-    return isBuy ? 'No funds available' : 'No supply available';
-  }
-
-  if (allowance.isZero()) {
-    return 'Enable';
-  }
-
-  return isBuy ? 'Buy' : 'Sell';
-}
-
 export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
@@ -243,46 +264,165 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const tokenAddress = getTokenAddress(token, chainId!)!;
   const quoteAddress = getTokenAddress(quote, chainId!)!;
 
-  const [allowance, isAllowanceLoading] = useTokenAllowance(
+  const addTransaction = useTransactionAdder();
+  const [approvalState, approve] = useApproveCallback(
     isBuy ? quoteAddress : tokenAddress,
   );
-  const tokenContract = useTokenContract(isBuy ? quoteAddress : tokenAddress)!;
 
   const [priceInput, setPriceInput] = useState('');
   const [quantityInput, setQuantityInput] = useState('');
   const [totalInput, setTotalInput] = useState('');
+  const [isMarket, setIsMarket] = useState(true);
 
   const [walletTicker, walletBalance] = useWalletBalance(isBuy);
+  const [offers, loadingOffers] = useBestOffers();
+
+  const currentOffer = useMemo(() => {
+    if (loadingOffers) return undefined;
+
+    return isBuy ? offers.buy : offers.sell;
+  }, [isBuy, offers, loadingOffers]);
 
   const modalStyle = useModalStyle();
 
-  const buttonEnabled = useButtonEnabled(
+  // Transaction modal values
+  const [{ attempting, hash, error }, setTransactionState] = useState<{
+    attempting: boolean;
+    hash: string | undefined;
+    error: string | undefined;
+  }>({
+    attempting: false,
+    hash: undefined,
+    error: undefined,
+  });
+
+  const buttonEnabled = useMemo(() => {
+    if (
+      walletBalance.isZero() ||
+      approvalState === ApprovalState.UNKNOWN ||
+      approvalState === ApprovalState.PENDING
+    ) {
+      return false;
+    }
+
+    if (approvalState === ApprovalState.NOT_APPROVED) {
+      return true;
+    }
+
+    const inputBN = parseUnits((isBuy ? totalInput : quantityInput) || '0');
+    const quantityBN = parseUnits(quantityInput || '0');
+
+    const marketRequirement =
+      isMarket && currentOffer ? quantityBN.lte(currentOffer.baseAmount) : true;
+
+    if (inputBN.isZero()) {
+      return false;
+    }
+    return walletBalance.gte(inputBN) && marketRequirement;
+  }, [
     walletBalance,
-    isBuy ? totalInput : quantityInput,
-    allowance,
-  );
-  const buttonText = useButtonText(isBuy, walletBalance, allowance);
+    approvalState,
+    isBuy,
+    totalInput,
+    quantityInput,
+    currentOffer,
+    isMarket,
+  ]);
+  const buttonText = useMemo(() => {
+    if (walletBalance.isZero()) {
+      return isBuy ? 'No funds available' : 'No supply available';
+    }
+
+    if (approvalState === ApprovalState.NOT_APPROVED) {
+      return 'Approve';
+    }
+
+    if (approvalState === ApprovalState.PENDING) {
+      return (
+        <>
+          <span style={{ marginRight: '5px' }}>Approving</span>
+          <Loader stroke="white" size="15px" />
+        </>
+      );
+    }
+
+    return isBuy ? 'Buy' : 'Sell';
+  }, [walletBalance, isBuy, approvalState]);
   const marketContract = useMarketContract()!;
+
+  useEffect(() => {
+    if (isMarket && currentOffer && !priceInput) {
+      setPriceInput(
+        `${currentOffer.price.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+      );
+      const total =
+        Number(formatEther(currentOffer.baseAmount)) * currentOffer.price;
+      setQuantityInput(formatEther(currentOffer.baseAmount));
+      setTotalInput(`${total}`);
+    }
+  }, [currentOffer, isMarket, priceInput]);
+
+  const updateIsMarket = () => {
+    setPriceInput('');
+    setQuantityInput('');
+    setTotalInput('');
+    setIsMarket(!isMarket);
+  };
 
   const executeClick = useCallback(async () => {
     if (!buttonEnabled) {
       return;
     }
 
-    if (allowance.isZero()) {
-      return requestAllowance(tokenContract, chainId!);
+    if (approvalState === ApprovalState.NOT_APPROVED) {
+      return approve();
     }
 
-    const payAmount = isBuy ? totalInput : quantityInput;
-    const buyAmount = isBuy ? quantityInput : totalInput;
-    const payAddress = isBuy ? quoteAddress : tokenAddress;
-    const buyAddress = isBuy ? tokenAddress : quoteAddress;
+    let trade: Promise<TransactionResponse>;
+    if (isMarket) {
+      if (!currentOffer) return;
 
-    // TODO: execute the trade here :D
-    executeTrade(marketContract, payAmount, payAddress, buyAmount, buyAddress);
-    onRequestClose();
+      const toBuy = parseUnits(quantityInput || '0');
+      if (toBuy.isZero()) return;
+      const maxAmount = isBuy
+        ? unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 / n2)
+        : unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 * n2);
+
+      trade = executeMatchTrade(marketContract, currentOffer, maxAmount);
+    } else {
+      const payAmount = isBuy ? totalInput : quantityInput;
+      const buyAmount = isBuy ? quantityInput : totalInput;
+      const payAddress = isBuy ? quoteAddress : tokenAddress;
+      const buyAddress = isBuy ? tokenAddress : quoteAddress;
+
+      trade = executeLimitTrade(
+        marketContract,
+        payAmount,
+        payAddress,
+        buyAmount,
+        buyAddress,
+      );
+    }
+
+    try {
+      setTransactionState({ attempting: true, hash, error });
+      const result = await trade;
+      addTransaction(result);
+      setTransactionState({ attempting: false, hash: result.hash, error });
+    } catch (e) {
+      const msg =
+        e.code === 4001
+          ? 'User rejected transaction.'
+          : `Trade failed: ${e.message}`;
+      setTransactionState({ attempting: false, hash, error: msg });
+    }
+
+    // onRequestClose();
   }, [
-    allowance,
+    approve,
     buttonEnabled,
     marketContract,
     totalInput,
@@ -290,13 +430,15 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     isBuy,
     tokenAddress,
     quoteAddress,
-    chainId,
     onRequestClose,
-    tokenContract,
+    isMarket,
+    currentOffer,
+    approvalState,
+    addTransaction,
   ]);
 
   function updateValues(value: string, type: number) {
-    if (type === 1) {
+    if (!isMarket && type === 1) {
       setPriceInput(value);
       if (quantityInput)
         setTotalInput(`${Number(value) * Number(quantityInput)}`);
@@ -321,7 +463,16 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         {token.name}
         <StyledExit onClick={onRequestClose} size={30} />
       </Header>
-      {isAllowanceLoading ? (
+      <TabGroupWrapper>
+        <TabGroupSelector selected={isMarket} onClick={updateIsMarket}>
+          Market
+        </TabGroupSelector>
+        <TabGroupSelector selected={!isMarket} onClick={updateIsMarket}>
+          Limit
+        </TabGroupSelector>
+        <TabGroupLine isMarket={isMarket} />
+      </TabGroupWrapper>
+      {approvalState === ApprovalState.UNKNOWN || loadingOffers ? (
         <InnerContentWrapper>
           <LoaderWrapper>
             <Loader size="50px" />
@@ -335,11 +486,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               <Tr>
                 <Th>Price</Th>
                 <TdInput>
-                  <Input
+                  <PriceInput
                     type="number"
                     placeholder="0.0"
                     value={priceInput}
                     onChange={(e) => updateValues(e.target.value, 1)}
+                    disabled={isMarket}
+                    isMarket={isMarket}
+                    isBuy={isBuy}
                   />
                 </TdInput>
                 <TdLabel>{'USD'}</TdLabel>
@@ -379,6 +533,18 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               {formatBN(walletBalance)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
+          <TransactionModal
+            onRequestClose={() =>
+              setTransactionState({
+                attempting: false,
+                hash: undefined,
+                error: undefined,
+              })
+            }
+            attempting={attempting}
+            hash={hash}
+            error={error}
+          />
         </InnerContentWrapper>
       )}
     </Modal>

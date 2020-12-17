@@ -49,6 +49,11 @@ const BodyChild = styled.div`
   display: flex;
   flex-direction: column;
   width: 50%;
+  height: 100%;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
 
   &:first-child {
     border-right: 2px dotted ${({ theme }) => theme.colors.primary};

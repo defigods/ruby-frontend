@@ -1,6 +1,40 @@
-import { formatEther, getAddress } from 'ethers/lib/utils';
+import { formatEther, getAddress, parseUnits } from 'ethers/lib/utils';
 import { QuoteToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
+
+const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
+  1: '',
+  3: 'ropsten.',
+  4: 'rinkeby.',
+  5: 'goerli.',
+  42: 'kovan.',
+};
+
+export function getEtherscanLink(
+  chainId: number,
+  data: string,
+  type: 'transaction' | 'token' | 'address' | 'block',
+): string {
+  const prefix = `https://${
+    ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]
+  }etherscan.io`;
+
+  switch (type) {
+    case 'transaction': {
+      return `${prefix}/tx/${data}`;
+    }
+    case 'token': {
+      return `${prefix}/token/${data}`;
+    }
+    case 'block': {
+      return `${prefix}/block/${data}`;
+    }
+    case 'address':
+    default: {
+      return `${prefix}/address/${data}`;
+    }
+  }
+}
 
 export function isAddress(value: any): string | false {
   try {
@@ -98,6 +132,15 @@ export function sortBigNumbers(
   } else {
     return ascending ? -1 : 1;
   }
+}
+
+export function unsafeMath(
+  bn: BigNumber,
+  n: number,
+  fn: (n1: number, n2: number) => number,
+): BigNumber {
+  const parsed = Number(formatEther(bn));
+  return parseUnits(`${fn(parsed, n).toFixed(18)}`);
 }
 
 export * from './debounce';
