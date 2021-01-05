@@ -387,8 +387,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
       const toBuy = parseUnits(quantityInput || '0');
       if (toBuy.isZero()) return;
+
       const maxAmount = isBuy
-        ? unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 / n2)
+        ? toBuy
         : unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 * n2);
 
       trade = executeMatchTrade(marketContract, currentOffer, maxAmount);
