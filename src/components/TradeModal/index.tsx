@@ -544,7 +544,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
           {currentFee && (
             <WalletBalanceWrapper>
               <WalletBalanceLabel>
-                Liquidity Provider Fee{' '}
+                Fee{' '}
                 <a
                   href="https://docs.rubicon.finance/contracts/rubicon-market/fee-structure"
                   target="_blank"
