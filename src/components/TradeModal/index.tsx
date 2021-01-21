@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { X } from 'react-feather';
+import { HelpCircle, X } from 'react-feather';
 import Modal from 'react-modal';
 import styled, { css, ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
@@ -19,7 +19,6 @@ import {
   formatBN,
   getTokenAddress,
   executeMatchTrade,
-  unsafeMath,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -28,6 +27,7 @@ import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
+import { LIQUIDITY_PROVIDER_FEE } from '../../config';
 
 interface TradeModalProps {
   isOpen: boolean;
@@ -222,6 +222,10 @@ const TabGroupLine = styled.div<{ isMarket: boolean }>`
         `}
 `;
 
+const StyledHelpCircle = styled(HelpCircle)`
+  color: ${({ theme }) => theme.text.secondary};
+`;
+
 function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
@@ -296,6 +300,17 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     error: undefined,
   });
 
+  const currentFee = useMemo(() => {
+    if (!priceInput || !quantityInput || !totalInput || !isMarket) {
+      return undefined;
+    }
+
+    const toFee = parseUnits(isBuy ? totalInput : quantityInput);
+    const feeAsInteger = parseUnits(LIQUIDITY_PROVIDER_FEE.toString(), 8); // 8 precision
+
+    return toFee.mul(feeAsInteger).div(10 ** 8);
+  }, [priceInput, quantityInput, totalInput, isMarket, isBuy]);
+
   const buttonEnabled = useMemo(() => {
     if (
       walletBalance.isZero() ||
@@ -318,7 +333,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     if (inputBN.isZero()) {
       return false;
     }
-    return walletBalance.gte(inputBN) && marketRequirement;
+    return walletBalance.gte(inputBN.add(currentFee || 0)) && marketRequirement;
   }, [
     walletBalance,
     approvalState,
@@ -327,6 +342,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     quantityInput,
     currentOffer,
     isMarket,
+    currentFee,
   ]);
   const buttonText = useMemo(() => {
     if (walletBalance.isZero()) {
@@ -352,12 +368,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
-      setPriceInput(
-        `${currentOffer.price.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`,
-      );
+      setPriceInput(currentOffer.price.toFixed(2));
       const total =
         Number(formatEther(currentOffer.baseAmount)) * currentOffer.price;
       setQuantityInput(formatEther(currentOffer.baseAmount));
@@ -383,15 +394,12 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
     let trade: Promise<TransactionResponse>;
     if (isMarket) {
-      if (!currentOffer) return;
+      if (!currentOffer || !totalInput) return;
 
-      const toBuy = parseUnits(quantityInput || '0');
+      const toBuy = parseUnits(isBuy ? quantityInput : totalInput);
       if (toBuy.isZero()) return;
-      const maxAmount = isBuy
-        ? unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 / n2)
-        : unsafeMath(toBuy, currentOffer.price, (n1, n2) => n1 * n2);
 
-      trade = executeMatchTrade(marketContract, currentOffer, maxAmount);
+      trade = executeMatchTrade(marketContract, currentOffer, toBuy);
     } else {
       const payAmount = isBuy ? totalInput : quantityInput;
       const buyAmount = isBuy ? quantityInput : totalInput;
@@ -533,6 +541,23 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               {formatBN(walletBalance)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
+          {currentFee && (
+            <WalletBalanceWrapper>
+              <WalletBalanceLabel>
+                Liquidity Provider Fee{' '}
+                <a
+                  href="https://docs.rubicon.finance/contracts/rubicon-market/fee-structure"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <StyledHelpCircle size="15px" />
+                </a>
+              </WalletBalanceLabel>
+              <WalletBalance>
+                {formatBN(currentFee)} {walletTicker}
+              </WalletBalance>
+            </WalletBalanceWrapper>
+          )}
           <TransactionModal
             onRequestClose={() =>
               setTransactionState({

@@ -1,4 +1,4 @@
-import { formatEther, getAddress, parseUnits } from 'ethers/lib/utils';
+import { formatEther, getAddress } from 'ethers/lib/utils';
 import { QuoteToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -112,7 +112,10 @@ export function getTokenAddress(token: Token | QuoteToken, chainId: number) {
 export function formatBN(bigNumber: BigNumber, decimals = 4): string {
   const temp = formatEther(bigNumber);
 
-  const result = Number(temp).toFixed(decimals);
+  const result = Number(temp).toLocaleString(undefined, {
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: 0,
+  });
   const test = '0.' + '0'.repeat(decimals);
 
   if (test === result) {
@@ -132,15 +135,6 @@ export function sortBigNumbers(
   } else {
     return ascending ? -1 : 1;
   }
-}
-
-export function unsafeMath(
-  bn: BigNumber,
-  n: number,
-  fn: (n1: number, n2: number) => number,
-): BigNumber {
-  const parsed = Number(formatEther(bn));
-  return parseUnits(`${fn(parsed, n).toFixed(18)}`);
 }
 
 export * from './debounce';

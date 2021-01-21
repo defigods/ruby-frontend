@@ -33,9 +33,7 @@ export async function executeMatchTrade(
 }
 
 export function getLibrary(provider: any): Web3Provider {
-  const library = new Web3Provider(provider);
-  library.pollingInterval = 15000;
-  return library;
+  return new Web3Provider(provider);
 }
 
 // account is not optional
