@@ -1,6 +1,6 @@
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
-import { injected } from '../connectors';
+import { injected, walletlink } from '../connectors';
 import { Web3Provider } from '@ethersproject/providers';
 
 export function useActiveWeb3React() {
@@ -14,6 +14,7 @@ export function useEagerConnect() {
   useEffect(() => {
     injected.isAuthorized().then((isAuthorized) => {
       if (isAuthorized) {
+        // **Need logic belwo to handle different connectors I think
         activate(injected, undefined, true).catch(() => {
           setTried(true);
         });
