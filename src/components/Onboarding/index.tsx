@@ -4,8 +4,9 @@ import styled, { ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import Loader from '../Loader';
 import mmLogo from '../../assets/img/metamask.svg';
+import coinbaseWalletLogo from '../../assets/img/coinbaseWalletLogo1.png';
 import logo from '../../assets/img/logo-color.png';
-import { injected } from '../../connectors';
+import { injected, walletlink } from '../../connectors';
 import { useWebSocket } from '../SocketProvider';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
 
@@ -36,6 +37,7 @@ const MainButton = styled.div`
 const LogoWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 100%;
+  height:
   padding: 30px 50px 30px 50px;
   display: flex;
   justify-content: center;
@@ -64,7 +66,15 @@ const Logo = styled.img`
 
 const MM = styled.img`
   width: 100%;
-  height: 100%;
+  height: 85px;
+  background-color: white;
+  border-radius: 10px;
+  border: 0.5px solid black;
+`;
+
+const CoinbaseWallet = styled.img`
+  width: 100%;
+  height: 85px;
   background-color: white;
   border-radius: 10px;
   border: 0.5px solid black;
@@ -120,6 +130,27 @@ export default function () {
     }
   }, [hasTried, connect]);
 
+  //Logic to use walletlink and connect to coinbase wallet
+  //https://github.com/walletlink/walletlink
+
+  const walletlinkcall = useCallback(() => {
+    // LOGIC to connect to wallet
+    // User should see the modal overlaying the main app
+    setHasTried(true);
+    activate(walletlink, undefined, true).catch((err) => {
+      console.error(`Failed to activate account`, err);
+      if (err instanceof NoEthereumProviderError) {
+        setHasWallet(false);
+      }
+    });
+  }, [activate]);
+
+  useEffect(() => {
+    if (!hasTried) {
+      connect();
+    }
+  }, [hasTried, connect]);
+
   function renderModal() {
     if (websocket.loading || (!hasTried && !active)) {
       return (
@@ -154,6 +185,16 @@ export default function () {
                 rel="noopener noreferrer"
               >
                 <MM src={mmLogo} alt="Metamask" />
+              </a>
+            </WalletOptionWrapper>
+            <WalletOptionWrapper>
+              <a
+                // href={'https://wallet.coinbase.com/'}
+                // target="_blank"
+                // rel="noopener noreferrer"
+                onClick={walletlinkcall}
+              >
+                <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
               </a>
             </WalletOptionWrapper>
           </TextWrapper>
