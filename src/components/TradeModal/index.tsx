@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { HelpCircle, X } from 'react-feather';
@@ -19,6 +20,8 @@ import {
   formatBN,
   getTokenAddress,
   executeMatchTrade,
+  useDebounce,
+  loadTotalPrice,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -28,6 +31,7 @@ import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
 import { LIQUIDITY_PROVIDER_FEE } from '../../config';
+import Decimal from 'decimal.js';
 
 interface TradeModalProps {
   isOpen: boolean;
@@ -278,8 +282,56 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const [totalInput, setTotalInput] = useState('');
   const [isMarket, setIsMarket] = useState(true);
 
+  const quantityRef = useRef<HTMLInputElement>(null);
+
   const [walletTicker, walletBalance] = useWalletBalance(isBuy);
   const [offers, loadingOffers] = useBestOffers();
+
+  const marketContract = useMarketContract()!;
+  const [marketState, setMarketState] = useState<{
+    loading: boolean;
+    payAmount: number;
+    error: boolean;
+  }>({
+    loading: false,
+    payAmount: 0,
+    error: false,
+  });
+
+  const debouncedMarketState = useDebounce(marketState, 200); // 200 ms debounce time
+
+  useEffect(() => {
+    if (debouncedMarketState.payAmount === 0) return;
+
+    // Send a web3 call to load the best price
+    loadTotalPrice(
+      marketContract,
+      tokenAddress,
+      quoteAddress,
+      debouncedMarketState.payAmount,
+      isBuy,
+    )
+      .then((result) => {
+        updateValues(formatEther(result), 3);
+        setMarketState({
+          ...marketState,
+          loading: false,
+          error: false,
+        });
+      })
+      .catch(() => {
+        updateValues('0', 3);
+        setMarketState({
+          ...marketState,
+          loading: false,
+          error: true,
+        });
+      });
+  }, [debouncedMarketState.payAmount]);
+
+  useEffect(() => {
+    quantityRef.current?.focus();
+  }, [loadingOffers]);
 
   const currentOffer = useMemo(() => {
     if (loadingOffers) return undefined;
@@ -324,25 +376,25 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       return true;
     }
 
-    const inputBN = parseUnits((isBuy ? totalInput : quantityInput) || '0');
-    const quantityBN = parseUnits(quantityInput || '0');
+    if (marketState.loading || marketState.error) {
+      return false;
+    }
 
-    const marketRequirement =
-      isMarket && currentOffer ? quantityBN.lte(currentOffer.baseAmount) : true;
+    const inputBN = parseUnits((isBuy ? totalInput : quantityInput) || '0');
 
     if (inputBN.isZero()) {
       return false;
     }
-    return walletBalance.gte(inputBN.add(currentFee || 0)) && marketRequirement;
+    return walletBalance.gte(inputBN.add(currentFee || 0));
   }, [
     walletBalance,
     approvalState,
     isBuy,
     totalInput,
     quantityInput,
-    currentOffer,
-    isMarket,
     currentFee,
+    marketState.loading,
+    marketState.error,
   ]);
   const buttonText = useMemo(() => {
     if (walletBalance.isZero()) {
@@ -362,13 +414,16 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       );
     }
 
+    if (marketState.error) {
+      return 'Insufficient tokens';
+    }
+
     return isBuy ? 'Buy' : 'Sell';
-  }, [walletBalance, isBuy, approvalState]);
-  const marketContract = useMarketContract()!;
+  }, [walletBalance, isBuy, approvalState, marketState.error]);
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
-      setPriceInput(currentOffer.price.toFixed(2));
+      setPriceInput(currentOffer.price.toString());
       const total =
         Number(formatEther(currentOffer.baseAmount)) * currentOffer.price;
       setQuantityInput(formatEther(currentOffer.baseAmount));
@@ -394,12 +449,27 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
     let trade: Promise<TransactionResponse>;
     if (isMarket) {
-      if (!currentOffer || !totalInput) return;
+      if (
+        !totalInput ||
+        !quantityInput ||
+        marketState.error ||
+        marketState.loading
+      )
+        return;
 
-      const toBuy = parseUnits(isBuy ? quantityInput : totalInput);
-      if (toBuy.isZero()) return;
+      const buyGem = isBuy ? tokenAddress : quoteAddress;
+      const payGem = isBuy ? quoteAddress : tokenAddress;
 
-      trade = executeMatchTrade(marketContract, currentOffer, toBuy);
+      const buyAmount = isBuy ? quantityInput : totalInput;
+      const maxFill = isBuy ? totalInput : quantityInput;
+
+      trade = executeMatchTrade(
+        marketContract,
+        buyGem,
+        payGem,
+        buyAmount,
+        maxFill,
+      );
     } else {
       const payAmount = isBuy ? totalInput : quantityInput;
       const buyAmount = isBuy ? quantityInput : totalInput;
@@ -440,30 +510,49 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     quoteAddress,
     onRequestClose,
     isMarket,
-    currentOffer,
     approvalState,
     addTransaction,
+    marketState.error,
+    marketState.loading,
   ]);
 
-  function updateValues(value: string, type: number) {
-    if (!isMarket && type === 1) {
-      setPriceInput(value);
-      if (quantityInput)
-        setTotalInput(`${Number(value) * Number(quantityInput)}`);
-      else if (totalInput)
-        setQuantityInput(`${Number(totalInput) / Number(value)}`);
-    } else if (type === 2) {
-      setQuantityInput(value);
-      if (priceInput) setTotalInput(`${Number(value) * Number(priceInput)}`);
-      else if (totalInput)
-        setPriceInput(`${Number(totalInput) / Number(value)}`);
-    } else if (type === 3) {
-      setTotalInput(value);
-      if (priceInput) setQuantityInput(`${Number(value) / Number(priceInput)}`);
-      else if (quantityInput)
-        setPriceInput(`${Number(value) / Number(quantityInput)}`);
+  const updateValues = (value: string, type: number) => {
+    // if (!isMarket) {
+    let valueDecimal = new Decimal(0);
+    try {
+      valueDecimal = new Decimal(value);
+    } catch (ex) {
+      return;
     }
-  }
+
+    if (type === 1) {
+      setPriceInput(valueDecimal.toString());
+      if (quantityInput)
+        setTotalInput(valueDecimal.times(quantityInput).toString());
+      else if (totalInput)
+        setQuantityInput(new Decimal(totalInput).div(valueDecimal).toString());
+    } else if (type === 2) {
+      setQuantityInput(valueDecimal.toString());
+      if (isMarket) {
+        setMarketState({
+          ...marketState,
+          loading: true,
+          payAmount: valueDecimal.toNumber(),
+        });
+      } else {
+        if (priceInput)
+          setTotalInput(valueDecimal.times(priceInput).toString());
+        else if (totalInput)
+          setPriceInput(new Decimal(totalInput).div(valueDecimal).toString());
+      }
+    } else if (type === 3) {
+      setTotalInput(valueDecimal.toString());
+      if (quantityInput)
+        setPriceInput(valueDecimal.div(quantityInput).toString());
+      else if (priceInput)
+        setQuantityInput(valueDecimal.div(priceInput).toString());
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} style={modalStyle} onRequestClose={onRequestClose}>
@@ -514,6 +603,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                     placeholder="0.0"
                     value={quantityInput}
                     onChange={(e) => updateValues(e.target.value, 2)}
+                    ref={quantityRef}
                   />
                 </TdInput>
                 <TdLabel>{token?.ticker}</TdLabel>
@@ -521,11 +611,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               <Tr>
                 <Th>Total</Th>
                 <TdInput>
-                  <Input
+                  <PriceInput
                     type="number"
                     placeholder="0.0"
                     value={totalInput}
                     onChange={(e) => updateValues(e.target.value, 3)}
+                    disabled={isMarket}
+                    isMarket={isMarket}
+                    isBuy={isBuy}
                   />
                 </TdInput>
                 <TdLabel>{'USD'}</TdLabel>
@@ -541,23 +634,21 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               {formatBN(walletBalance)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
-          {currentFee && (
-            <WalletBalanceWrapper>
-              <WalletBalanceLabel>
-                Fee{' '}
-                <a
-                  href="https://docs.rubicon.finance/contracts/rubicon-market/fee-structure"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <StyledHelpCircle size="15px" />
-                </a>
-              </WalletBalanceLabel>
-              <WalletBalance>
-                {formatBN(currentFee)} {walletTicker}
-              </WalletBalance>
-            </WalletBalanceWrapper>
-          )}
+          <WalletBalanceWrapper>
+            <WalletBalanceLabel>
+              Fee{' '}
+              <a
+                href="https://docs.rubicon.finance/contracts/rubicon-market/fee-structure"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <StyledHelpCircle size="15px" />
+              </a>
+            </WalletBalanceLabel>
+            <WalletBalance>
+              {formatBN(currentFee || BigNumber.from(0))} {walletTicker}
+            </WalletBalance>
+          </WalletBalanceWrapper>
           <TransactionModal
             onRequestClose={() =>
               setTransactionState({

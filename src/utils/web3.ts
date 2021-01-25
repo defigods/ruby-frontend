@@ -7,6 +7,21 @@ import { useMemo } from 'react';
 import { useActiveWeb3React } from '../hooks';
 import { ContractOffer } from '../types';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
+import Decimal from 'decimal.js';
+
+export async function loadTotalPrice(
+  contract: Contract,
+  token: string,
+  quote: string,
+  amount: number,
+  isBuy: boolean,
+): Promise<BigNumber> {
+  return contract.functions[isBuy ? 'getPayAmount' : 'getBuyAmount'](
+    quote,
+    token,
+    parseUnits(amount.toString(), 18),
+  ).then((result) => result[0] as BigNumber);
+}
 
 export async function executeLimitTrade(
   contract: Contract,
@@ -26,10 +41,17 @@ export async function executeLimitTrade(
 
 export async function executeMatchTrade(
   contract: Contract,
-  offer: ContractOffer,
-  maxAmount: BigNumber,
+  buyGem: string,
+  payGem: string,
+  amount: string,
+  maxFill: string,
 ): Promise<TransactionResponse> {
-  return contract.functions.buy(offer.id, maxAmount);
+  return contract.functions.buyAllAmount(
+    buyGem,
+    parseUnits(amount, 18),
+    payGem,
+    parseUnits(maxFill, 18),
+  );
 }
 
 export function getLibrary(provider: any): Web3Provider {
@@ -120,9 +142,10 @@ export async function getBestOffer(
     return undefined;
   }
 
-  // If you want to know why this is... ask mason
-  const price =
-    Number(formatEther(quoteAmount)) / Number(formatEther(baseAmount));
+  // Must convert the BigNumbers to a decimal precision because the BN.js library does not support floating points
+  const price = new Decimal(formatEther(quoteAmount))
+    .div(formatEther(baseAmount))
+    .toNumber();
 
   return {
     payAmount,

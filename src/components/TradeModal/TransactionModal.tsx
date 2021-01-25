@@ -208,7 +208,7 @@ export default function ({
     );
 
     // We have reached success! Woohoo!
-  }, [attempting, transactionPending, error, hash]);
+  }, [attempting, transactionPending, error, hash, chainId, onRequestClose]);
   return (
     <Modal
       isOpen={attempting || !!hash || !!error}
