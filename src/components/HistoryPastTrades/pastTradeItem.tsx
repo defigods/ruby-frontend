@@ -1,17 +1,19 @@
-import React from 'react';
-import { ExternalLink } from 'react-feather';
+import React, { useCallback } from 'react';
+import { ExternalLink, X } from 'react-feather';
 import styled from 'styled-components';
 import { UserTrade } from '../../types';
 import moment from 'moment';
 import { useActiveWeb3React } from '../../hooks';
-import { getEtherscanLink } from '../../utils';
+import { cancelTrade, getEtherscanLink } from '../../utils';
+import { useMarketContract } from '../../hooks/contract';
 
 interface PastTradeItemProps {
   data: UserTrade;
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ killed: boolean }>`
   width: 100%;
+  position: relative;
   border: 1px solid ${({ theme }) => theme.colors.primary};
   border-radius: 10px;
   padding: 10px 0 10px 0;
@@ -19,6 +21,7 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
+  opacity: ${({ killed }) => (killed ? '20%' : '100%')};
 `;
 
 const TextItem = styled.div`
@@ -35,10 +38,29 @@ const SizeText = styled(TextItem)<{ isBuy: boolean }>`
   color: ${({ isBuy, theme }) => (isBuy ? theme.text.green : theme.text.red)};
 `;
 
+const StyledX = styled(X)`
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  color: ${({ theme }) => theme.colors.tertiary};
+`;
+
 export default function ({ data }: PastTradeItemProps) {
   const { chainId } = useActiveWeb3React();
+
+  const contract = useMarketContract()!;
+
+  const cancelTradeCallback = useCallback(async () => {
+    return await cancelTrade(contract, data.id);
+  }, [data.id, contract]);
+
   return (
-    <Wrapper>
+    <Wrapper killed={data.killed}>
+      {!data.completed && !data.killed && (
+        <StyledX onClick={cancelTradeCallback} />
+      )}
       <TextItem style={{ fontWeight: 500 }}>
         {data.isBuy ? data.buyGem : data.payGem}
       </TextItem>

@@ -236,7 +236,7 @@ function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
   const [balances] = useTokenBalances();
 
   return isBuySelected
-    ? ['USD', balances[quote.ticker] || BigNumber.from(0)]
+    ? [quote.ticker, balances[quote.ticker] || BigNumber.from(0)]
     : [token.ticker, balances[token.ticker] || BigNumber.from(0)];
 }
 
@@ -423,11 +423,11 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
-      setPriceInput(currentOffer.price.toString());
-      const total =
-        Number(formatEther(currentOffer.baseAmount)) * currentOffer.price;
-      setQuantityInput(formatEther(currentOffer.baseAmount));
-      setTotalInput(`${total}`);
+      const price = new Decimal(currentOffer.price);
+      const baseAmount = new Decimal(formatEther(currentOffer.baseAmount));
+      setPriceInput(price.toString());
+      setQuantityInput(baseAmount.toString());
+      setTotalInput(price.mul(baseAmount).toString());
     }
   }, [currentOffer, isMarket, priceInput]);
 
@@ -593,7 +593,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                     isBuy={isBuy}
                   />
                 </TdInput>
-                <TdLabel>{'USD'}</TdLabel>
+                <TdLabel>{quote.ticker}</TdLabel>
               </Tr>
               <Tr>
                 <Th>Quantity</Th>
@@ -621,7 +621,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                     isBuy={isBuy}
                   />
                 </TdInput>
-                <TdLabel>{'USD'}</TdLabel>
+                <TdLabel>{quote.ticker}</TdLabel>
               </Tr>
             </tbody>
           </Table>

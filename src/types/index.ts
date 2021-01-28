@@ -56,6 +56,8 @@ export type UserTrade = {
   buyGem: string;
   payAmount: number;
   buyAmount: number;
+  completed: boolean;
+  killed: boolean;
   timestamp: number;
   transactionHash: string;
 };

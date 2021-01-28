@@ -6,6 +6,7 @@ import { getTokenAddress, useContract } from '../../utils';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useActiveWeb3React } from '../../hooks';
 import { DAI_INTERFACE } from '../../constants/abis/dai';
+import { FAUCET_ENABLED_IDS } from '../../config';
 
 const Wrapper = styled.div`
   display: flex;
@@ -81,9 +82,11 @@ export default function () {
         History
         <ActiveDot />
       </StyledNavLink>
-      <StyledNavLink to="/faucet" onClick={faucet}>
-        Faucet
-      </StyledNavLink>
+      {FAUCET_ENABLED_IDS.includes(chainId || -1) && (
+        <StyledNavLink to="/faucet" onClick={faucet}>
+          Faucet
+        </StyledNavLink>
+      )}
     </Wrapper>
   );
 }

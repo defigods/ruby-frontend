@@ -9,6 +9,8 @@ export const DEFAULT_CHAIN = 42;
 
 export const LIQUIDITY_PROVIDER_FEE = 0.002;
 
+export const FAUCET_ENABLED_IDS = [42];
+
 export const markets: Record<
   number,
   { address: string; blockNumber: number }

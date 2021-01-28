@@ -30,10 +30,35 @@ async function loadUserHistoricTrade(
     [quoteAddress, tokenAddress],
   );
 
-  const mapToUserTrade = (events: Event[], isBuy: boolean) => {
+  const mapKillToId = (events: Event[]) => {
+    return events.map<string>((ev) => ev.args!['id'] as string);
+  };
+
+  const mapMakeToUserTrade = (
+    events: Event[],
+    isBuy: boolean,
+    killedIds: string[],
+  ) => {
     return events.map<UserTrade>((ev) => ({
       id: ev.args!['id'] as string,
       isBuy,
+      completed: false,
+      killed: killedIds.includes(ev.args!['id']),
+      payGem: isBuy ? quote : token,
+      buyGem: isBuy ? token : quote,
+      payAmount: Number(formatEther(ev.args!['pay_amt'] as BigNumber)),
+      buyAmount: Number(formatEther(ev.args!['buy_amt'] as BigNumber)),
+      timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
+      transactionHash: ev['transactionHash'] as string,
+    }));
+  };
+
+  const mapTakeToUserTrade = (events: Event[], isBuy: boolean) => {
+    return events.map<UserTrade>((ev) => ({
+      id: ev.args!['id'] as string,
+      isBuy,
+      completed: true,
+      killed: false,
       payGem: isBuy ? quote : token,
       buyGem: isBuy ? token : quote,
       payAmount: Number(formatEther(ev.args!['give_amt'] as BigNumber)),
@@ -91,25 +116,92 @@ async function loadUserHistoricTrade(
     null,
   )!;
 
+  const possibleMakesBuyFilter = contract?.filters.LogMake(
+    null,
+    buyPair,
+    account,
+    null,
+    null,
+    null,
+    null,
+    null,
+  );
+
+  const possibleMakesSellFilter = contract?.filters.LogMake(
+    null,
+    sellPair,
+    account,
+    null,
+    null,
+    null,
+    null,
+    null,
+  );
+
+  const killedBuysFilter = contract?.filters.LogKill(
+    null,
+    buyPair,
+    account,
+    null,
+    null,
+    null,
+    null,
+    null,
+  );
+
+  const killedSellsFilter = contract?.filters.LogKill(
+    null,
+    sellPair,
+    account,
+    null,
+    null,
+    null,
+    null,
+    null,
+  );
+
   const sells = [
     ...(await contract
       .queryFilter(sellMakesFilter, startingBlock)
-      .then((re) => mapToUserTrade(re, false))),
+      .then((re) => mapTakeToUserTrade(re, false))),
     ...(await contract
       .queryFilter(sellTakesFilter, startingBlock)
-      .then((re) => mapToUserTrade(re, false))),
+      .then((re) => mapTakeToUserTrade(re, false))),
   ].sort((a, b) => b.timestamp - a.timestamp);
 
   const buys = [
     ...(await contract
       .queryFilter(buyMakesFilter, startingBlock)
-      .then((re) => mapToUserTrade(re, true))),
+      .then((re) => mapTakeToUserTrade(re, true))),
     ...(await contract
       .queryFilter(buyTakesFilter, startingBlock)
-      .then((re) => mapToUserTrade(re, true))),
+      .then((re) => mapTakeToUserTrade(re, true))),
   ].sort((a, b) => b.timestamp - a.timestamp);
 
-  return { buys, sells };
+  const killedIds = [
+    ...(await contract
+      .queryFilter(killedBuysFilter, startingBlock)
+      .then((re) => mapKillToId(re))),
+    ...(await contract
+      .queryFilter(killedSellsFilter, startingBlock)
+      .then((re) => mapKillToId(re))),
+  ];
+
+  const incompleteSells = (
+    await contract
+      .queryFilter(possibleMakesSellFilter, startingBlock)
+      .then((re) => mapMakeToUserTrade(re, false, killedIds))
+  ).filter((item) => !sells.find((sell) => sell.id === item.id));
+  const incompleteBuys = (
+    await contract
+      .queryFilter(possibleMakesBuyFilter, startingBlock)
+      .then((re) => mapMakeToUserTrade(re, true, killedIds))
+  ).filter((item) => !buys.find((sell) => sell.id === item.id));
+
+  return {
+    buys: [...buys, ...incompleteBuys],
+    sells: [...sells, ...incompleteSells],
+  };
 }
 
 /**

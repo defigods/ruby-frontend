@@ -9,6 +9,13 @@ import { ContractOffer } from '../types';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import Decimal from 'decimal.js';
 
+export async function cancelTrade(
+  contract: Contract,
+  id: string,
+): Promise<TransactionResponse> {
+  return contract.functions.cancel(id);
+}
+
 export async function loadTotalPrice(
   contract: Contract,
   token: string,
