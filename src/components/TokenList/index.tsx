@@ -38,6 +38,7 @@ const NoSearchBarHeader = styled.div`
   text-align: center;
   padding: 20px;
   font-weight: bold;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
 `;
 
 export default function (props: TokenListProps) {
