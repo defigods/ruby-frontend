@@ -1,11 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CountUp from 'react-countup';
 import styled from 'styled-components';
+import { useActiveWeb3React } from '../../hooks';
 import {
   useSelectedTimeHistory,
   useSelectedToken,
 } from '../../state/tokens/hooks';
-import { getTokenPercentChange, usePrevious } from '../../utils';
+import {
+  getEtherscanLink,
+  getTokenAddress,
+  getTokenPercentChange,
+  usePrevious,
+} from '../../utils';
 import TokenIcon from '../TokenIcon';
 
 interface HeaderViewProps {
@@ -58,9 +64,16 @@ const StyledCountUp = styled(CountUp)`
   font-size: 35px;
 `;
 
+const StyledA = styled.a`
+  color: inherit;
+  text-decoration: inherit;
+`;
+
 export default function ({ timestamp }: HeaderViewProps) {
   const selectedToken = useSelectedToken()!; // will always be defined here
   const selectedTimeHistory = useSelectedTimeHistory();
+
+  const { chainId } = useActiveWeb3React();
 
   // TODO: create a loading thing if the prices r being loaded
 
@@ -104,13 +117,25 @@ export default function ({ timestamp }: HeaderViewProps) {
           {!timestamp && 'TODAY'}
         </SubtitleWrapper>
       </ColWrapper>
-      <RowWrapper>
-        <ColWrapperWithTA>
-          <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
-          <SubtitleWrapper>{selectedToken.name} | Equity Token</SubtitleWrapper>
-        </ColWrapperWithTA>
-        <TokenIcon token={selectedToken} size="40px" />
-      </RowWrapper>
+      <StyledA
+        href={getEtherscanLink(
+          chainId!,
+          getTokenAddress(selectedToken, chainId!)!,
+          'token',
+        )}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <RowWrapper>
+          <ColWrapperWithTA>
+            <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
+            <SubtitleWrapper>
+              {selectedToken.name} | Equity Token
+            </SubtitleWrapper>
+          </ColWrapperWithTA>
+          <TokenIcon token={selectedToken} size="40px" />
+        </RowWrapper>
+      </StyledA>
     </Wrapper>
   );
 }
