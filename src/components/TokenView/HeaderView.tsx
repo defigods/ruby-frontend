@@ -6,6 +6,7 @@ import {
   useSelectedToken,
 } from '../../state/tokens/hooks';
 import { getTokenPercentChange, usePrevious } from '../../utils';
+import TokenIcon from '../TokenIcon';
 
 interface HeaderViewProps {
   timestamp?: number;
@@ -20,12 +21,22 @@ const Wrapper = styled.div`
   margin: 0 20px;
 `;
 
-const ChildWrapper = styled.div`
+const ColWrapper = styled.div`
   display: flex;
   flex-direction: column;
+`;
 
-  &:last-child {
-    text-align: right;
+const ColWrapperWithTA = styled(ColWrapper)`
+  text-align: right;
+`;
+
+const RowWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  img {
+    padding-left: 8px;
   }
 `;
 
@@ -82,7 +93,7 @@ export default function ({ timestamp }: HeaderViewProps) {
 
   return (
     <Wrapper>
-      <ChildWrapper>
+      <ColWrapper>
         {MemoCountUp}
         <SubtitleWrapper>
           <DifferenceWrapper upwardsTrend={absoluteDifference > 0}>
@@ -92,11 +103,14 @@ export default function ({ timestamp }: HeaderViewProps) {
           </DifferenceWrapper>{' '}
           {!timestamp && 'TODAY'}
         </SubtitleWrapper>
-      </ChildWrapper>
-      <ChildWrapper>
-        <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
-        <SubtitleWrapper>{selectedToken.name} | Equity Token</SubtitleWrapper>
-      </ChildWrapper>
+      </ColWrapper>
+      <RowWrapper>
+        <ColWrapperWithTA>
+          <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
+          <SubtitleWrapper>{selectedToken.name} | Equity Token</SubtitleWrapper>
+        </ColWrapperWithTA>
+        <TokenIcon token={selectedToken} size="40px" />
+      </RowWrapper>
     </Wrapper>
   );
 }

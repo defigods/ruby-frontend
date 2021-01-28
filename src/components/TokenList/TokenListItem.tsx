@@ -8,6 +8,7 @@ import { TimeHistory, Token } from '../../types';
 import { getSortedPrices } from '../../utils';
 import LineChart from './LineChart';
 import { useHistory } from 'react-router-dom';
+import TokenIcon from '../TokenIcon';
 
 interface TokenListItemProps extends Token {
   /**
@@ -26,7 +27,7 @@ const Wrapper = styled.div<{ selected: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 15px 25px;
+  padding: 15px;
   cursor: pointer;
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.secondary : 'auto'};
@@ -42,11 +43,16 @@ const ItemWrapper = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
 
   &:first-child {
     justify-content: flex-start;
     & > {
       margin-right: auto;
+    }
+
+    img {
+      padding-right: 8px;
     }
   }
   &:last-child {
@@ -108,6 +114,7 @@ export default function (props: TokenListItemProps) {
       }
     >
       <ItemWrapper>
+        <TokenIcon token={props} />
         <TextWrapper>
           <Title>{props.title}</Title>
           <Subtitle>{props.subtitle}</Subtitle>

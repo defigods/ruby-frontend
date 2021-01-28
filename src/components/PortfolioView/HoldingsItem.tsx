@@ -7,6 +7,7 @@ import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
 import { UserToken } from '../../types';
 import { getTokenPercentChange } from '../../utils';
+import TokenIcon from '../TokenIcon';
 
 interface HoldingsItemProps {
   token: UserToken;
@@ -30,6 +31,16 @@ const TableItem = styled.span<{ width: number }>`
   font-size: 16px;
   width: ${({ width }) => width}%;
   font-weight: 600;
+`;
+
+const DoubleItemRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  img {
+    padding-right: 8px;
+  }
 `;
 
 const DoubleItem = styled.div`
@@ -83,7 +94,10 @@ export default function ({ token, percentage }: HoldingsItemProps) {
         style={{ fontSize: '18px', cursor: 'pointer' }}
         onClick={() => redirect(token.ticker)}
       >
-        {token.ticker}
+        <DoubleItemRow>
+          <TokenIcon token={token} />
+          {token.ticker}
+        </DoubleItemRow>
       </TableItem>
       <TableItem width={25}>
         <DoubleItem>
