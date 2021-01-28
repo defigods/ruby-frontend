@@ -46,7 +46,7 @@ export default function () {
   return (
     <Wrapper>
       <LogoWrapper>
-        <Link to="/">
+        <Link to="/trade">
           <Logo src={logo} alt="logo" />
         </Link>
       </LogoWrapper>
