@@ -13,10 +13,10 @@ export const markets: Record<
   number,
   { address: string; blockNumber: number }
 > = {
-  // 1: {
-  //   address: 'TODO',
-  //   blockNumber: 0,
-  // },
+  1: {
+    address: '0x568538C3c6A8bB6aDc2Bf2bd7620EaA54D37a720',
+    blockNumber: 20875039,
+  },
   42: {
     address: '0x9C735089059689803F507DAAad78c6970468124d',
     blockNumber: 20875039,
