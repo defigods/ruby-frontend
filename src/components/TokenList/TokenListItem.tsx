@@ -66,6 +66,7 @@ const ItemWrapper = styled.div`
 const TextWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  margin-left: 4px;
 `;
 
 const Title = styled.span`
@@ -114,7 +115,7 @@ export default function (props: TokenListItemProps) {
       }
     >
       <ItemWrapper>
-        <TokenIcon token={props} />
+        <TokenIcon token={props} size="32px" />
         <TextWrapper>
           <Title>{props.title}</Title>
           <Subtitle>{props.subtitle}</Subtitle>

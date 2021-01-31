@@ -129,9 +129,7 @@ export default function ({ timestamp }: HeaderViewProps) {
         <RowWrapper>
           <ColWrapperWithTA>
             <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
-            <SubtitleWrapper>
-              {selectedToken.name} | Equity Token
-            </SubtitleWrapper>
+            <SubtitleWrapper>{selectedToken.name}</SubtitleWrapper>
           </ColWrapperWithTA>
           <TokenIcon token={selectedToken} size="40px" />
         </RowWrapper>
