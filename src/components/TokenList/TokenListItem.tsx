@@ -115,7 +115,7 @@ export default function (props: TokenListItemProps) {
       }
     >
       <ItemWrapper>
-        <TokenIcon token={props} size="32px" />
+        <TokenIcon token={props} />
         <TextWrapper>
           <Title>{props.title}</Title>
           <Subtitle>{props.subtitle}</Subtitle>

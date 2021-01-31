@@ -22,6 +22,7 @@ import {
   executeMatchTrade,
   useDebounce,
   loadTotalPrice,
+  isNumeric,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -517,22 +518,23 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   ]);
 
   const updateValues = (value: string, type: number) => {
-    // if (!isMarket) {
+    if (!isNumeric(value)) return;
+
     let valueDecimal = new Decimal(0);
     try {
       valueDecimal = new Decimal(value);
     } catch (ex) {
-      return;
+      // return;
     }
 
     if (type === 1) {
-      setPriceInput(valueDecimal.toString());
+      setPriceInput(value);
       if (quantityInput)
         setTotalInput(valueDecimal.times(quantityInput).toString());
       else if (totalInput)
         setQuantityInput(new Decimal(totalInput).div(valueDecimal).toString());
     } else if (type === 2) {
-      setQuantityInput(valueDecimal.toString());
+      setQuantityInput(value);
       if (isMarket) {
         setMarketState({
           ...marketState,
@@ -546,7 +548,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
           setPriceInput(new Decimal(totalInput).div(valueDecimal).toString());
       }
     } else if (type === 3) {
-      setTotalInput(valueDecimal.toString());
+      setTotalInput(value);
       if (quantityInput)
         setPriceInput(valueDecimal.div(quantityInput).toString());
       else if (priceInput)
@@ -584,10 +586,16 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <Th>Price</Th>
                 <TdInput>
                   <PriceInput
-                    type="number"
+                    type="text"
                     placeholder="0.0"
                     value={priceInput}
                     onChange={(e) => updateValues(e.target.value, 1)}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    inputMode="decimal"
+                    pattern="^[0-9]*[.]?[0-9]*$"
+                    maxLength={50}
                     disabled={isMarket}
                     isMarket={isMarket}
                     isBuy={isBuy}
@@ -599,10 +607,16 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <Th>Quantity</Th>
                 <TdInput>
                   <Input
-                    type="number"
+                    type="test"
                     placeholder="0.0"
                     value={quantityInput}
                     onChange={(e) => updateValues(e.target.value, 2)}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    inputMode="decimal"
+                    pattern="^[0-9]*[.]?[0-9]*$"
+                    maxLength={50}
                     ref={quantityRef}
                   />
                 </TdInput>
@@ -612,10 +626,16 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <Th>Total</Th>
                 <TdInput>
                   <PriceInput
-                    type="number"
+                    type="test"
                     placeholder="0.0"
                     value={totalInput}
                     onChange={(e) => updateValues(e.target.value, 3)}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    inputMode="decimal"
+                    pattern="^[0-9]*[.]?[0-9]*$"
+                    maxLength={50}
                     disabled={isMarket}
                     isMarket={isMarket}
                     isBuy={isBuy}

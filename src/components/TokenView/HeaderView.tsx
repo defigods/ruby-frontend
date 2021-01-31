@@ -131,7 +131,7 @@ export default function ({ timestamp }: HeaderViewProps) {
             <TitleWrapper>{selectedToken.ticker}</TitleWrapper>
             <SubtitleWrapper>{selectedToken.name}</SubtitleWrapper>
           </ColWrapperWithTA>
-          <TokenIcon token={selectedToken} size="40px" />
+          <TokenIcon token={selectedToken} size="50px" />
         </RowWrapper>
       </StyledA>
     </Wrapper>

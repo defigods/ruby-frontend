@@ -8,7 +8,7 @@ interface TokenIconProps {
   size?: string;
 }
 
-const DEFAULT_SIZE = '30px';
+const DEFAULT_SIZE = '45px';
 
 const Container = styled.div<{ size: string }>`
   border-radius: 50%;
@@ -20,6 +20,7 @@ const Container = styled.div<{ size: string }>`
 const Image = styled.img`
   height: 100%;
   width: 100%;
+  object-fit: contain;
 `;
 
 export default function ({ token, size }: TokenIconProps) {

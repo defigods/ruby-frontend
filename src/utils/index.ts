@@ -137,6 +137,16 @@ export function sortBigNumbers(
   }
 }
 
+export function isNumeric(test: string): boolean {
+  const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`);
+
+  return test === '' || inputRegex.test(escapeRegExp(test));
+}
+
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export * from './debounce';
 export * from './web3';
 export * from './hooks';
