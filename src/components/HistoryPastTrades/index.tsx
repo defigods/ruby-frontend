@@ -103,7 +103,7 @@ export default function () {
             </>
           )}
         </ContentWrapper>
-        {sortedTrades.length === 0 && (
+        {sortedTrades.length === 0 && !loading && (
           <Warning>
             <AlertCircle size={12} style={{ marginRight: 5 }} />
             No trades found
