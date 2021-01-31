@@ -31,7 +31,7 @@ export default function (): null {
           quantity: Number(formatEther(userTokens[ticker])),
         };
       })
-      .filter((t) => t !== undefined) as UserToken[];
+      .filter((t) => t !== undefined && t.quantity > 0) as UserToken[];
 
     dispatch(fetchUserTokenList.fulfilled(toDispatch));
   }, [dispatch, isTokenPending, tokens, userTokens, userTokensLoading]);

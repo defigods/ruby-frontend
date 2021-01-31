@@ -134,6 +134,8 @@ export default function ({ data, onHover, loading }: LineChartProps) {
     const minValues = points.map((p) => Math.abs(x - p[1]));
     const minIndex = minValues.indexOf(Math.min(...minValues));
 
+    if (!points[minIndex]) return null;
+
     setHoveredTimestamp(points[minIndex][0]);
     const xGraph = points[minIndex][1];
 

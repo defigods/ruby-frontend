@@ -4,6 +4,7 @@ import Loader, { LoaderWrapper } from '../Loader';
 import PastTradeItem from './PastTradeItem';
 import { useUserTrades } from '../../hooks/trades';
 import { useSelectedToken } from '../../state/tokens/hooks';
+import { AlertCircle } from 'react-feather';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -11,6 +12,7 @@ const Wrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.secondary};
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 const Header = styled.div`
@@ -49,6 +51,17 @@ const ContentWrapper = styled.div`
   ::-webkit-scrollbar {
     width: 0px;
   }
+`;
+
+const Warning = styled.div`
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 `;
 
 export default function () {
@@ -90,6 +103,12 @@ export default function () {
             </>
           )}
         </ContentWrapper>
+        {sortedTrades.length === 0 && (
+          <Warning>
+            <AlertCircle size={12} style={{ marginRight: 5 }} />
+            No trades found
+          </Warning>
+        )}
       </BodyWrapper>
     </Wrapper>
   );
