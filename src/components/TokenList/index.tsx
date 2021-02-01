@@ -43,6 +43,7 @@ const NoSearchBarHeader = styled.div`
 
 export default function (props: TokenListProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
+
   const searchBar = props.searchBar ?? true;
 
   const filteredData = search
@@ -54,9 +55,14 @@ export default function (props: TokenListProps) {
       })
     : props.data;
 
+  console.log('Filtered data', filteredData);
+
   const sortedData = filteredData.sort((a, b) => {
     return b.currentPrice - a.currentPrice;
   });
+
+  console.log('sortedData', sortedData);
+  // useUserTradesKilled...
 
   return (
     <Wrapper>

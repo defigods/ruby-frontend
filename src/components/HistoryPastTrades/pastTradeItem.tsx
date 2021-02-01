@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { ExternalLink, X } from 'react-feather';
 import styled from 'styled-components';
 import { UserTrade } from '../../types';
+import { useUserTrades } from '../../hooks/trades';
 import moment from 'moment';
 import { useActiveWeb3React } from '../../hooks';
 import { cancelTrade, getEtherscanLink } from '../../utils';
