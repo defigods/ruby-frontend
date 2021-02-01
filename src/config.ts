@@ -5,7 +5,7 @@ export const websocket = {
       : 'localhost:3000',
 };
 
-export const DEFAULT_CHAIN = 42;
+export const DEFAULT_CHAIN = 1;
 
 export const LIQUIDITY_PROVIDER_FEE = 0.002;
 
