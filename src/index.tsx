@@ -29,6 +29,10 @@ const Updaters = () => {
   );
 };
 
+if (!!(window as any)['ethereum']) {
+  (window as any)['ethereum'].autoRefreshOnNetworkChange = true;
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <FixedGlobalStyle />

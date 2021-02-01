@@ -5,13 +5,14 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
-import { UserToken } from '../../types';
+import { QuoteUserToken, UserToken } from '../../types';
 import { getTokenPercentChange } from '../../utils';
 import TokenIcon from '../TokenIcon';
 
 interface HoldingsItemProps {
-  token: UserToken;
+  token: UserToken | QuoteUserToken;
   percentage?: number;
+  isQuote?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -75,8 +76,10 @@ const StyledChevronDown = styled(ChevronDown)`
   color: ${({ theme }) => theme.text.red};
 `;
 
-export default function ({ token, percentage }: HoldingsItemProps) {
-  const [, percentChange] = getTokenPercentChange(token);
+export default function ({ token, percentage, isQuote }: HoldingsItemProps) {
+  const [, percentChange] = isQuote
+    ? [0, 0]
+    : getTokenPercentChange(token as UserToken);
   const upwards = percentChange > 0;
 
   const dispatch = useDispatch<AppDispatch>();
@@ -92,7 +95,7 @@ export default function ({ token, percentage }: HoldingsItemProps) {
       <TableItem
         width={50}
         style={{ fontSize: '18px', cursor: 'pointer' }}
-        onClick={() => redirect(token.ticker)}
+        onClick={() => (!isQuote ? redirect(token.ticker) : null)}
       >
         <DoubleItemRow>
           <TokenIcon token={token} />

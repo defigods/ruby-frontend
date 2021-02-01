@@ -4,7 +4,9 @@ import { Token } from '../../types';
 import unknown from '../../assets/img/unknown-icon.svg';
 
 interface TokenIconProps {
-  token: Token;
+  token: {
+    logo?: string;
+  };
   size?: string;
 }
 

@@ -43,6 +43,11 @@ export interface Token {
   addresses: { chainId: number; value: string }[];
 }
 
+export interface QuoteUserToken extends QuoteToken {
+  quantity: number;
+  currentPrice: number;
+}
+
 export interface UserToken extends Token {
   quantity: number;
 }

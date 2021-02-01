@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import { useSelectedTimeHistory } from '../../state/tokens/hooks';
@@ -16,11 +16,11 @@ import {
   useIsPortfolioPending,
   usePortfolioData,
 } from '../../state/portfolio/hooks';
-import { useSelectedQuote } from '../../state/quotes/hooks';
 import {
   useIsUserTradesLoading,
   useUserTrades,
 } from '../../state/trades/hooks';
+import { useQuoteBalance, useSelectedQuote } from '../../state/quotes/hooks';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -83,12 +83,23 @@ export default function () {
   ]);
 
   const data = usePortfolioData();
+  const quoteBalance = useQuoteBalance();
+
+  const addQuoteBalance = useMemo(() => {
+    if (!data) return undefined;
+    return Object.keys(data).reduce((accum, next) => {
+      return {
+        ...accum,
+        [next]: data[Number(next)] + (quoteBalance || 0),
+      };
+    }, {});
+  }, [data, quoteBalance]);
 
   return (
     <Wrapper>
-      <HeaderView timestamp={hoveredTimestamp} entry={data} />
+      <HeaderView timestamp={hoveredTimestamp} entry={addQuoteBalance} />
       <LineChart
-        data={data}
+        data={addQuoteBalance}
         onHover={setHoveredTimestamp}
         loading={portfolioPending}
       />

@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useUserTokensWithPendingBalances } from '../../state/user/hooks';
+import { useQuoteBalance, useSelectedQuote } from '../../state/quotes/hooks';
+import { useUserTokens } from '../../state/user/hooks';
+import { QuoteUserToken } from '../../types';
 import HoldingsItem from './HoldingsItem';
 import HoldingsSwitch from './HoldingsSwitch';
 
@@ -50,23 +53,36 @@ const TableContent = styled.div`
 
 export default function () {
   const [userTokens] = useUserTokensWithPendingBalances();
+  const selectedQuote = useSelectedQuote()!;
+  const quoteBalance = useQuoteBalance();
+
+  const sortedUserTokens = useMemo(() => {
+    const quoteToken: QuoteUserToken = {
+      ...selectedQuote,
+      quantity: quoteBalance || 0,
+      currentPrice: 1.0, // lol
+    };
+    return [...userTokens, quoteToken].sort(
+      (a, b) => b.quantity * b.currentPrice - a.quantity * a.currentPrice,
+    );
+  }, [userTokens, selectedQuote, quoteBalance]);
 
   const [useDollars, setUseDollars] = useState(true);
 
   const percentages = useMemo(() => {
-    const totalHoldings = userTokens.reduce(
+    const totalHoldings = sortedUserTokens.reduce(
       (accum, next) => (accum += next.quantity * next.currentPrice),
       0,
     );
 
-    return userTokens.reduce<{ [ticker: string]: number }>(
+    return sortedUserTokens.reduce<{ [ticker: string]: number }>(
       (accum, next) => ({
         ...accum,
         [next.ticker]: (next.quantity * next.currentPrice) / totalHoldings,
       }),
       {},
     );
-  }, [userTokens]);
+  }, [sortedUserTokens]);
 
   return (
     <Wrapper>
@@ -83,10 +99,11 @@ export default function () {
         <TableHeaderItem width={25}>Holding</TableHeaderItem>
       </TableHeader>
       <TableContent>
-        {userTokens.map((token) => (
+        {sortedUserTokens.map((token) => (
           <HoldingsItem
             token={token}
             key={token.ticker}
+            isQuote={token.ticker === selectedQuote.ticker}
             percentage={useDollars ? undefined : percentages[token.ticker]}
           />
         ))}

@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import Loader, { LoaderWrapper } from '../Loader';
-import PastTradeItem from './pastTradeItem';
-import { useUserTrades } from '../../hooks/trades';
+import PastTradeItem from './PastTradeItem';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import { AlertCircle } from 'react-feather';
 import {

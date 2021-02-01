@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { AppState } from '..';
 import { UserToken } from '../../types';
 import { useIsUserTradesLoading, usePendingTrades } from '../trades/hooks';
+import { useQuoteBalance } from '../quotes/hooks';
 
 export function useUserTokens(): UserToken[] {
   return useSelector((state: AppState) => state.user.tokens);
@@ -48,9 +49,11 @@ export function useIsUserTokenPending(): boolean {
 
 export function useUserTotal(): number {
   const tokens = useUserTokens();
-
-  return tokens.reduce(
-    (total, next) => (total += next.quantity * next.currentPrice),
-    0,
+  const quoteBalance = useQuoteBalance();
+  return (
+    tokens.reduce(
+      (total, next) => (total += next.quantity * next.currentPrice),
+      0,
+    ) + (quoteBalance || 0)
   );
 }

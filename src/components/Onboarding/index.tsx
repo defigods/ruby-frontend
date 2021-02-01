@@ -37,7 +37,6 @@ const MainButton = styled.div`
 const LogoWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 100%;
-  height:
   padding: 30px 50px 30px 50px;
   display: flex;
   justify-content: center;
@@ -118,8 +117,8 @@ export default function () {
     setHasTried(true);
     activate(injected, undefined, true).catch((err) => {
       console.error(`Failed to activate account`, err);
+      setHasWallet(false);
       if (err instanceof NoEthereumProviderError) {
-        setHasWallet(false);
       }
     });
   }, [activate]);
