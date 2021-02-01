@@ -62,7 +62,7 @@ export default function (props: TokenListProps) {
     <Wrapper>
       {searchBar ? (
         <SearchBar
-          placeholder="Search by token or company name"
+          placeholder="Search by token or asset name"
           onSearch={(s) => setSearch(s)}
         ></SearchBar>
       ) : (
