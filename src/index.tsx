@@ -13,6 +13,7 @@ import TokensUpdater from './state/tokens/updater';
 import UserUpdater from './state/user/updater';
 import QuotesUpdater from './state/quotes/updater';
 import TransactionsUpdater from './state/transactions/updater';
+import TradesUpdater from './state/trades/updater';
 import SocketProvider from './components/SocketProvider';
 
 const Updaters = () => {
@@ -23,6 +24,7 @@ const Updaters = () => {
       <TokensUpdater />
       <UserUpdater />
       <TransactionsUpdater />
+      <TradesUpdater />
     </>
   );
 };

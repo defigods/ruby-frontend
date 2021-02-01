@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Token } from '../../types';
 import unknown from '../../assets/img/unknown-icon.svg';

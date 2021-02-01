@@ -7,8 +7,10 @@ import TokenList from '../../components/TokenList';
 import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
 import { useIsTokenSelected } from '../../state/tokens/hooks';
-import { useIsUserTokenPending, useUserTokens } from '../../state/user/hooks';
-import { useUserTrades } from '../../hooks/trades';
+import {
+  useIsUserTokenPending,
+  useUserTokensWithPendingBalances,
+} from '../../state/user/hooks';
 
 const LoaderWrapper = styled.div`
   height: 100vh;
@@ -20,10 +22,9 @@ const LoaderWrapper = styled.div`
 
 export default function () {
   const dispatch = useDispatch<AppDispatch>();
-  const userTokens = useUserTokens();
+  const [userTokens, pendingLoading] = useUserTokensWithPendingBalances();
   const userPending = useIsUserTokenPending();
   const tokenSelected = useIsTokenSelected();
-  const [ordersData, loading] = useUserTrades();
 
   useEffect(() => {
     if (!tokenSelected && userTokens.length > 0) {
@@ -31,52 +32,22 @@ export default function () {
     }
   }, [tokenSelected, userTokens, dispatch]);
 
-  const data = userTokens.map((t) => ({
-    ...t,
-    title: t.ticker,
-    subtitle: `${t.quantity.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} TOKENS`,
-  }));
-
-  // console.log('userTrades', ordersData);
-  // console.log('userTokens', userTokens);
-
-  const oustandingOrdersData = useMemo(() => {
-    if (loading) {
-      return [];
-    }
-
-    for (let i = 0; i < userTokens.length; i++) {
-      const ordersByToken = ordersData[userTokens[i]['ticker']];
-      console.log(ordersByToken);
-      for (let b = 0; b < ordersByToken['buys'].length; b++) {
-        if (
-          !ordersByToken['buys'][b]['completed'] &&
-          !ordersByToken['buys'][b]['killed']
-        ) {
-          console.log('Outstanding order: ', ordersByToken['buys'][b]);
-          // if (ordersByToken['buys'][b]['isBuy']) {
-          //    //**append buy Amount to portfolio data */
-          //}
-          // else {
-          //     // ** append sell amount to portfolio data **
-          //}
-        }
-      }
-    }
-  }, [loading, ordersData, userTokens]);
-
-  console.log('target data', oustandingOrdersData);
-
-  // const outstandingOrdersData = ordersData.map((token) => ({
-  //   console.log(token);
-  // }));
+  const data = useMemo(
+    () =>
+      userTokens.map((t) => ({
+        ...t,
+        title: t.ticker,
+        subtitle: `${t.quantity.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} TOKENS`,
+      })),
+    [userTokens],
+  );
 
   return (
     <>
-      {userPending ? (
+      {userPending || pendingLoading ? (
         <LoaderWrapper>
           <Loader size="50px" />
         </LoaderWrapper>

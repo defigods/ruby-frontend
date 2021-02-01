@@ -64,8 +64,7 @@ export type UserTrade = {
 
 export type UserTrades = {
   [ticker: string]: {
-    buys: UserTrade[];
-    sells: UserTrade[];
+    trades: UserTrade[];
     balance: number;
   };
 };

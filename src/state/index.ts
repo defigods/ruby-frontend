@@ -7,6 +7,7 @@ import quotes from './quotes/reducer';
 import settings from './settings/reducer';
 import portfolio from './portfolio/reducer';
 import transactions from './transactions/reducer';
+import trades from './trades/reducer';
 
 const PERSISTENT_KEYS: string[] = ['settings'];
 
@@ -19,6 +20,7 @@ const store = configureStore({
     settings,
     portfolio,
     transactions,
+    trades,
   },
   middleware: [
     ...getDefaultMiddleware({ thunk: false }),

@@ -41,7 +41,7 @@ export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
   const tokensLoading = useIsTokenPending();
   const { chainId, account, library } = useActiveWeb3React();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<{ [ticker: string]: BigNumber }>({});
 
   const contracts = useMemo(() => {
@@ -68,8 +68,7 @@ export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
   const blockNumber = useBlockNumber();
 
   useEffect(() => {
-    if (contracts.length === 0 || !account) return;
-
+    if (contracts.length === 0 || !account || loading) return;
     const fetchData = async () => {
       const results = (await Promise.all(
         contracts
@@ -93,9 +92,9 @@ export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
       );
       setLoading(false);
     };
-
+    if (!Object.keys(results).length) setLoading(true);
     fetchData();
-  }, [contracts, account, loading, blockNumber]);
+  }, [contracts, account, blockNumber]);
 
   return [results, loading];
 }

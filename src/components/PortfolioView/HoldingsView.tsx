@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useUserTokens } from '../../state/user/hooks';
+import { useUserTokensWithPendingBalances } from '../../state/user/hooks';
 import HoldingsItem from './HoldingsItem';
 import HoldingsSwitch from './HoldingsSwitch';
 
@@ -49,7 +49,7 @@ const TableContent = styled.div`
 `;
 
 export default function () {
-  const userTokens = useUserTokens();
+  const [userTokens] = useUserTokensWithPendingBalances();
 
   const [useDollars, setUseDollars] = useState(true);
 

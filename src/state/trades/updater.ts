@@ -1,16 +1,68 @@
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '..';
+import { fetchUserTrades } from './actions';
 import { Contract, Event } from '@ethersproject/contracts';
 import { formatEther, solidityKeccak256 } from 'ethers/lib/utils';
-import { useEffect, useState } from 'react';
-import { useActiveWeb3React } from '.';
-import { markets } from '../config';
-import { useBlockNumber } from '../state/application/hooks';
-import { useIsQuoteSelected, useSelectedQuote } from '../state/quotes/hooks';
-import { useIsTokenPending, useTokens } from '../state/tokens/hooks';
-import { UserTrade, UserTrades } from '../types';
-import { getTokenAddress } from '../utils';
-import { useMarketContract } from './contract';
 import { BigNumber } from '@ethersproject/bignumber';
-import { useTokenBalances } from './wallet';
+import { useIsTokenPending, useTokens } from '../tokens/hooks';
+import { useSelectedQuote } from '../quotes/hooks';
+import { useActiveWeb3React } from '../../hooks';
+import { useMarketContract } from '../../hooks/contract';
+import { useTokenBalances } from '../../hooks/wallet';
+import { getTokenAddress } from '../../utils';
+import { UserTrade, UserTrades } from '../../types';
+import { markets } from '../../config';
+import { useUserTrades } from './hooks';
+
+export default function (): null {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const tokens = useTokens();
+  const tokensLoading = useIsTokenPending();
+  const quote = useSelectedQuote();
+  const { chainId, account } = useActiveWeb3React();
+  const contract = useMarketContract();
+  const userTrades = useUserTrades();
+  const [balances, balancesLoading] = useTokenBalances();
+
+  useEffect(() => {
+    if (
+      tokensLoading ||
+      !quote ||
+      !contract ||
+      !account ||
+      !chainId ||
+      balancesLoading
+    )
+      return;
+    if (!Object.keys(userTrades).length) dispatch(fetchUserTrades.pending());
+    const fetchData = async () => {
+      // Loop through each token
+      const quoteAddress = getTokenAddress(quote, chainId)!;
+      const results: UserTrades = {};
+      for (const token of tokens) {
+        const tokenAddress = getTokenAddress(token, chainId)!;
+        results[token.ticker] = {
+          trades: await loadUserHistoricTrade(
+            token.ticker,
+            quote.ticker,
+            tokenAddress,
+            quoteAddress,
+            account,
+            chainId,
+            contract,
+          ),
+          balance: Number(formatEther(balances[token.ticker] || '0')),
+        };
+      }
+      dispatch(fetchUserTrades.fulfilled(results));
+    };
+    fetchData();
+  }, [balances, tokensLoading, quote, account, chainId]);
+
+  return null;
+}
 
 async function loadUserHistoricTrade(
   token: string,
@@ -20,12 +72,13 @@ async function loadUserHistoricTrade(
   account: string,
   chainId: number,
   contract: Contract,
-) {
-  const buyPair = solidityKeccak256(
+): Promise<UserTrade[]> {
+  // Pair form: <pay_gem><buy_gem>
+  const sellPair = solidityKeccak256(
     ['address', 'address'],
     [tokenAddress, quoteAddress],
   );
-  const sellPair = solidityKeccak256(
+  const buyPair = solidityKeccak256(
     ['address', 'address'],
     [quoteAddress, tokenAddress],
   );
@@ -53,7 +106,11 @@ async function loadUserHistoricTrade(
     }));
   };
 
-  const mapTakeToUserTrade = (events: Event[], isBuy: boolean) => {
+  const mapTakeToUserTrade = (
+    events: Event[],
+    isBuy: boolean,
+    isTake: boolean,
+  ) => {
     return events.map<UserTrade>((ev) => ({
       id: ev.args!['id'] as string,
       isBuy,
@@ -61,8 +118,12 @@ async function loadUserHistoricTrade(
       killed: false,
       payGem: isBuy ? quote : token,
       buyGem: isBuy ? token : quote,
-      payAmount: Number(formatEther(ev.args!['give_amt'] as BigNumber)),
-      buyAmount: Number(formatEther(ev.args!['take_amt'] as BigNumber)),
+      payAmount: Number(
+        formatEther(ev.args![isTake ? 'give_amt' : 'take_amt'] as BigNumber),
+      ),
+      buyAmount: Number(
+        formatEther(ev.args![isTake ? 'take_amt' : 'give_amt'] as BigNumber),
+      ),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
       transactionHash: ev['transactionHash'] as string,
     }));
@@ -70,6 +131,7 @@ async function loadUserHistoricTrade(
 
   const startingBlock = markets[chainId].blockNumber;
 
+  // isBuy: false
   const sellMakesFilter = contract?.filters.LogTake(
     null,
     sellPair,
@@ -81,6 +143,7 @@ async function loadUserHistoricTrade(
     null,
     null,
   )!;
+  // isBuy: true
   const sellTakesFilter = contract?.filters.LogTake(
     null,
     sellPair,
@@ -93,6 +156,7 @@ async function loadUserHistoricTrade(
     null,
   )!;
 
+  // isBuy: true
   const buyMakesFilter = contract?.filters.LogTake(
     null,
     buyPair,
@@ -104,6 +168,7 @@ async function loadUserHistoricTrade(
     null,
     null,
   )!;
+  // isBuy: false
   const buyTakesFilter = contract?.filters.LogTake(
     null,
     buyPair,
@@ -160,22 +225,19 @@ async function loadUserHistoricTrade(
     null,
   );
 
-  const sells = [
+  const trades = [
     ...(await contract
       .queryFilter(sellMakesFilter, startingBlock)
-      .then((re) => mapTakeToUserTrade(re, false))),
+      .then((re) => mapTakeToUserTrade(re, false, false))),
     ...(await contract
       .queryFilter(sellTakesFilter, startingBlock)
-      .then((re) => mapTakeToUserTrade(re, false))),
-  ];
-
-  const buys = [
+      .then((re) => mapTakeToUserTrade(re, true, true))),
     ...(await contract
       .queryFilter(buyMakesFilter, startingBlock)
-      .then((re) => mapTakeToUserTrade(re, true))),
+      .then((re) => mapTakeToUserTrade(re, true, false))),
     ...(await contract
       .queryFilter(buyTakesFilter, startingBlock)
-      .then((re) => mapTakeToUserTrade(re, true))),
+      .then((re) => mapTakeToUserTrade(re, false, true))),
   ];
 
   const killedIds = [
@@ -187,79 +249,18 @@ async function loadUserHistoricTrade(
       .then((re) => mapKillToId(re))),
   ];
 
-  const incompleteSells = (
-    await contract
-      .queryFilter(possibleMakesSellFilter, startingBlock)
-      .then((re) => mapMakeToUserTrade(re, false, killedIds))
-  ).filter((item) => !sells.find((sell) => sell.id === item.id));
-  const incompleteBuys = (
-    await contract
-      .queryFilter(possibleMakesBuyFilter, startingBlock)
-      .then((re) => mapMakeToUserTrade(re, true, killedIds))
-  ).filter((item) => !buys.find((sell) => sell.id === item.id));
+  const incompleteTrades = [
+    ...(
+      await contract
+        .queryFilter(possibleMakesSellFilter, startingBlock)
+        .then((re) => mapMakeToUserTrade(re, false, killedIds))
+    ).filter((item) => !trades.find((trade) => trade.id === item.id)),
+    ...(
+      await contract
+        .queryFilter(possibleMakesBuyFilter, startingBlock)
+        .then((re) => mapMakeToUserTrade(re, true, killedIds))
+    ).filter((item) => !trades.find((trade) => trade.id === item.id)),
+  ];
 
-  return {
-    buys: [...buys, ...incompleteBuys],
-    sells: [...sells, ...incompleteSells],
-  };
-}
-
-/**
- * Load the historical trades of a user across all tokens
- */
-export function useUserTrades(): [UserTrades, boolean] {
-  const tokens = useTokens();
-  const [balances, balancesLoading] = useTokenBalances();
-  const quote = useSelectedQuote();
-  const tokensLoading = useIsTokenPending();
-  const quoteSelected = useIsQuoteSelected();
-  const { chainId, account } = useActiveWeb3React();
-  const contract = useMarketContract();
-
-  const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<UserTrades>({});
-
-  const blockNumber = useBlockNumber();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (tokensLoading || !quoteSelected || !chainId || balancesLoading)
-        return;
-      // Loop through each token
-      const quoteAddress = getTokenAddress(quote!, chainId)!;
-      const results: UserTrades = {};
-      for (const token of tokens) {
-        const tokenAddress = getTokenAddress(token, chainId)!;
-        results[token.ticker] = {
-          ...(await loadUserHistoricTrade(
-            token.ticker,
-            quote!.ticker,
-            tokenAddress,
-            quoteAddress,
-            account!,
-            chainId,
-            contract!,
-          )),
-          balance: Number(formatEther(balances[token.ticker] || '0')),
-        };
-      }
-      setResults(results);
-      setLoading(false);
-    };
-    if (!results) setLoading(true);
-    fetchData();
-  }, [
-    tokensLoading,
-    quoteSelected,
-    chainId,
-    blockNumber,
-    balancesLoading,
-    account,
-    balances,
-    contract,
-    quote,
-    tokens,
-  ]);
-
-  return [results, loading];
+  return [...trades, ...incompleteTrades];
 }

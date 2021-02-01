@@ -2,9 +2,12 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import Loader, { LoaderWrapper } from '../Loader';
 import PastTradeItem from './PastTradeItem';
-import { useUserTrades } from '../../hooks/trades';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import { AlertCircle } from 'react-feather';
+import {
+  useUserTrades,
+  useIsUserTradesLoading,
+} from '../../state/trades/hooks';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -65,7 +68,8 @@ const Warning = styled.div`
 `;
 
 export default function () {
-  const [data, loading] = useUserTrades();
+  const data = useUserTrades();
+  const loading = useIsUserTradesLoading();
   const selectedToken = useSelectedToken();
 
   const sortedTrades = useMemo(() => {
@@ -74,11 +78,10 @@ export default function () {
       return [];
     }
 
-    const { buys, sells } = data[selectedToken.ticker];
-
-    return [...buys, ...sells].sort((a, b) => b.timestamp - a.timestamp);
+    return data[selectedToken.ticker].trades
+      .slice()
+      .sort((a, b) => b.timestamp - a.timestamp);
   }, [selectedToken, loading, data]);
-
   return (
     <Wrapper>
       <Header>Trade History</Header>

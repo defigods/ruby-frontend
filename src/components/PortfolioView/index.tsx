@@ -7,7 +7,6 @@ import LineChart from '../LineChart';
 import TimeHistorySelector from '../TimeHistorySelector';
 import HoldingsView from './HoldingsView';
 import { useWebSocket } from '../SocketProvider';
-import { useUserTrades } from '../../hooks/trades';
 import { TimeHistoryEntry } from '../../types';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../state';
@@ -18,6 +17,10 @@ import {
   usePortfolioData,
 } from '../../state/portfolio/hooks';
 import { useSelectedQuote } from '../../state/quotes/hooks';
+import {
+  useIsUserTradesLoading,
+  useUserTrades,
+} from '../../state/trades/hooks';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -47,7 +50,8 @@ export default function () {
   );
 
   const websocket = useWebSocket();
-  const [userTrades, userTradesLoading] = useUserTrades();
+  const userTrades = useUserTrades();
+  const userTradesLoading = useIsUserTradesLoading();
   const dispatch = useDispatch<AppDispatch>();
   const portfolioLoaded = useIsPortfolioLoaded();
   const portfolioPending = useIsPortfolioPending();
