@@ -246,7 +246,7 @@ export function useUserTrades(): [UserTrades, boolean] {
       setResults(results);
       setLoading(false);
     };
-    setLoading(true);
+    if (!results) setLoading(true);
     fetchData();
   }, [
     tokensLoading,
