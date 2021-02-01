@@ -40,7 +40,6 @@ export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
   const quotes = useQuotes();
   const tokensLoading = useIsTokenPending();
   const { chainId, account, library } = useActiveWeb3React();
-  console.log(chainId, account, library);
 
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<{ [ticker: string]: BigNumber }>({});

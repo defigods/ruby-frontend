@@ -17,7 +17,7 @@ export const markets: Record<
 > = {
   1: {
     address: '0x568538C3c6A8bB6aDc2Bf2bd7620EaA54D37a720',
-    blockNumber: 20875039,
+    blockNumber: 11734016,
   },
   42: {
     address: '0x9C735089059689803F507DAAad78c6970468124d',

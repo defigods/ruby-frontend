@@ -167,7 +167,7 @@ async function loadUserHistoricTrade(
     ...(await contract
       .queryFilter(sellTakesFilter, startingBlock)
       .then((re) => mapTakeToUserTrade(re, false))),
-  ].sort((a, b) => b.timestamp - a.timestamp);
+  ];
 
   const buys = [
     ...(await contract
@@ -176,7 +176,7 @@ async function loadUserHistoricTrade(
     ...(await contract
       .queryFilter(buyTakesFilter, startingBlock)
       .then((re) => mapTakeToUserTrade(re, true))),
-  ].sort((a, b) => b.timestamp - a.timestamp);
+  ];
 
   const killedIds = [
     ...(await contract
