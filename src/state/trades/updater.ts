@@ -53,7 +53,7 @@ export default function (): null {
             chainId,
             contract,
           ),
-          balance: Number(formatEther(balances[token.ticker] || '0')),
+          balance: balances[token.ticker]?.toNumber() || 0,
         };
       }
       dispatch(fetchUserTrades.fulfilled(results));

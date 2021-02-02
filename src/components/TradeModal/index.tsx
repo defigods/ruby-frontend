@@ -17,7 +17,6 @@ import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
 import {
   executeLimitTrade,
-  formatBN,
   getTokenAddress,
   executeMatchTrade,
   useDebounce,
@@ -25,9 +24,8 @@ import {
   isNumeric,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
-import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionResponse } from '@ethersproject/providers';
-import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { formatEther } from 'ethers/lib/utils';
 import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
@@ -231,14 +229,14 @@ const StyledHelpCircle = styled(HelpCircle)`
   color: ${({ theme }) => theme.text.secondary};
 `;
 
-function useWalletBalance(isBuySelected: boolean): [string, BigNumber] {
+function useWalletBalance(isBuySelected: boolean): [string, Decimal] {
   const token = useSelectedToken()!;
   const quote = useSelectedQuote()!;
   const [balances] = useTokenBalances();
 
   return isBuySelected
-    ? [quote.ticker, balances[quote.ticker] || BigNumber.from(0)]
-    : [token.ticker, balances[token.ticker] || BigNumber.from(0)];
+    ? [quote.ticker, balances[quote.ticker] || new Decimal(0)]
+    : [token.ticker, balances[token.ticker] || new Decimal(0)];
 }
 
 function useModalStyle(): Modal.Styles {
@@ -355,13 +353,13 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const currentFee = useMemo(() => {
     if (!priceInput || !quantityInput || !totalInput || !isMarket) {
-      return undefined;
+      return new Decimal(0);
     }
 
-    const toFee = parseUnits(isBuy ? totalInput : quantityInput);
-    const feeAsInteger = parseUnits(LIQUIDITY_PROVIDER_FEE.toString(), 8); // 8 precision
+    const toFee = new Decimal(isBuy ? totalInput : quantityInput);
+    const feeAsInteger = new Decimal(LIQUIDITY_PROVIDER_FEE);
 
-    return toFee.mul(feeAsInteger).div(10 ** 8);
+    return toFee.mul(feeAsInteger);
   }, [priceInput, quantityInput, totalInput, isMarket, isBuy]);
 
   const buttonEnabled = useMemo(() => {
@@ -381,7 +379,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       return false;
     }
 
-    const inputBN = parseUnits((isBuy ? totalInput : quantityInput) || '0');
+    const inputBN = new Decimal((isBuy ? totalInput : quantityInput) || '0');
 
     if (inputBN.isZero()) {
       return false;
@@ -651,7 +649,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
           <WalletBalanceWrapper>
             <WalletBalanceLabel>Wallet Balance</WalletBalanceLabel>
             <WalletBalance>
-              {formatBN(walletBalance)} {walletTicker}
+              {walletBalance.toFixed(4)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
           <WalletBalanceWrapper>
@@ -666,7 +664,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               </a>
             </WalletBalanceLabel>
             <WalletBalance>
-              {formatBN(currentFee || BigNumber.from(0))} {walletTicker}
+              {currentFee.toFixed(4)} {walletTicker}
             </WalletBalance>
           </WalletBalanceWrapper>
           <TransactionModal

@@ -5,11 +5,13 @@ import { ERC20_INTERFACE } from '../constants/abis/erc20';
 import { useEffect, useMemo, useState } from 'react';
 import { getContract, getTokenAddress } from '../utils';
 import { useActiveWeb3React } from '.';
-import { Pair } from '../types';
+import { BaseToken, Pair } from '../types';
 import { useQuotes } from '../state/quotes/hooks';
 import { markets } from '../config';
 import { useTokenContract } from './contract';
 import { useBlockNumber } from '../state/application/hooks';
+import Decimal from 'decimal.js';
+import { formatUnits } from 'ethers/lib/utils';
 
 export function useTokenAllowance(token: string): [BigNumber, boolean] {
   const [loading, setLoading] = useState(true);
@@ -35,34 +37,29 @@ export function useTokenAllowance(token: string): [BigNumber, boolean] {
   return [result, loading];
 }
 
-export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
+export function useTokenBalances(): [{ [ticker: string]: Decimal }, boolean] {
   const tokens = useTokens();
   const quotes = useQuotes();
   const tokensLoading = useIsTokenPending();
   const { chainId, account, library } = useActiveWeb3React();
 
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<{ [ticker: string]: BigNumber }>({});
+  const [results, setResults] = useState<{ [ticker: string]: Decimal }>({});
 
   const contracts = useMemo(() => {
     if (!library || !chainId || tokensLoading) return [];
-    return [...tokens, ...quotes].map<Pair<string, Contract | undefined>>(
-      (t) => {
-        try {
-          return [
-            t.ticker,
-            getContract(
-              getTokenAddress(t, chainId!)!,
-              ERC20_INTERFACE,
-              library,
-            ),
-          ];
-        } catch (error) {
-          console.error('Failed to get contract', error);
-          return [t.ticker, undefined];
-        }
-      },
-    );
+    const combined: BaseToken[] = [...tokens, ...quotes];
+    return combined.map<Pair<BaseToken, Contract | undefined>>((t) => {
+      try {
+        return [
+          t,
+          getContract(getTokenAddress(t, chainId!)!, ERC20_INTERFACE, library),
+        ];
+      } catch (error) {
+        console.error('Failed to get contract', error);
+        return [t, undefined];
+      }
+    });
   }, [tokens, quotes, chainId, library, tokensLoading]);
 
   const blockNumber = useBlockNumber();
@@ -79,9 +76,10 @@ export function useTokenBalances(): [{ [ticker: string]: BigNumber }, boolean] {
             const amount = (
               await contract[1]?.functions.balanceOf(account)
             )[0] as BigNumber;
-            return [contract[0], amount];
+            const raw = formatUnits(amount, contract[0].precision);
+            return [contract[0].ticker, new Decimal(raw)];
           }),
-      )) as Pair<string, BigNumber>[];
+      )) as Pair<string, Decimal>[];
       setResults(
         results.reduce((accum, next) => {
           return {

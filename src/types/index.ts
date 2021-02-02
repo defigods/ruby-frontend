@@ -23,21 +23,20 @@ export interface TokenTrade {
   price: number;
 }
 
-export interface QuoteToken {
+export interface BaseToken {
   ticker: string;
   name: string;
+  precision: number;
   logo?: string;
   description?: string;
   addresses: { chainId: number; value: string }[];
 }
 
-export interface Token {
-  ticker: string;
-  name: string;
-  logo?: string;
+export interface QuoteToken extends BaseToken {}
+
+export interface Token extends BaseToken {
   currentPrice: number;
   prices: TokenPrice;
-  description?: string;
   asks: TokenTrade[];
   bids: TokenTrade[];
   addresses: { chainId: number; value: string }[];

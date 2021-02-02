@@ -1,5 +1,5 @@
 import { formatEther, getAddress } from 'ethers/lib/utils';
-import { QuoteToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
+import { BaseToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
 const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
@@ -105,7 +105,7 @@ export function getPercentChange(
   return [difference, difference / currentPrice];
 }
 
-export function getTokenAddress(token: Token | QuoteToken, chainId: number) {
+export function getTokenAddress(token: BaseToken, chainId: number) {
   return token?.addresses.find((t) => t.chainId === chainId)?.value;
 }
 

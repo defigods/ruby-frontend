@@ -1,4 +1,3 @@
-import { formatEther } from 'ethers/lib/utils';
 import { useSelector } from 'react-redux';
 import { AppState } from '..';
 import { useTokenBalances } from '../../hooks/wallet';
@@ -26,6 +25,6 @@ export function useQuoteBalance(): number | undefined {
   const balances = useTokenBalances();
   const quote = useSelectedQuote();
   return quote && quote.ticker in balances[0]
-    ? Number(formatEther(balances[0][quote.ticker]))
+    ? balances[0][quote.ticker].toNumber()
     : undefined;
 }
