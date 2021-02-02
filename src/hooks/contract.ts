@@ -47,12 +47,16 @@ export function useBestOffers(): [
         contract,
         getTokenAddress(selectedQuote, chainId!)!,
         getTokenAddress(selectedToken, chainId!)!,
+        selectedToken.precision,
+        selectedQuote.precision,
       );
 
       const buy = await getBestOffer(
         contract,
         getTokenAddress(selectedToken, chainId!)!,
         getTokenAddress(selectedQuote, chainId!)!,
+        selectedToken.precision,
+        selectedQuote.precision,
         false,
       );
 

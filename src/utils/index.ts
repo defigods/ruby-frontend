@@ -1,4 +1,4 @@
-import { formatEther, getAddress } from 'ethers/lib/utils';
+import { getAddress } from 'ethers/lib/utils';
 import { BaseToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -107,22 +107,6 @@ export function getPercentChange(
 
 export function getTokenAddress(token: BaseToken, chainId: number) {
   return token?.addresses.find((t) => t.chainId === chainId)?.value;
-}
-
-export function formatBN(bigNumber: BigNumber, decimals = 4): string {
-  const temp = formatEther(bigNumber);
-
-  const result = Number(temp).toLocaleString(undefined, {
-    maximumFractionDigits: decimals,
-    minimumFractionDigits: 0,
-  });
-  const test = '0.' + '0'.repeat(decimals);
-
-  if (test === result) {
-    return '<' + result;
-  } else {
-    return result;
-  }
 }
 
 export function sortBigNumbers(

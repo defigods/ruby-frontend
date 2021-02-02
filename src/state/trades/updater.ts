@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '..';
 import { fetchUserTrades } from './actions';
 import { Contract, Event } from '@ethersproject/contracts';
-import { formatEther, solidityKeccak256 } from 'ethers/lib/utils';
+import { formatUnits, solidityKeccak256 } from 'ethers/lib/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { useIsTokenPending, useTokens } from '../tokens/hooks';
 import { useSelectedQuote } from '../quotes/hooks';
@@ -11,7 +11,7 @@ import { useActiveWeb3React } from '../../hooks';
 import { useMarketContract } from '../../hooks/contract';
 import { useTokenBalances } from '../../hooks/wallet';
 import { getTokenAddress } from '../../utils';
-import { UserTrade, UserTrades } from '../../types';
+import { QuoteToken, Token, UserTrade, UserTrades } from '../../types';
 import { markets } from '../../config';
 import { useUserTrades } from './hooks';
 
@@ -45,10 +45,8 @@ export default function (): null {
         const tokenAddress = getTokenAddress(token, chainId)!;
         results[token.ticker] = {
           trades: await loadUserHistoricTrade(
-            token.ticker,
-            quote.ticker,
-            tokenAddress,
-            quoteAddress,
+            token,
+            quote,
             account,
             chainId,
             contract,
@@ -65,14 +63,14 @@ export default function (): null {
 }
 
 async function loadUserHistoricTrade(
-  token: string,
-  quote: string,
-  tokenAddress: string,
-  quoteAddress: string,
+  token: Token,
+  quote: QuoteToken,
   account: string,
   chainId: number,
   contract: Contract,
 ): Promise<UserTrade[]> {
+  const tokenAddress = getTokenAddress(token, chainId)!;
+  const quoteAddress = getTokenAddress(quote, chainId)!;
   // Pair form: <pay_gem><buy_gem>
   const sellPair = solidityKeccak256(
     ['address', 'address'],
@@ -97,10 +95,20 @@ async function loadUserHistoricTrade(
       isBuy,
       completed: false,
       killed: killedIds.includes(ev.args!['id']),
-      payGem: isBuy ? quote : token,
-      buyGem: isBuy ? token : quote,
-      payAmount: Number(formatEther(ev.args!['pay_amt'] as BigNumber)),
-      buyAmount: Number(formatEther(ev.args!['buy_amt'] as BigNumber)),
+      payGem: isBuy ? quote.ticker : token.ticker,
+      buyGem: isBuy ? token.ticker : quote.ticker,
+      payAmount: Number(
+        formatUnits(
+          ev.args!['pay_amt'] as BigNumber,
+          isBuy ? quote.precision : token.precision,
+        ),
+      ),
+      buyAmount: Number(
+        formatUnits(
+          ev.args!['buy_amt'] as BigNumber,
+          isBuy ? token.precision : quote.precision,
+        ),
+      ),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
       transactionHash: ev['transactionHash'] as string,
     }));
@@ -116,13 +124,19 @@ async function loadUserHistoricTrade(
       isBuy,
       completed: true,
       killed: false,
-      payGem: isBuy ? quote : token,
-      buyGem: isBuy ? token : quote,
+      payGem: isBuy ? quote.ticker : token.ticker,
+      buyGem: isBuy ? token.ticker : quote.ticker,
       payAmount: Number(
-        formatEther(ev.args![isTake ? 'give_amt' : 'take_amt'] as BigNumber),
+        formatUnits(
+          ev.args![isTake ? 'give_amt' : 'take_amt'] as BigNumber,
+          isBuy ? quote.precision : token.precision,
+        ),
       ),
       buyAmount: Number(
-        formatEther(ev.args![isTake ? 'take_amt' : 'give_amt'] as BigNumber),
+        formatUnits(
+          ev.args![isTake ? 'take_amt' : 'give_amt'] as BigNumber,
+          isBuy ? token.precision : quote.precision,
+        ),
       ),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
       transactionHash: ev['transactionHash'] as string,

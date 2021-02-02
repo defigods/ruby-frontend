@@ -6,7 +6,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { useMemo } from 'react';
 import { useActiveWeb3React } from '../hooks';
 import { ContractOffer } from '../types';
-import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import Decimal from 'decimal.js';
 
 export async function cancelTrade(
@@ -20,27 +20,27 @@ export async function loadTotalPrice(
   contract: Contract,
   token: string,
   quote: string,
-  amount: number,
+  amount: BigNumber,
   isBuy: boolean,
 ): Promise<BigNumber> {
   return contract.functions[isBuy ? 'getPayAmount' : 'getBuyAmount'](
     quote,
     token,
-    parseUnits(amount.toString(), 18),
+    amount,
   ).then((result) => result[0] as BigNumber);
 }
 
 export async function executeLimitTrade(
   contract: Contract,
-  payAmount: string,
+  payAmount: BigNumber,
   payGem: string,
-  buyAmount: string,
+  buyAmount: BigNumber,
   buyGem: string,
 ): Promise<TransactionResponse> {
   return contract.functions['offer(uint256,address,uint256,address,uint256)'](
-    parseUnits(payAmount, 18),
+    payAmount,
     payGem,
-    parseUnits(buyAmount, 18),
+    buyAmount,
     buyGem,
     parseUnits('0', 18),
   );
@@ -50,15 +50,10 @@ export async function executeMatchTrade(
   contract: Contract,
   buyGem: string,
   payGem: string,
-  amount: string,
-  maxFill: string,
+  amount: BigNumber,
+  maxFill: BigNumber,
 ): Promise<TransactionResponse> {
-  return contract.functions.buyAllAmount(
-    buyGem,
-    parseUnits(amount, 18),
-    payGem,
-    parseUnits(maxFill, 18),
-  );
+  return contract.functions.buyAllAmount(buyGem, amount, payGem, maxFill);
 }
 
 export function getLibrary(provider: any): Web3Provider {
@@ -126,6 +121,8 @@ export async function getBestOffer(
   contract: Contract,
   _payGem: string,
   _buyGem: string,
+  tokenPrecision: number,
+  quotePrecision: number,
   isBuy: boolean = true,
 ): Promise<ContractOffer | undefined> {
   const offerId = (await contract.functions.getBestOffer(
@@ -150,8 +147,8 @@ export async function getBestOffer(
   }
 
   // Must convert the BigNumbers to a decimal precision because the BN.js library does not support floating points
-  const price = new Decimal(formatEther(quoteAmount))
-    .div(formatEther(baseAmount))
+  const price = new Decimal(formatUnits(quoteAmount, quotePrecision))
+    .div(formatUnits(baseAmount, tokenPrecision))
     .toNumber();
 
   return {

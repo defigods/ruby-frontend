@@ -15,6 +15,7 @@ import { useBestOffers, useMarketContract } from '../../hooks/contract';
 import { useTokenBalances } from '../../hooks/wallet';
 import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useSelectedToken } from '../../state/tokens/hooks';
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   executeLimitTrade,
   getTokenAddress,
@@ -25,7 +26,7 @@ import {
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { TransactionResponse } from '@ethersproject/providers';
-import { formatEther } from 'ethers/lib/utils';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
@@ -289,19 +290,18 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const marketContract = useMarketContract()!;
   const [marketState, setMarketState] = useState<{
     loading: boolean;
-    payAmount: number;
+    payAmount: BigNumber;
     error: boolean;
   }>({
     loading: false,
-    payAmount: 0,
+    payAmount: BigNumber.from(0),
     error: false,
   });
 
   const debouncedMarketState = useDebounce(marketState, 200); // 200 ms debounce time
 
   useEffect(() => {
-    if (debouncedMarketState.payAmount === 0) return;
-
+    if (debouncedMarketState.payAmount.isZero()) return;
     // Send a web3 call to load the best price
     loadTotalPrice(
       marketContract,
@@ -311,7 +311,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       isBuy,
     )
       .then((result) => {
-        updateValues(formatEther(result), 3);
+        updateValues(formatUnits(result, quote.precision), 3);
         setMarketState({
           ...marketState,
           loading: false,
@@ -423,7 +423,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
       const price = new Decimal(currentOffer.price);
-      const baseAmount = new Decimal(formatEther(currentOffer.baseAmount));
+      const baseAmount = new Decimal(
+        formatUnits(currentOffer.baseAmount, token.precision),
+      );
       setPriceInput(price.toString());
       setQuantityInput(baseAmount.toString());
       setTotalInput(price.mul(baseAmount).toString());
@@ -459,8 +461,12 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       const buyGem = isBuy ? tokenAddress : quoteAddress;
       const payGem = isBuy ? quoteAddress : tokenAddress;
 
-      const buyAmount = isBuy ? quantityInput : totalInput;
-      const maxFill = isBuy ? totalInput : quantityInput;
+      const buyAmount = isBuy
+        ? parseUnits(quantityInput, token.precision)
+        : parseUnits(totalInput, quote.precision);
+      const maxFill = isBuy
+        ? parseUnits(totalInput, quote.precision)
+        : parseUnits(quantityInput, token.precision);
 
       trade = executeMatchTrade(
         marketContract,
@@ -470,8 +476,12 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         maxFill,
       );
     } else {
-      const payAmount = isBuy ? totalInput : quantityInput;
-      const buyAmount = isBuy ? quantityInput : totalInput;
+      const payAmount = isBuy
+        ? parseUnits(totalInput, quote.precision)
+        : parseUnits(quantityInput, token.precision);
+      const buyAmount = isBuy
+        ? parseUnits(quantityInput, token.precision)
+        : parseUnits(totalInput, quote.precision);
       const payAddress = isBuy ? quoteAddress : tokenAddress;
       const buyAddress = isBuy ? tokenAddress : quoteAddress;
 
@@ -537,7 +547,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         setMarketState({
           ...marketState,
           loading: true,
-          payAmount: valueDecimal.toNumber(),
+          payAmount: parseUnits(valueDecimal.toString(), token.precision),
         });
       } else {
         if (priceInput)
