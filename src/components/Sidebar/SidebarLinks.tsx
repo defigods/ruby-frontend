@@ -55,6 +55,38 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `;
 
+const StyledNavLinkRamp = styled(NavLink).attrs({
+  activeClassName,
+})`
+  color: #22bf73;
+  // text-transform: uppercase;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
+
+  &:not(.${activeClassName}) > ${ActiveDot} {
+    display: none;
+  }
+
+  & > svg {
+    color: ${({ theme }) => theme.text.tertiary};
+  }
+
+  &.${activeClassName} {
+    color: ${({ theme }) => theme.text.primary};
+  }
+
+  &:hover:not(.${activeClassName}) {
+    color: ${({ theme }) => darken(0.1, '#22bf73')};
+  }
+`;
+
 export default function () {
   const quote = useSelectedQuote()!;
   const { chainId } = useActiveWeb3React();
@@ -87,6 +119,7 @@ export default function () {
           Faucet
         </StyledNavLink>
       )}
+      <StyledNavLinkRamp to="/ramp">Buy Crypto</StyledNavLinkRamp>
     </Wrapper>
   );
 }

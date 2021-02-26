@@ -5,6 +5,8 @@ import Sidebar from '../../components/Sidebar';
 import { useActiveWeb3React, useEagerConnect } from '../../hooks';
 import Trade from '../Trade';
 import History from '../History';
+import Ramp from '../Ramp';
+
 import Onboarding from '../../components/Onboarding';
 import { useWebSocket } from '../../components/SocketProvider';
 import Loader, { LoaderWrapper } from '../../components/Loader';
@@ -55,6 +57,7 @@ export default function () {
                     />
                     <Route exact strict path="/trade" component={Trade} />
                     <Route exact strict path="/history" component={History} />
+                    <Route exact strict path="/ramp" component={Ramp} />
                     <Redirect to="/trade" />
                   </>
                 ) : (
