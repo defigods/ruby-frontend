@@ -128,7 +128,7 @@ export default function () {
             hostAppName: 'Rubicon',
             hostLogoUrl:
               'https://user-images.githubusercontent.com/32072172/109361232-34969c80-784e-11eb-9b4d-91c09806eec1.png',
-            swapAmount: '100000000000000000', // .1 ETH in wei
+            // swapAmount: '100000000000000000', // .1 ETH in wei
             swapAsset: 'ETH',
             userAddress: String(account),
           })
