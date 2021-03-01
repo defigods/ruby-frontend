@@ -7,6 +7,7 @@ import { useSelectedQuote } from '../../state/quotes/hooks';
 import { useActiveWeb3React } from '../../hooks';
 import { DAI_INTERFACE } from '../../constants/abis/dai';
 import { FAUCET_ENABLED_IDS } from '../../config';
+import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 
 const Wrapper = styled.div`
   display: flex;
@@ -22,6 +23,8 @@ const ActiveDot = styled.div`
   background-color: ${({ theme }) => theme.colors.tertiary};
   margin-right: 5px;
 `;
+
+const div1 = styled.div``;
 
 const StyledNavLink = styled(NavLink).attrs({
   activeClassName,
@@ -55,7 +58,7 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `;
 
-const StyledNavLinkRamp = styled(NavLink).attrs({
+const StyledNavLinkRamp = styled(div1).attrs({
   activeClassName,
 })`
   color: #22bf73;
@@ -83,13 +86,13 @@ const StyledNavLinkRamp = styled(NavLink).attrs({
   }
 
   &:hover:not(.${activeClassName}) {
-    color: ${({ theme }) => darken(0.1, '#22bf73')};
+    color: ${() => darken(0.1, '#22bf73')};
   }
 `;
 
 export default function () {
   const quote = useSelectedQuote()!;
-  const { chainId } = useActiveWeb3React();
+  const { account, chainId } = useActiveWeb3React();
 
   const quoteAddress = getTokenAddress(quote, chainId!);
 
@@ -119,7 +122,22 @@ export default function () {
           Faucet
         </StyledNavLink>
       )}
-      <StyledNavLinkRamp to="/ramp">Buy Crypto</StyledNavLinkRamp>
+      <StyledNavLinkRamp
+        onClick={() =>
+          new RampInstantSDK({
+            hostAppName: 'Rubicon',
+            hostLogoUrl:
+              'https://user-images.githubusercontent.com/32072172/109361232-34969c80-784e-11eb-9b4d-91c09806eec1.png',
+            swapAmount: '100000000000000000', // .1 ETH in wei
+            swapAsset: 'ETH',
+            userAddress: String(account),
+          })
+            .on('*', (event) => console.log(event))
+            .show()
+        }
+      >
+        Buy Crypto
+      </StyledNavLinkRamp>
     </Wrapper>
   );
 }
