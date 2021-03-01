@@ -5,7 +5,6 @@ import Sidebar from '../../components/Sidebar';
 import { useActiveWeb3React, useEagerConnect } from '../../hooks';
 import Trade from '../Trade';
 import History from '../History';
-
 import Onboarding from '../../components/Onboarding';
 import { useWebSocket } from '../../components/SocketProvider';
 import Loader, { LoaderWrapper } from '../../components/Loader';
