@@ -14,6 +14,6 @@ export const injected = new InjectedConnector({
 
 export const walletlink = new WalletLinkConnector({
   url: RPC_URLS[1],
-  appLogoUrl: 'http://app.rubicon.finance/logo.png',
+  appLogoUrl: 'https://app.rubicon.finance/logo.png',
   appName: 'Rubicon',
 });

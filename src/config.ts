@@ -1,7 +1,7 @@
 export const websocket = {
   url:
     process.env.NODE_ENV === 'production'
-      ? 'http://data.rubicon.finance:3000'
+      ? 'https://data.rubicon.finance'
       : 'localhost:3000',
 };
 

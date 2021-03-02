@@ -116,6 +116,7 @@ const Body = styled.div`
 const ErrorMessage = styled.span`
   color: ${({ theme }) => theme.text.red};
   font-size: 16px;
+  text-align: center;
 `;
 
 const Header = styled.div`
