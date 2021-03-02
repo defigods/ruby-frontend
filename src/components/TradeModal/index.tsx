@@ -23,6 +23,7 @@ import {
   useDebounce,
   loadTotalPrice,
   isNumeric,
+  getSigner,
 } from '../../utils';
 import Loader, { LoaderWrapper } from '../Loader';
 import { TransactionResponse } from '@ethersproject/providers';
@@ -379,7 +380,10 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       return false;
     }
 
-    const inputBN = new Decimal((isBuy ? totalInput : quantityInput) || '0');
+    let inputBN = new Decimal(0);
+    try {
+      inputBN = new Decimal((isBuy ? totalInput : quantityInput) || '0');
+    } catch (ex) {}
 
     if (inputBN.isZero()) {
       return false;
