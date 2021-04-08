@@ -9,6 +9,7 @@ import { useMarketContract } from '../../hooks/contract';
 
 interface PastTradeItemProps {
   data: UserTrade;
+  key: any;
 }
 
 const Wrapper = styled.div<{ killed: boolean }>`
@@ -47,7 +48,7 @@ const StyledX = styled(X)`
   color: ${({ theme }) => theme.colors.tertiary};
 `;
 
-export default function ({ data }: PastTradeItemProps) {
+export default function ({ data, key }: any) {
   const { chainId } = useActiveWeb3React();
 
   const contract = useMarketContract()!;
