@@ -33,7 +33,7 @@ export function useTransactionAdder(): (
       } = {},
     ) => {
       if (!account) return;
-      if (!chainId || chainId !== 42) return;
+      if (!chainId) return;
 
       const { hash } = response;
       if (!hash) {

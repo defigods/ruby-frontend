@@ -29,16 +29,7 @@ const BodyWrapper = styled.div`
 `;
 
 export default function () {
-  const { account, chainId } = useActiveWeb3React();
-
-  useEffect(() => {
-    console.log('chain ID: ', chainId);
-    if (chainId !== 42) {
-      window.alert(
-        'this is not kovan network, please change the kovan network',
-      );
-    }
-  }, [chainId]);
+  const { account } = useActiveWeb3React();
 
   const websocket = useWebSocket();
   const hasTried = useEagerConnect();
@@ -55,7 +46,7 @@ export default function () {
               </LoaderWrapper>
             ) : (
               <Switch>
-                {!!account && chainId == 42 ? (
+                {!!account ? (
                   <>
                     <Route
                       exact
