@@ -24,6 +24,7 @@ export default function (): null {
   const quoteTicker = useSelectedQuote();
 
   useEffect(() => {
+    if (chainId !== 42) return;
     if (websocket.loading || quotesLoading || !quoteTicker) return;
     dispatch(fetchTokenList.pending());
     websocket.socket?.emit(
@@ -48,6 +49,7 @@ export default function (): null {
   const timeHistory = useSelectedTimeHistory();
 
   useEffect(() => {
+    if (chainId !== 42) return;
     if (!selectedToken || !quoteTicker) {
       return;
     }
@@ -77,6 +79,7 @@ export default function (): null {
   const tokens = useTokens();
 
   useEffect(() => {
+    if (chainId !== 42) return;
     if (!selectedToken || !quoteTicker) {
       return;
     }

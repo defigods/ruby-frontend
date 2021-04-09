@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from '../../components/Sidebar';
@@ -29,7 +29,17 @@ const BodyWrapper = styled.div`
 `;
 
 export default function () {
-  const { account } = useActiveWeb3React();
+  const { account, chainId } = useActiveWeb3React();
+
+  useEffect(() => {
+    console.log('chain ID: ', chainId);
+    if (chainId !== 42) {
+      window.alert(
+        'this is not kovan network, please change the kovan network',
+      );
+    }
+  }, [chainId]);
+
   const websocket = useWebSocket();
   const hasTried = useEagerConnect();
 
@@ -45,7 +55,7 @@ export default function () {
               </LoaderWrapper>
             ) : (
               <Switch>
-                {!!account ? (
+                {!!account && chainId == 42 ? (
                   <>
                     <Route
                       exact

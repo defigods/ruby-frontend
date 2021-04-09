@@ -13,10 +13,11 @@ const LoaderWrapper = styled.div`
   display: flex;
 `;
 
-export default function () {
+export default function (props: any) {
   const tokens = useTokens();
   const tokensPending = useIsTokenPending();
 
+  console.log('props: ', props);
   const data = tokens.map((t) => ({
     ...t,
     title: t.ticker,

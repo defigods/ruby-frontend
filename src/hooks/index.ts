@@ -1,7 +1,7 @@
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { injected, walletlink } from '../connectors';
-import { Web3Provider } from '@ethersproject/providers';
+import { Web3Provider, Network } from '@ethersproject/providers';
 
 export function useActiveWeb3React() {
   return useWeb3React<Web3Provider>();
