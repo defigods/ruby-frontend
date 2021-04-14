@@ -682,13 +682,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
             </WalletBalance>
           </WalletBalanceWrapper>
           <TransactionModal
-            onRequestClose={() =>
+            onRequestClose={() => {
+              onRequestClose();
               setTransactionState({
                 attempting: false,
                 hash: undefined,
                 error: undefined,
-              })
-            }
+              });
+            }}
             attempting={attempting}
             hash={hash}
             error={error}
