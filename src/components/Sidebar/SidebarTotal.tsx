@@ -32,7 +32,7 @@ export default function () {
       <Label>Portfolio Total:</Label>
       <UserTotal>
         <CountUp
-          end={tokensLoading ? 0 : 100000000000000000000}
+          end={tokensLoading ? 0 : userTotal}
           decimals={2}
           prefix="$"
           separator=","
