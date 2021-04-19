@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import CountUp from 'react-countup';
 import { useIsUserTokenPending, useUserTotal } from '../../state/user/hooks';
+import { nFormatter } from '../../utils';
 
 const Wrapper = styled.div`
   flex-direction: column;
@@ -31,10 +32,11 @@ export default function () {
       <Label>Portfolio Total:</Label>
       <UserTotal>
         <CountUp
-          end={tokensLoading ? 0 : userTotal}
+          end={tokensLoading ? 0 : 100000000000000000000}
           decimals={2}
           prefix="$"
           separator=","
+          formattingFn={nFormatter}
         />
       </UserTotal>
     </Wrapper>
