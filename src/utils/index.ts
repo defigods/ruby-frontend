@@ -148,10 +148,6 @@ export function nFormatter(num: number, digits: number = 2) {
     }
   }
   if (i > 0) i--;
-  const amount = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(num / si[i].value);
   return (
     '$' +
     new Intl.NumberFormat('en-US', {
