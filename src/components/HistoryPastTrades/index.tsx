@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import Loader, { LoaderWrapper } from '../Loader';
 import PastTradeItem from './PastTradeItem';
-import { useSelectedToken } from '../../state/tokens/hooks';
+import { useIsTokenSelected, useSelectedToken } from '../../state/tokens/hooks';
 import { AlertCircle } from 'react-feather';
+import { UserTrade } from '../../types';
 import {
   useUserTrades,
   useIsUserTradesLoading,
@@ -70,17 +71,23 @@ const Warning = styled.div`
 export default function () {
   const data = useUserTrades();
   const loading = useIsUserTradesLoading();
+  const isTokenSelected = useIsTokenSelected();
   const selectedToken = useSelectedToken();
 
   const sortedTrades = useMemo(() => {
     // here, create the History data
-    if (!selectedToken || loading) {
-      return [];
+    if (loading) return [];
+    const tradeData: UserTrade[] = [];
+    if (isTokenSelected) {
+      if (selectedToken) {
+        tradeData.push(...data[selectedToken.ticker].trades);
+      } else {
+        Object.keys(data).forEach((key) => {
+          tradeData.push(...data[key].trades);
+        });
+      }
     }
-
-    return data[selectedToken.ticker].trades
-      .slice()
-      .sort((a, b) => b.timestamp - a.timestamp);
+    return tradeData.slice().sort((a, b) => b.timestamp - a.timestamp);
   }, [selectedToken, loading, data]);
   return (
     <Wrapper>
