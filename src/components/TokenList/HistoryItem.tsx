@@ -2,9 +2,8 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { AppDispatch } from '../../state';
-import { selectToken } from '../../state/tokens/actions';
-import { useSelectedToken } from '../../state/tokens/hooks';
-import { useHistory } from 'react-router-dom';
+import { selectHistory } from '../../state/tokens/actions';
+import { useIsHistorySelected } from '../../state/tokens/hooks';
 
 const Wrapper = styled.div<{ selected: boolean }>`
   display: flex;
@@ -60,14 +59,12 @@ export default function () {
   const dispatch = useDispatch<AppDispatch>();
   // Get the last day of data
 
-  const selectedToken = useSelectedToken();
-
-  const history = useHistory();
+  const isHistorySelected = useIsHistorySelected();
 
   return (
     <Wrapper
-      selected={'TOTAL' === selectedToken?.ticker}
-      onClick={() => dispatch(selectToken('TOTAL'))}
+      selected={isHistorySelected}
+      onClick={() => dispatch(selectHistory())}
     >
       <ItemWrapper>
         <TextWrapper>
