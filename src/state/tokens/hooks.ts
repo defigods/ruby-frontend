@@ -16,6 +16,10 @@ export function useSelectedToken(): Token | undefined {
   });
 }
 
+export function useIsHistorySelected(): boolean {
+  return useSelector((state: AppState) => state.tokens.historyAll);
+}
+
 export function useIsTokenPending(): boolean {
   return useSelector((state: AppState) => state.tokens.loading);
 }

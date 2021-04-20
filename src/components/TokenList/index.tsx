@@ -4,8 +4,10 @@ import styled from 'styled-components';
 import { Token } from '../../types';
 import SearchBar from './SearchBar';
 import TokenListItem from './TokenListItem';
+import HistoryItem from './HistoryItem';
 
 interface TokenListProps {
+  isHistory: boolean;
   data: (Token & { title: string; subtitle: string })[];
   searchBar?: boolean;
   selectable?: boolean;
@@ -69,7 +71,7 @@ export default function (props: TokenListProps) {
       ) : (
         <NoSearchBarHeader>Your Tokens</NoSearchBarHeader>
       )}
-
+      {props.isHistory && <HistoryItem />}
       {sortedData.map((item) => (
         <TokenListItem
           {...item}

@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { AppDispatch } from '../../state';
 import { selectToken } from '../../state/tokens/actions';
-import { useSelectedToken } from '../../state/tokens/hooks';
+import {
+  useIsHistorySelected,
+  useSelectedToken,
+} from '../../state/tokens/hooks';
 import { TimeHistory, Token } from '../../types';
 import { getSortedPrices } from '../../utils';
 import LineChart from './LineChart';
@@ -95,6 +98,7 @@ export default function (props: TokenListItemProps) {
   }
 
   const selectedToken = useSelectedToken();
+  const isHistorySelected = useIsHistorySelected();
 
   const history = useHistory();
 
@@ -106,7 +110,9 @@ export default function (props: TokenListItemProps) {
   return (
     <Wrapper
       selected={
-        props.selectable ? props.ticker === selectedToken?.ticker : false
+        !!props.selectable &&
+        !isHistorySelected &&
+        props.ticker === selectedToken?.ticker
       }
       onClick={() =>
         props.selectable

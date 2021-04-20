@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import CountUp from 'react-countup';
 import { useIsUserTokenPending, useUserTotal } from '../../state/user/hooks';
+import { nFormatter } from '../../utils';
 
 const Wrapper = styled.div`
   flex-direction: column;
@@ -35,6 +36,7 @@ export default function () {
           decimals={2}
           prefix="$"
           separator=","
+          formattingFn={nFormatter}
         />
       </UserTotal>
     </Wrapper>

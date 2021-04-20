@@ -5,6 +5,8 @@ import {
   fetchTokenTimeHistory,
   selectTimeHistory,
   selectToken,
+  selectHistory,
+  deselectHistory,
   updateOrderBook,
   updatePrice,
 } from './actions';
@@ -12,6 +14,7 @@ import {
 export interface TokensState {
   readonly tokens: Token[];
   readonly selected?: string;
+  readonly historyAll: boolean;
   readonly loading: boolean;
   readonly error?: Error;
   readonly selectedTimeHistory: TimeHistory;
@@ -21,6 +24,7 @@ export interface TokensState {
 const initialState: TokensState = {
   tokens: [],
   selected: undefined,
+  historyAll: false,
   loading: true,
   error: undefined,
   selectedTimeHistory: TimeHistory.ONE_DAY,
@@ -53,7 +57,20 @@ export default createReducer(initialState, (builder) =>
     .addCase(selectToken, (state, action) => {
       return {
         ...state,
+        historyAll: false,
         selected: action.payload,
+      };
+    })
+    .addCase(selectHistory, (state, action) => {
+      return {
+        ...state,
+        historyAll: true,
+      };
+    })
+    .addCase(deselectHistory, (state, action) => {
+      return {
+        ...state,
+        historyAll: false,
       };
     })
     .addCase(selectTimeHistory, (state, action) => {

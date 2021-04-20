@@ -1,8 +1,11 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import Loader from '../../components/Loader';
 import TokenList from '../../components/TokenList';
 import TokenView from '../../components/TokenView';
+import { AppDispatch } from '../../state';
+import { deselectHistory } from '../../state/tokens/actions';
 import { useTokens, useIsTokenPending } from '../../state/tokens/hooks';
 
 const LoaderWrapper = styled.div`
@@ -16,6 +19,8 @@ const LoaderWrapper = styled.div`
 export default function () {
   const tokens = useTokens();
   const tokensPending = useIsTokenPending();
+  const dispatch = useDispatch<AppDispatch>();
+  dispatch(deselectHistory());
 
   const data = tokens.map((t) => ({
     ...t,
@@ -31,7 +36,12 @@ export default function () {
         </LoaderWrapper>
       ) : (
         <>
-          <TokenList data={data} searchBar={true} selectable={true} />
+          <TokenList
+            data={data}
+            searchBar={true}
+            selectable={true}
+            isHistory={false}
+          />
           <TokenView />
         </>
       )}
