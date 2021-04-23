@@ -125,12 +125,10 @@ export async function getBestOffer(
   quotePrecision: number,
   isBuy: boolean = true,
 ): Promise<ContractOffer | undefined> {
-  const offerId = (await contract.functions.getBestOffer(
-    _payGem,
-    _buyGem,
-  )) as number;
-
-  const offer = await contract.functions.getOffer(offerId);
+  const offerId = await contract.functions.getBestOffer(_payGem, _buyGem);
+  const offer = await contract.functions.getOffer(
+    Array.isArray(offerId) ? offerId[0] : offerId,
+  );
   const payAmount = offer[0] as BigNumber;
   const payGem = offer[1];
   const buyAmount = offer[2] as BigNumber;
