@@ -69,7 +69,7 @@ export default function () {
       <ItemWrapper>
         <TextWrapper>
           <Title>Total History</Title>
-          <Subtitle>All token trading histories</Subtitle>
+          <Subtitle>Trade history across all assets</Subtitle>
         </TextWrapper>
       </ItemWrapper>
     </Wrapper>
