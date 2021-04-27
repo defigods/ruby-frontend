@@ -72,15 +72,14 @@ async function loadUserHistoricTrade(
   const tokenAddress = getTokenAddress(token, chainId)!;
   const quoteAddress = getTokenAddress(quote, chainId)!;
   // Pair form: <pay_gem><buy_gem>
-  const sellPair = solidityKeccak256(
-    ['address', 'address'],
-    [tokenAddress, quoteAddress],
-  );
-  const buyPair = solidityKeccak256(
-    ['address', 'address'],
-    [quoteAddress, tokenAddress],
-  );
-
+  const sellPair =
+    tokenAddress && quoteAddress
+      ? solidityKeccak256(['address', 'address'], [tokenAddress, quoteAddress])
+      : null;
+  const buyPair =
+    tokenAddress && quoteAddress
+      ? solidityKeccak256(['address', 'address'], [quoteAddress, tokenAddress])
+      : null;
   const mapKillToId = (events: Event[]) => {
     return events.map<string>((ev) => ev.args!['id'] as string);
   };
