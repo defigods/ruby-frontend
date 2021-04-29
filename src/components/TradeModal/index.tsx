@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { HelpCircle, X } from 'react-feather';
 import Modal from 'react-modal';
+import ReactSlider from 'react-slider';
 import styled, { css, ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import { useBestOffers, useMarketContract } from '../../hooks/contract';
@@ -126,6 +127,49 @@ const Table = styled.table`
   width: 100%;
 `;
 
+const TrSlider = styled.tr`
+  height: inherit;
+  line-height: inherit;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.text.secondary};
+  }
+`;
+
+const Slider = styled(ReactSlider)`
+  width: 100%;
+  height: 25px;
+`;
+
+const StyledThumb = styled.div`
+  text-align: center;
+  border-radius: 4px;
+  cursor: grab;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const Indicator = styled.span`
+  font-weight: bold;
+`;
+
+const Thumb = (props: any, state: any) => (
+  <StyledThumb {...props}>
+    <Indicator>{'<|>'}</Indicator>
+  </StyledThumb>
+);
+
+const StyledTrack = styled.div`
+  top: 22px;
+  bottom: 0;
+  background: #fff;
+`;
+
+const Track = (props: any, state: any) => (
+  <StyledTrack {...props} index={state.index} />
+);
+
 const Tr = styled.tr`
   height: inherit;
   line-height: inherit;
@@ -133,6 +177,11 @@ const Tr = styled.tr`
   &:not(:last-child) {
     border-bottom: 1px solid ${({ theme }) => theme.text.secondary};
   }
+`;
+
+const TrNoLine = styled.tr`
+  height: inherit;
+  line-height: inherit;
 `;
 
 const Th = styled.th`
@@ -156,6 +205,27 @@ const TdLabel = styled.td`
   text-align: left;
   font-weight: 500;
   color: ${({ theme }) => theme.text.secondary};
+`;
+
+const TdButton = styled.td`
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 14px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const TdButtonEnd = styled.td`
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: right;
+  font-size: 14px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const Input = styled.input`
@@ -333,6 +403,22 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     quantityRef.current?.focus();
   }, [loadingOffers]);
 
+  const sliderRatio = useMemo(() => {
+    if (priceInput === '' || parseFloat(priceInput) == 0) return 1;
+    let quantity = walletBalance.toNumber() / parseFloat(priceInput);
+    let ratio = 0;
+    while (quantity <= 100) {
+      ratio++;
+      quantity *= 10;
+    }
+    return Math.pow(10, ratio);
+  }, [walletBalance, priceInput]);
+
+  const maxQuantity = useMemo(() => {
+    if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
+    return (walletBalance.toNumber() * sliderRatio) / parseFloat(priceInput);
+  }, [walletBalance, priceInput]);
+
   const currentOffer = useMemo(() => {
     if (loadingOffers) return undefined;
 
@@ -427,12 +513,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
       const price = new Decimal(currentOffer.price);
-      const baseAmount = new Decimal(
-        formatUnits(currentOffer.baseAmount, token.precision),
-      );
       setPriceInput(price.toString());
-      setQuantityInput(baseAmount.toString());
-      setTotalInput(price.mul(baseAmount).toString());
     }
   }, [currentOffer, isMarket, priceInput]);
 
@@ -615,13 +696,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 </TdInput>
                 <TdLabel>{quote.ticker}</TdLabel>
               </Tr>
-              <Tr>
+              <TrNoLine>
                 <Th>Quantity</Th>
                 <TdInput>
                   <Input
                     type="test"
                     placeholder="0.0"
-                    value={quantityInput}
+                    value={quantityInput.length === 0 ? '0.0' : quantityInput}
+                    disabled
                     onChange={(e) => updateValues(e.target.value, 2)}
                     autoComplete="off"
                     autoCorrect="off"
@@ -633,7 +715,37 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                   />
                 </TdInput>
                 <TdLabel>{token?.ticker}</TdLabel>
-              </Tr>
+              </TrNoLine>
+              <TrSlider>
+                <TdButton onClick={() => setQuantityInput('0.0')}>Min</TdButton>
+                <Slider
+                  // className="horizontal-slider"
+                  // thumbClassName="example-thumb"
+                  // trackClassName="example-track"
+                  min={0}
+                  max={maxQuantity}
+                  onChange={(val) =>
+                    updateValues(
+                      (parseFloat(val.toString()) / sliderRatio).toString(),
+                      2,
+                    )
+                  }
+                  value={
+                    quantityInput == ''
+                      ? 0
+                      : parseFloat(quantityInput) * sliderRatio
+                  }
+                  renderThumb={Thumb}
+                  renderTrack={Track}
+                />
+                <TdButtonEnd
+                  onClick={() =>
+                    setQuantityInput((maxQuantity / sliderRatio).toFixed(2))
+                  }
+                >
+                  Max
+                </TdButtonEnd>
+              </TrSlider>
               <Tr>
                 <Th>Total</Th>
                 <TdInput>
