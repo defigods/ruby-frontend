@@ -741,7 +741,11 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 />
                 <TdButtonEnd
                   onClick={() =>
-                    setQuantityInput((maxQuantity / sliderRatio).toFixed(2))
+                    setQuantityInput(
+                      (maxQuantity / sliderRatio).toFixed(
+                        Math.log10(sliderRatio),
+                      ),
+                    )
                   }
                 >
                   Max
