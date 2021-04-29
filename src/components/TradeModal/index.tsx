@@ -165,7 +165,6 @@ const Thumb = (props: any, state: any) => (
 const StyledTrack = styled.div`
   top: 22px;
   bottom: 0;
-  padding: 0 4px;
   background: #fff;
 `;
 
@@ -375,10 +374,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const debouncedMarketState = useDebounce(marketState, 200); // 200 ms debounce time
 
   useEffect(() => {
-    if (debouncedMarketState.payAmount.isZero()) {
-      setTotalInput('0.0');
-      return;
-    }
+    if (debouncedMarketState.payAmount.isZero()) return;
     // Send a web3 call to load the best price
     loadTotalPrice(
       marketContract,
@@ -478,6 +474,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     } catch (ex) {}
 
     if (inputBN.isZero()) {
+      return false;
+    }
+    if (new Decimal(quantityInput).isZero()) {
       return false;
     }
     return walletBalance.gte(inputBN.add(currentFee || 0));
