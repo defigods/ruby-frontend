@@ -408,6 +408,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const sliderRatio = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 1;
     let quantity = walletBalance.toNumber() / parseFloat(priceInput);
+    if (quantity == 0) return 1;
     let ratio = 0;
     while (quantity <= 100) {
       ratio++;
@@ -707,7 +708,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                   <Input
                     type="test"
                     placeholder="0.0"
-                    value={quantityInput.length === 0 ? '0.0' : quantityInput}
+                    value={quantityInput}
                     onChange={(e) => updateValues(e.target.value, 2)}
                     autoComplete="off"
                     autoCorrect="off"
