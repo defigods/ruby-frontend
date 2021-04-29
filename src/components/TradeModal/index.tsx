@@ -33,6 +33,7 @@ import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
 import { LIQUIDITY_PROVIDER_FEE } from '../../config';
+import sliderThumb from '../../assets/img/slider-thumb.png';
 import Decimal from 'decimal.js';
 
 interface TradeModalProps {
@@ -150,19 +151,21 @@ const StyledThumb = styled.div`
   }
 `;
 
-const Indicator = styled.span`
-  font-weight: bold;
+const ThumbImage = styled.img`
+  width: 16px;
+  height: 20px;
 `;
 
 const Thumb = (props: any, state: any) => (
   <StyledThumb {...props}>
-    <Indicator>{'<|>'}</Indicator>
+    <ThumbImage src={sliderThumb} alt="thumb" />
   </StyledThumb>
 );
 
 const StyledTrack = styled.div`
   top: 22px;
   bottom: 0;
+  padding: 0 4px;
   background: #fff;
 `;
 
@@ -372,7 +375,10 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const debouncedMarketState = useDebounce(marketState, 200); // 200 ms debounce time
 
   useEffect(() => {
-    if (debouncedMarketState.payAmount.isZero()) return;
+    if (debouncedMarketState.payAmount.isZero()) {
+      setTotalInput('0.0');
+      return;
+    }
     // Send a web3 call to load the best price
     loadTotalPrice(
       marketContract,
@@ -703,7 +709,6 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                     type="test"
                     placeholder="0.0"
                     value={quantityInput.length === 0 ? '0.0' : quantityInput}
-                    disabled
                     onChange={(e) => updateValues(e.target.value, 2)}
                     autoComplete="off"
                     autoCorrect="off"
@@ -719,9 +724,6 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               <TrSlider>
                 <TdButton onClick={() => setQuantityInput('0.0')}>Min</TdButton>
                 <Slider
-                  // className="horizontal-slider"
-                  // thumbClassName="example-thumb"
-                  // trackClassName="example-track"
                   min={0}
                   max={maxQuantity}
                   onChange={(val) =>
