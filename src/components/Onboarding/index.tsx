@@ -5,8 +5,9 @@ import { useActiveWeb3React } from '../../hooks';
 import Loader from '../Loader';
 import mmLogo from '../../assets/img/metamask.svg';
 import coinbaseWalletLogo from '../../assets/img/coinbaseWalletLogo1.png';
+import walletConnectLogo from '../../assets/img/walletconnect-logo.png';
 import logo from '../../assets/img/logo-color.png';
-import { injected, walletlink } from '../../connectors';
+import { injected, walletlink, walletConnect } from '../../connectors';
 import { useWebSocket } from '../SocketProvider';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
 
@@ -77,6 +78,15 @@ const CoinbaseWallet = styled.img`
   background-color: white;
   border-radius: 10px;
   border: 0.5px solid black;
+`;
+
+const WalletConnect = styled.img`
+  width: 100%;
+  height: 85px;
+  background-color: white;
+  border-radius: 10px;
+  border: 0.5px solid black;
+  padding: 21px 10px 21px 10px;
 `;
 
 function useModalStyle(): Modal.Styles {
@@ -150,6 +160,24 @@ export default function () {
     }
   }, [hasTried, connect]);
 
+  const walletConnectCall = useCallback(() => {
+    // LOGIC to connect to wallet
+    // User should see the modal overlaying the main app
+    setHasTried(true);
+    activate(walletConnect, undefined, true).catch((err) => {
+      console.error(`Failed to activate account`, err);
+      if (err instanceof NoEthereumProviderError) {
+        setHasWallet(false);
+      }
+    });
+  }, [activate]);
+
+  useEffect(() => {
+    if (!hasTried) {
+      connect();
+    }
+  }, [hasTried, connect]);
+
   function renderModal() {
     if (websocket.loading || (!hasTried && !active)) {
       return (
@@ -194,6 +222,11 @@ export default function () {
                 onClick={walletlinkcall}
               >
                 <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
+              </a>
+            </WalletOptionWrapper>
+            <WalletOptionWrapper>
+              <a onClick={walletConnectCall}>
+                <WalletConnect src={walletConnectLogo} alt="WalletConnect" />
               </a>
             </WalletOptionWrapper>
           </TextWrapper>

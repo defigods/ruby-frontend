@@ -1,5 +1,6 @@
 import { InjectedConnector } from '@web3-react/injected-connector';
 import { WalletLinkConnector } from '@web3-react/walletlink-connector';
+import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 
 //
 const RPC_URLS = {
@@ -16,4 +17,10 @@ export const walletlink = new WalletLinkConnector({
   url: RPC_URLS[1],
   appLogoUrl: 'https://app.rubicon.finance/logo.png',
   appName: 'Rubicon',
+});
+
+export const walletConnect = new WalletConnectConnector({
+  rpc: { 1: RPC_URLS[1], 42: RPC_URLS[42] },
+  bridge: 'https://bridge.walletconnect.org',
+  qrcode: true,
 });
