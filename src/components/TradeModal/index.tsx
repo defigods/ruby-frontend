@@ -407,7 +407,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const sliderRatio = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 1;
-    let quantity = walletBalance.toNumber() / parseFloat(priceInput);
+    let quantity = new Decimal(walletBalance).div(priceInput).toNumber();
     if (quantity == 0) return 1;
     let ratio = 0;
     while (quantity <= 100) {
@@ -419,7 +419,10 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const maxQuantity = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
-    return (walletBalance.toNumber() * sliderRatio) / parseFloat(priceInput);
+    return new Decimal(walletBalance)
+      .mul(sliderRatio)
+      .div(priceInput)
+      .toNumber();
   }, [walletBalance, priceInput]);
 
   const currentOffer = useMemo(() => {
@@ -728,14 +731,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                   max={maxQuantity}
                   onChange={(val) =>
                     updateValues(
-                      (parseFloat(val.toString()) / sliderRatio).toString(),
+                      new Decimal(val.toString()).div(sliderRatio).toString(),
                       2,
                     )
                   }
                   value={
                     quantityInput == ''
                       ? 0
-                      : parseFloat(quantityInput) * sliderRatio
+                      : new Decimal(quantityInput).mul(sliderRatio).toNumber()
                   }
                   renderThumb={Thumb}
                   renderTrack={Track}
@@ -743,9 +746,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <TdButtonEnd
                   onClick={() =>
                     setQuantityInput(
-                      (maxQuantity / sliderRatio).toFixed(
-                        Math.log10(sliderRatio),
-                      ),
+                      new Decimal(maxQuantity)
+                        .div(sliderRatio)
+                        .toFixed(Math.log10(sliderRatio)),
                     )
                   }
                 >
