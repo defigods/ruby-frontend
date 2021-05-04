@@ -424,7 +424,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     return new Decimal(walletBalance)
       .div(1 + LIQUIDITY_PROVIDER_FEE)
       .mul(sliderRatio)
-      .div(priceInput)
+      .div(isBuy ? priceInput : 1)
       .toNumber();
   }, [walletBalance, priceInput]);
 
