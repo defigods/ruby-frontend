@@ -420,6 +420,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   const maxQuantity = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
     return new Decimal(walletBalance)
+      .div(1 + LIQUIDITY_PROVIDER_FEE)
       .mul(sliderRatio)
       .div(priceInput)
       .toNumber();
@@ -745,10 +746,11 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 />
                 <TdButtonEnd
                   onClick={() =>
-                    setQuantityInput(
+                    updateValues(
                       new Decimal(maxQuantity)
                         .div(sliderRatio)
                         .toFixed(Math.log10(sliderRatio)),
+                      2,
                     )
                   }
                 >
