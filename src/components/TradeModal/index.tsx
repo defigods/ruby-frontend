@@ -137,6 +137,8 @@ const TrSlider = styled.tr`
   }
 `;
 
+const TdSlider = styled.td``;
+
 const Slider = styled(ReactSlider)`
   width: 100%;
   height: 25px;
@@ -727,23 +729,25 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
               </TrNoLine>
               <TrSlider>
                 <TdButton onClick={() => setQuantityInput('0.0')}>Min</TdButton>
-                <Slider
-                  min={0}
-                  max={maxQuantity}
-                  onChange={(val) =>
-                    updateValues(
-                      new Decimal(val.toString()).div(sliderRatio).toString(),
-                      2,
-                    )
-                  }
-                  value={
-                    quantityInput == ''
-                      ? 0
-                      : new Decimal(quantityInput).mul(sliderRatio).toNumber()
-                  }
-                  renderThumb={Thumb}
-                  renderTrack={Track}
-                />
+                <TdSlider>
+                  <Slider
+                    min={0}
+                    max={maxQuantity}
+                    onChange={(val) =>
+                      updateValues(
+                        new Decimal(val.toString()).div(sliderRatio).toString(),
+                        2,
+                      )
+                    }
+                    value={
+                      quantityInput == ''
+                        ? 0
+                        : new Decimal(quantityInput).mul(sliderRatio).toNumber()
+                    }
+                    renderThumb={Thumb}
+                    renderTrack={Track}
+                  />
+                </TdSlider>
                 <TdButtonEnd
                   onClick={() =>
                     updateValues(
