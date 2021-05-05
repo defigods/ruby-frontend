@@ -8,17 +8,21 @@ import { cancelTrade, getEtherscanLink } from '../../utils';
 import { useMarketContract } from '../../hooks/contract';
 
 interface PastTradeItemProps {
-  data: UserTrade;
+  trade: UserTrade;
   key: any;
 }
 
-const Wrapper = styled.div<{ killed: boolean }>`
+const Wrapper = styled.div`
   width: 100%;
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.primary};
   border-radius: 10px;
   padding: 10px 0 10px 0;
   margin: 10px 0 10px 0;
+`;
+
+const Row = styled.div<{ killed: boolean }>`
+  width: 100%;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -48,39 +52,56 @@ const StyledX = styled(X)`
   color: ${({ theme }) => theme.colors.tertiary};
 `;
 
-export default function ({ data, key }: any) {
+export default function ({ trade }: any) {
   const { chainId } = useActiveWeb3React();
 
   const contract = useMarketContract()!;
 
-  const cancelTradeCallback = useCallback(async () => {
-    return await cancelTrade(contract, data.id);
-  }, [data.id, contract]);
+  const cancelTradeCallback = useCallback(
+    async (id) => {
+      return await cancelTrade(contract, id);
+    },
+    [contract],
+  );
 
   return (
-    <Wrapper killed={data.killed}>
-      {!data.completed && !data.killed && (
-        <StyledX onClick={cancelTradeCallback} />
-      )}
-      <TextItem style={{ fontWeight: 500 }}>
-        {data.isBuy ? data.buyGem : data.payGem}
-      </TextItem>
-      <TextItem>{data.isBuy ? 'BUY' : 'SELL'}</TextItem>
-      <SizeText isBuy={data.isBuy}>
-        {data.isBuy
-          ? `+${data.buyAmount.toFixed(2)}`
-          : `-${data.payAmount.toFixed(2)}`}
-      </SizeText>
-      <TextItem>{moment.unix(data.timestamp).fromNow()}</TextItem>
-      <TextItem>
-        <a
-          href={getEtherscanLink(chainId!, data.transactionHash, 'transaction')}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Link />
-        </a>
-      </TextItem>
+    <Wrapper>
+      {[trade, ...trade.siblings].map((data, idx) => (
+        <Row killed={data.killed} key={data.id}>
+          {!data.completed && !data.killed && (
+            <StyledX onClick={() => cancelTradeCallback(data.id)} />
+          )}
+          <TextItem style={{ fontWeight: 500 }}>
+            {idx > 0 ? '' : data.isBuy ? data.buyGem : data.payGem}
+          </TextItem>
+          <TextItem>{idx > 0 ? '' : data.isBuy ? 'BUY' : 'SELL'}</TextItem>
+          <SizeText isBuy={data.isBuy}>
+            {data.isBuy
+              ? `+${data.buyAmount.toFixed(2)}`
+              : `-${data.payAmount.toFixed(2)}`}
+          </SizeText>
+          <TextItem>
+            {idx > 0 ? '' : moment.unix(data.timestamp).fromNow()}
+          </TextItem>
+          <TextItem>
+            {idx > 0 ? (
+              ''
+            ) : (
+              <a
+                href={getEtherscanLink(
+                  chainId!,
+                  data.transactionHash,
+                  'transaction',
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Link />
+              </a>
+            )}
+          </TextItem>
+        </Row>
+      ))}
     </Wrapper>
   );
 }

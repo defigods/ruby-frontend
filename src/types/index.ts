@@ -64,6 +64,7 @@ export type UserTrade = {
   killed: boolean;
   timestamp: number;
   transactionHash: string;
+  siblings: UserTrade[];
 };
 
 export type UserTrades = {
