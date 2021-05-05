@@ -64,7 +64,11 @@ export function useBestOffers(): [
       setLoading(false);
     };
 
-    fetchData();
+    try {
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
   }, [contract, selectedToken, block, chainId, selectedQuote]);
 
   return [result, loading];
