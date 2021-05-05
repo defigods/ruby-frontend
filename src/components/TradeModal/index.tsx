@@ -740,13 +740,15 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <TdSlider>
                   <Slider
                     min={0}
-                    max={maxQuantity}
-                    onChange={(val) =>
+                    max={Math.floor(maxQuantity)}
+                    onChange={(val) => {
+                      console.log('val', val);
+
                       updateValues(
                         new Decimal(val.toString()).div(sliderRatio).toString(),
                         2,
-                      )
-                    }
+                      );
+                    }}
                     value={
                       quantityInput == ''
                         ? 0
@@ -759,7 +761,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <TdButtonEnd
                   onClick={() =>
                     updateValues(
-                      new Decimal(maxQuantity)
+                      new Decimal(Math.floor(maxQuantity))
                         .div(sliderRatio)
                         .toFixed(Math.log10(sliderRatio)),
                       2,
