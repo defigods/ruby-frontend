@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { HelpCircle, X } from 'react-feather';
 import Modal from 'react-modal';
+import ReactSlider from 'react-slider';
 import styled, { css, ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import { useBestOffers, useMarketContract } from '../../hooks/contract';
@@ -32,6 +33,7 @@ import { ApprovalState, useApproveCallback } from '../../hooks/approval';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import TransactionModal from './TransactionModal';
 import { LIQUIDITY_PROVIDER_FEE } from '../../config';
+import sliderThumb from '../../assets/img/slider-thumb.png';
 import Decimal from 'decimal.js';
 
 interface TradeModalProps {
@@ -126,6 +128,52 @@ const Table = styled.table`
   width: 100%;
 `;
 
+const TrSlider = styled.tr`
+  height: inherit;
+  line-height: inherit;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.text.secondary};
+  }
+`;
+
+const TdSlider = styled.td``;
+
+const Slider = styled(ReactSlider)`
+  width: 100%;
+  height: 25px;
+`;
+
+const StyledThumb = styled.div`
+  text-align: center;
+  border-radius: 4px;
+  cursor: grab;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const ThumbImage = styled.img`
+  width: 16px;
+  height: 20px;
+`;
+
+const Thumb = (props: any, state: any) => (
+  <StyledThumb {...props}>
+    <ThumbImage src={sliderThumb} alt="thumb" />
+  </StyledThumb>
+);
+
+const StyledTrack = styled.div`
+  top: 22px;
+  bottom: 0;
+  background: #fff;
+`;
+
+const Track = (props: any, state: any) => (
+  <StyledTrack {...props} index={state.index} />
+);
+
 const Tr = styled.tr`
   height: inherit;
   line-height: inherit;
@@ -133,6 +181,11 @@ const Tr = styled.tr`
   &:not(:last-child) {
     border-bottom: 1px solid ${({ theme }) => theme.text.secondary};
   }
+`;
+
+const TrNoLine = styled.tr`
+  height: inherit;
+  line-height: inherit;
 `;
 
 const Th = styled.th`
@@ -156,6 +209,27 @@ const TdLabel = styled.td`
   text-align: left;
   font-weight: 500;
   color: ${({ theme }) => theme.text.secondary};
+`;
+
+const TdButton = styled.td`
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 14px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const TdButtonEnd = styled.td`
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: right;
+  font-size: 14px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const Input = styled.input`
@@ -312,7 +386,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       isBuy,
     )
       .then((result) => {
-        updateValues(formatUnits(result, quote.precision), 3);
+        updateValues(formatUnits(result, quote.precision), 3, false);
         setMarketState({
           ...marketState,
           loading: false,
@@ -320,7 +394,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         });
       })
       .catch(() => {
-        updateValues('0', 3);
+        updateValues('0', 3, false);
         setMarketState({
           ...marketState,
           loading: false,
@@ -332,6 +406,27 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
   useEffect(() => {
     quantityRef.current?.focus();
   }, [loadingOffers]);
+
+  const sliderRatio = useMemo(() => {
+    if (priceInput === '' || parseFloat(priceInput) == 0) return 1;
+    let quantity = new Decimal(walletBalance).div(priceInput).toNumber();
+    if (quantity == 0) return 1;
+    let ratio = 0;
+    while (quantity <= 100) {
+      ratio++;
+      quantity *= 10;
+    }
+    return Math.pow(10, ratio);
+  }, [walletBalance, priceInput]);
+
+  const maxQuantity = useMemo(() => {
+    if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
+    return new Decimal(walletBalance)
+      .div(1 + LIQUIDITY_PROVIDER_FEE)
+      .mul(sliderRatio)
+      .div(isBuy ? priceInput : 1)
+      .toNumber();
+  }, [walletBalance, priceInput]);
 
   const currentOffer = useMemo(() => {
     if (loadingOffers) return undefined;
@@ -388,6 +483,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     if (inputBN.isZero()) {
       return false;
     }
+    if (new Decimal(quantityInput).isZero()) {
+      return false;
+    }
     return walletBalance.gte(inputBN.add(currentFee || 0));
   }, [
     walletBalance,
@@ -426,13 +524,9 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
+      console.log('update price input ------->');
       const price = new Decimal(currentOffer.price);
-      const baseAmount = new Decimal(
-        formatUnits(currentOffer.baseAmount, token.precision),
-      );
       setPriceInput(price.toString());
-      setQuantityInput(baseAmount.toString());
-      setTotalInput(price.mul(baseAmount).toString());
     }
   }, [currentOffer, isMarket, priceInput]);
 
@@ -529,7 +623,11 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     marketState.loading,
   ]);
 
-  const updateValues = (value: string, type: number) => {
+  const updateValues = (
+    value: string,
+    type: number,
+    refresh: boolean = true,
+  ) => {
     if (!isNumeric(value)) return;
 
     let valueDecimal = new Decimal(0);
@@ -541,12 +639,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
     if (type === 1) {
       setPriceInput(value);
+      if (!refresh) return;
       if (quantityInput)
         setTotalInput(valueDecimal.times(quantityInput).toString());
       else if (totalInput)
         setQuantityInput(new Decimal(totalInput).div(valueDecimal).toString());
     } else if (type === 2) {
       setQuantityInput(value);
+      if (!refresh) return;
       if (isMarket) {
         setMarketState({
           ...marketState,
@@ -561,6 +661,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       }
     } else if (type === 3) {
       setTotalInput(value);
+      if (!refresh) return;
       if (quantityInput)
         setPriceInput(valueDecimal.div(quantityInput).toString());
       else if (priceInput)
@@ -615,7 +716,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 </TdInput>
                 <TdLabel>{quote.ticker}</TdLabel>
               </Tr>
-              <Tr>
+              <TrNoLine>
                 <Th>Quantity</Th>
                 <TdInput>
                   <Input
@@ -633,7 +734,43 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                   />
                 </TdInput>
                 <TdLabel>{token?.ticker}</TdLabel>
-              </Tr>
+              </TrNoLine>
+              <TrSlider>
+                <TdButton onClick={() => setQuantityInput('0.0')}>Min</TdButton>
+                <TdSlider>
+                  <Slider
+                    min={0}
+                    max={Math.floor(maxQuantity)}
+                    onChange={(val) => {
+                      console.log('val', val);
+
+                      updateValues(
+                        new Decimal(val.toString()).div(sliderRatio).toString(),
+                        2,
+                      );
+                    }}
+                    value={
+                      quantityInput == ''
+                        ? 0
+                        : new Decimal(quantityInput).mul(sliderRatio).toNumber()
+                    }
+                    renderThumb={Thumb}
+                    renderTrack={Track}
+                  />
+                </TdSlider>
+                <TdButtonEnd
+                  onClick={() =>
+                    updateValues(
+                      new Decimal(Math.floor(maxQuantity))
+                        .div(sliderRatio)
+                        .toFixed(Math.log10(sliderRatio)),
+                      2,
+                    )
+                  }
+                >
+                  Max
+                </TdButtonEnd>
+              </TrSlider>
               <Tr>
                 <Th>Total</Th>
                 <TdInput>

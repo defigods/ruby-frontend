@@ -88,7 +88,21 @@ export default function () {
     } else if (selectedToken) {
       tradeData.push(...data[selectedToken.ticker].trades);
     }
-    return tradeData.slice().sort((a, b) => b.timestamp - a.timestamp);
+    const results = tradeData.slice().sort((a, b) => b.timestamp - a.timestamp);
+    let bigIndex = 0;
+    for (let i = 1; i < results.length - 1; ) {
+      if (results[bigIndex].transactionHash === results[i].transactionHash) {
+        results.splice(bigIndex, 1, {
+          ...results[bigIndex],
+          payAmount: results[bigIndex].payAmount + results[i].payAmount,
+          buyAmount: results[bigIndex].buyAmount + results[i].buyAmount,
+        });
+        results.splice(i, 1);
+      } else {
+        bigIndex = i++;
+      }
+    }
+    return results;
   }, [selectedToken, isHistorySelected, loading, data]);
   return (
     <Wrapper>
@@ -108,8 +122,8 @@ export default function () {
             </LoaderWrapper>
           ) : (
             <>
-              {sortedTrades.map((trade, idx) => (
-                <PastTradeItem data={trade} key={idx} />
+              {sortedTrades.map((trade) => (
+                <PastTradeItem data={trade} key={trade.transactionHash} />
               ))}
             </>
           )}

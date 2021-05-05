@@ -8,7 +8,7 @@ import { cancelTrade, getEtherscanLink } from '../../utils';
 import { useMarketContract } from '../../hooks/contract';
 
 interface PastTradeItemProps {
-  data: UserTrade;
+  trade: UserTrade;
   key: any;
 }
 
@@ -48,7 +48,7 @@ const StyledX = styled(X)`
   color: ${({ theme }) => theme.colors.tertiary};
 `;
 
-export default function ({ data, key }: any) {
+export default function ({ data }: any) {
   const { chainId } = useActiveWeb3React();
 
   const contract = useMarketContract()!;
