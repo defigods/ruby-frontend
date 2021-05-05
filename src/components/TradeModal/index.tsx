@@ -386,7 +386,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       isBuy,
     )
       .then((result) => {
-        updateValues(formatUnits(result, quote.precision), 3);
+        updateValues(formatUnits(result, quote.precision), 3, false);
         setMarketState({
           ...marketState,
           loading: false,
@@ -394,7 +394,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         });
       })
       .catch(() => {
-        // updateValues('0', 3);
+        updateValues('0', 3, false);
         setMarketState({
           ...marketState,
           loading: false,
@@ -524,6 +524,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
+      console.log('update price input ------->');
       const price = new Decimal(currentOffer.price);
       setPriceInput(price.toString());
     }
@@ -622,7 +623,11 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     marketState.loading,
   ]);
 
-  const updateValues = (value: string, type: number) => {
+  const updateValues = (
+    value: string,
+    type: number,
+    refresh: boolean = true,
+  ) => {
     if (!isNumeric(value)) return;
 
     let valueDecimal = new Decimal(0);
@@ -634,12 +639,14 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
     if (type === 1) {
       setPriceInput(value);
+      if (!refresh) return;
       if (quantityInput)
         setTotalInput(valueDecimal.times(quantityInput).toString());
       else if (totalInput)
         setQuantityInput(new Decimal(totalInput).div(valueDecimal).toString());
     } else if (type === 2) {
       setQuantityInput(value);
+      if (!refresh) return;
       if (isMarket) {
         setMarketState({
           ...marketState,
@@ -654,6 +661,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       }
     } else if (type === 3) {
       setTotalInput(value);
+      if (!refresh) return;
       if (quantityInput)
         setPriceInput(valueDecimal.div(quantityInput).toString());
       else if (priceInput)
