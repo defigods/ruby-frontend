@@ -94,7 +94,8 @@ export default function () {
       if (results[bigIndex].transactionHash === results[i].transactionHash) {
         results.splice(bigIndex, 1, {
           ...results[bigIndex],
-          siblings: [...results[bigIndex].siblings, results[i]],
+          payAmount: results[bigIndex].payAmount + results[i].payAmount,
+          buyAmount: results[bigIndex].buyAmount + results[i].buyAmount,
         });
         results.splice(i, 1);
       } else {
@@ -122,7 +123,7 @@ export default function () {
           ) : (
             <>
               {sortedTrades.map((trade) => (
-                <PastTradeItem trade={trade} key={trade.transactionHash} />
+                <PastTradeItem data={trade} key={trade.transactionHash} />
               ))}
             </>
           )}

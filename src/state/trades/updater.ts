@@ -110,7 +110,6 @@ async function loadUserHistoricTrade(
       ),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
       transactionHash: ev['transactionHash'] as string,
-      siblings: [],
     }));
   };
 
@@ -140,7 +139,6 @@ async function loadUserHistoricTrade(
       ),
       timestamp: (ev.args!['timestamp'] as BigNumber).toNumber(),
       transactionHash: ev['transactionHash'] as string,
-      siblings: [],
     }));
   };
 
