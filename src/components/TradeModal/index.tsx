@@ -394,7 +394,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
         });
       })
       .catch(() => {
-        updateValues('0', 3);
+        // updateValues('0', 3);
         setMarketState({
           ...marketState,
           loading: false,
