@@ -412,7 +412,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     let quantity = new Decimal(walletBalance).div(priceInput).toNumber();
     if (quantity == 0) return 1;
     let ratio = 0;
-    while (quantity <= 100) {
+    while (quantity <= 1000) {
       ratio++;
       quantity *= 10;
     }
@@ -425,6 +425,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
       .div(1 + LIQUIDITY_PROVIDER_FEE)
       .mul(sliderRatio)
       .div(isBuy ? priceInput : 1)
+      .floor()
       .toNumber();
   }, [walletBalance, priceInput]);
 
@@ -524,7 +525,6 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
-      console.log('update price input ------->');
       const price = new Decimal(currentOffer.price);
       setPriceInput(price.toString());
     }
@@ -761,9 +761,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <TdButtonEnd
                   onClick={() =>
                     updateValues(
-                      new Decimal(Math.floor(maxQuantity))
-                        .div(sliderRatio)
-                        .toFixed(Math.log10(sliderRatio)),
+                      new Decimal(maxQuantity).div(sliderRatio).toString(),
                       2,
                     )
                   }
