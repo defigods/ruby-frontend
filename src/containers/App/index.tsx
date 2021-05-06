@@ -2,7 +2,11 @@ import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from '../../components/Sidebar';
-import { useActiveWeb3React, useEagerConnect } from '../../hooks';
+import {
+  useActiveWeb3React,
+  useEagerConnect,
+  useInactiveListener,
+} from '../../hooks';
 import Trade from '../Trade';
 import History from '../History';
 import Onboarding from '../../components/Onboarding';
@@ -33,6 +37,9 @@ export default function () {
 
   const websocket = useWebSocket();
   const hasTried = useEagerConnect();
+
+  // Register event handlers to injected web3 provider (metamask)
+  useInactiveListener();
 
   return (
     <Suspense fallback={null}>
