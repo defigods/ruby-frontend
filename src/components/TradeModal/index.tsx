@@ -412,7 +412,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     let quantity = new Decimal(walletBalance).div(priceInput).toNumber();
     if (quantity == 0) return 1;
     let ratio = 0;
-    while (quantity <= 1000) {
+    while (quantity <= 1e18) {
       ratio++;
       quantity *= 10;
     }
@@ -421,12 +421,13 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const maxQuantity = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
-    return new Decimal(walletBalance)
-      .div(1 + LIQUIDITY_PROVIDER_FEE)
-      .mul(sliderRatio)
-      .div(isBuy ? priceInput : 1)
-      .floor()
-      .toNumber();
+    return (
+      new Decimal(walletBalance)
+        // .div(1 + LIQUIDITY_PROVIDER_FEE)
+        .mul(sliderRatio)
+        .div(isBuy ? priceInput : 1)
+        .toNumber()
+    );
   }, [walletBalance, priceInput]);
 
   const currentOffer = useMemo(() => {
@@ -487,7 +488,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     if (new Decimal(quantityInput).isZero()) {
       return false;
     }
-    return walletBalance.gte(inputBN.add(currentFee || 0));
+    return walletBalance.gte(inputBN.add(/* currentFee || */ 0));
   }, [
     walletBalance,
     approvalState,
@@ -517,7 +518,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     }
 
     if (marketState.error) {
-      return 'Insufficient Liquidity';
+      return 'Insufficient tokens';
     }
 
     return isBuy ? 'Buy' : 'Sell';
