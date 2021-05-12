@@ -109,11 +109,13 @@ export default function () {
       <Header>Trade History</Header>
       <BodyWrapper>
         <TableHeader>
-          {['Token', 'Action', 'Size', 'Timestamp', 'Details'].map((item) => (
-            <span style={{ width: '20%', textAlign: 'center' }} key={item}>
-              {item}
-            </span>
-          ))}
+          {['Token', 'Action', 'Size', 'Price', 'Timestamp', 'Details'].map(
+            (item) => (
+              <span style={{ width: '20%', textAlign: 'center' }} key={item}>
+                {item}
+              </span>
+            ),
+          )}
         </TableHeader>
         <ContentWrapper>
           {loading ? (
