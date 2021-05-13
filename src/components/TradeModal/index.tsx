@@ -412,7 +412,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     let quantity = new Decimal(walletBalance).div(priceInput).toNumber();
     if (quantity == 0) return 1;
     let ratio = 0;
-    while (quantity <= 100) {
+    while (quantity <= 1e18) {
       ratio++;
       quantity *= 10;
     }
@@ -421,11 +421,13 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const maxQuantity = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
-    return new Decimal(walletBalance)
-      .div(1 + LIQUIDITY_PROVIDER_FEE)
-      .mul(sliderRatio)
-      .div(isBuy ? priceInput : 1)
-      .toNumber();
+    return (
+      new Decimal(walletBalance)
+        // .div(1 + LIQUIDITY_PROVIDER_FEE)
+        .mul(sliderRatio)
+        .div(isBuy ? priceInput : 1)
+        .toNumber()
+    );
   }, [walletBalance, priceInput]);
 
   const currentOffer = useMemo(() => {
@@ -486,7 +488,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     if (new Decimal(quantityInput).isZero()) {
       return false;
     }
-    return walletBalance.gte(inputBN.add(currentFee || 0));
+    return walletBalance.gte(inputBN.add(/* currentFee || */ 0));
   }, [
     walletBalance,
     approvalState,
@@ -524,7 +526,6 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   useEffect(() => {
     if (isMarket && currentOffer && !priceInput) {
-      console.log('update price input ------->');
       const price = new Decimal(currentOffer.price);
       setPriceInput(price.toString());
     }
@@ -761,9 +762,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
                 <TdButtonEnd
                   onClick={() =>
                     updateValues(
-                      new Decimal(Math.floor(maxQuantity))
-                        .div(sliderRatio)
-                        .toFixed(Math.log10(sliderRatio)),
+                      new Decimal(maxQuantity).div(sliderRatio).toString(),
                       2,
                     )
                   }

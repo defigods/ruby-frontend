@@ -68,8 +68,13 @@ export default function ({ data }: any) {
       <TextItem>{data.isBuy ? 'BUY' : 'SELL'}</TextItem>
       <SizeText isBuy={data.isBuy}>
         {data.isBuy
-          ? `+${data.buyAmount.toFixed(2)}`
-          : `-${data.payAmount.toFixed(2)}`}
+          ? `+${data.buyAmount.toFixed(4)}`
+          : `-${data.payAmount.toFixed(4)}`}
+      </SizeText>
+      <SizeText isBuy={data.isBuy}>
+        {data.isBuy
+          ? `$${(data.payAmount / data.buyAmount).toFixed(2)}`
+          : `$${(data.buyAmount / data.payAmount).toFixed(2)}`}
       </SizeText>
       <TextItem>{moment.unix(data.timestamp).fromNow()}</TextItem>
       <TextItem>
