@@ -518,7 +518,7 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
     }
 
     if (marketState.error) {
-      return 'Insufficient tokens';
+      return 'Insufficient Liquidity';
     }
 
     return isBuy ? 'Buy' : 'Sell';
