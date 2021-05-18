@@ -13,7 +13,7 @@ export const injected = new InjectedConnector({
   supportedChainIds: [42, 1],
 });
 
-export const walletlink = new WalletLinkConnector({
+export const walletLink = new WalletLinkConnector({
   url: RPC_URLS[1],
   appLogoUrl: 'https://app.rubicon.finance/logo.png',
   appName: 'Rubicon',

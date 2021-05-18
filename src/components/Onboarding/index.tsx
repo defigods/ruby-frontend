@@ -1,14 +1,14 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import Modal from 'react-modal';
 import styled, { ThemeContext } from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import Loader from '../Loader';
-import mmLogo from '../../assets/img/metamask.svg';
 import coinbaseWalletLogo from '../../assets/img/coinbaseWalletLogo1.png';
 import walletConnectLogo from '../../assets/img/walletconnect-logo.png';
 import logo from '../../assets/img/logo-color.png';
-import { injected, walletlink, walletConnect } from '../../connectors';
+import { walletLink, walletConnect } from '../../connectors';
 import { useWebSocket } from '../SocketProvider';
+import MetaMaskConnector from './Metamask';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
 
 Modal.setAppElement('#root');
@@ -57,19 +57,14 @@ const WalletOptionWrapper = styled.div`
   padding: 20px 50px 20px 50px;
   display: flex;
   justify-content: center;
+  div {
+    cursor: pointer;
+  }
 `;
 
 const Logo = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const MM = styled.img`
-  width: 100%;
-  height: 85px;
-  background-color: white;
-  border-radius: 10px;
-  border: 0.5px solid black;
 `;
 
 const CoinbaseWallet = styled.img`
@@ -112,123 +107,69 @@ function useModalStyle(): Modal.Styles {
   };
 }
 
-export default function () {
-  const modalStyle = useModalStyle();
-  const { active, activate } = useActiveWeb3React();
+// TODO: Apply DRY principle on Connectors
 
-  const [hasWallet, setHasWallet] = useState(true);
-  const [hasTried, setHasTried] = useState(false);
-
-  const websocket = useWebSocket();
+function WalletLinkConnector() {
+  const { activate } = useActiveWeb3React();
 
   const connect = useCallback(() => {
-    // LOGIC to connect to wallet
-    // User should see the modal overlaying the main app
-    setHasTried(true);
-    activate(injected, undefined, true).catch((err) => {
-      console.error(`Failed to activate account`, err);
-      setHasWallet(false);
-      if (err instanceof NoEthereumProviderError) {
-      }
+    activate(walletLink, undefined, true).catch((err) => {
+      console.error(`Failed to activate account using walletLink`, err);
     });
   }, [activate]);
 
-  useEffect(() => {
-    if (!hasTried) {
-      connect();
-    }
-  }, [hasTried, connect]);
+  return (
+    <WalletOptionWrapper>
+      <div onClick={connect}>
+        <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
+      </div>
+    </WalletOptionWrapper>
+  );
+}
 
-  //Logic to use walletlink and connect to coinbase wallet
-  //https://github.com/walletlink/walletlink
+function WalletConnectConnector() {
+  const { activate } = useActiveWeb3React();
 
-  const walletlinkcall = useCallback(() => {
-    // LOGIC to connect to wallet
-    // User should see the modal overlaying the main app
-    setHasTried(true);
-    activate(walletlink, undefined, true).catch((err) => {
-      console.error(`Failed to activate account`, err);
-      if (err instanceof NoEthereumProviderError) {
-        setHasWallet(false);
-      }
-    });
-  }, [activate]);
-
-  useEffect(() => {
-    if (!hasTried) {
-      connect();
-    }
-  }, [hasTried, connect]);
-
-  const walletConnectCall = useCallback(() => {
-    // LOGIC to connect to wallet
-    // User should see the modal overlaying the main app
-    setHasTried(true);
+  const connect = useCallback(() => {
     activate(walletConnect, undefined, true).catch((err) => {
-      console.error(`Failed to activate account`, err);
+      console.error(`Failed to activate account using walletConnect`, err);
       if (err instanceof NoEthereumProviderError) {
-        setHasWallet(false);
       }
     });
   }, [activate]);
 
-  useEffect(() => {
-    if (!hasTried) {
-      connect();
-    }
-  }, [hasTried, connect]);
+  return (
+    <WalletOptionWrapper>
+      <div onClick={connect}>
+        <WalletConnect src={walletConnectLogo} alt="WalletConnect" />
+      </div>
+    </WalletOptionWrapper>
+  );
+}
+
+export default function () {
+  const modalStyle = useModalStyle();
+  const websocket = useWebSocket();
 
   function renderModal() {
-    if (websocket.loading || (!hasTried && !active)) {
+    if (websocket.loading) {
       return (
         <TextWrapper>
           <Loader size="100px" />
         </TextWrapper>
       );
-    } else if (hasTried && !active && hasWallet) {
-      return (
-        <>
-          <TextWrapper>
-            <h2>Welcome to Rubicon</h2>
-            <p>Please connect your browser wallet to begin trading.</p>
-          </TextWrapper>
-          <MainButton onClick={connect}>CONNECT</MainButton>
-        </>
-      );
     } else {
-      // they don't have an extension
       return (
         <>
           <TextWrapper>
             <h2>Welcome to Rubicon</h2>
             <p>
               To trade on Rubicon and connect to the Ethereum blockchain, please
-              install a browser wallet.
+              connect your wallet.
             </p>
-            <WalletOptionWrapper>
-              <a
-                href={'https://metamask.io/'}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MM src={mmLogo} alt="Metamask" />
-              </a>
-            </WalletOptionWrapper>
-            <WalletOptionWrapper>
-              <a
-                // href={'https://wallet.coinbase.com/'}
-                // target="_blank"
-                // rel="noopener noreferrer"
-                onClick={walletlinkcall}
-              >
-                <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
-              </a>
-            </WalletOptionWrapper>
-            <WalletOptionWrapper>
-              <a onClick={walletConnectCall}>
-                <WalletConnect src={walletConnectLogo} alt="WalletConnect" />
-              </a>
-            </WalletOptionWrapper>
+            <MetaMaskConnector />
+            <WalletLinkConnector />
+            <WalletConnectConnector />
           </TextWrapper>
         </>
       );

@@ -1,6 +1,7 @@
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
-import { injected, walletlink } from '../connectors';
+import { injected } from '../connectors';
+
 import { Web3Provider } from '@ethersproject/providers';
 
 declare global {
@@ -16,6 +17,13 @@ export function useActiveWeb3React() {
 export function useEagerConnect() {
   const { activate, active } = useWeb3React(); // specifically using useWeb3ReactCore because of what this hook does
   const [tried, setTried] = useState(false);
+
+  /* TODO: Investigate the possibility to eager connect using walletlink and walletconnect
+  using localStorage as source of last connected wallet info.
+  -> On new wallet connection: Store which connector was used, and on the next page reload
+  use the data to try to activate the connector (both walletlink and walletconnect already
+  store data on localStorage)
+  */
 
   useEffect(() => {
     injected.isAuthorized().then((isAuthorized) => {
