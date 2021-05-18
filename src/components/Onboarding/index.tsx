@@ -1,38 +1,14 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import Modal from 'react-modal';
 import styled, { ThemeContext } from 'styled-components';
-import { useActiveWeb3React } from '../../hooks';
 import Loader from '../Loader';
-import mmLogo from '../../assets/img/metamask.svg';
-import coinbaseWalletLogo from '../../assets/img/coinbaseWalletLogo1.png';
 import logo from '../../assets/img/logo-color.png';
-import { injected, walletlink } from '../../connectors';
 import { useWebSocket } from '../SocketProvider';
-import { NoEthereumProviderError } from '@web3-react/injected-connector';
+import MetaMaskConnectorButton from './Metamask';
+import WalletConnectConnectorButton from './Walletconnect';
+import WalletLinkConnectorButton from './Walletlink';
 
 Modal.setAppElement('#root');
-
-const MainButton = styled.div`
-  background-color: ${({ theme }) => theme.colors.tertiary};
-  color: ${({ theme }) => theme.text.againstRed};
-  width: 80%;
-  border-radius: 4px;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 14px;
-  padding: 15px 0;
-  margin: auto;
-  margin-bottom: 15px;
-  margin-top: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 100ms ease-in;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
 
 const LogoWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
@@ -50,33 +26,20 @@ const TextWrapper = styled.div`
   justify-content: center;
 `;
 
-const WalletOptionWrapper = styled.div`
+export const WalletOptionWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 100%;
   padding: 20px 50px 20px 50px;
   display: flex;
   justify-content: center;
+  div {
+    cursor: pointer;
+  }
 `;
 
 const Logo = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const MM = styled.img`
-  width: 100%;
-  height: 85px;
-  background-color: white;
-  border-radius: 10px;
-  border: 0.5px solid black;
-`;
-
-const CoinbaseWallet = styled.img`
-  width: 100%;
-  height: 85px;
-  background-color: white;
-  border-radius: 10px;
-  border: 0.5px solid black;
 `;
 
 function useModalStyle(): Modal.Styles {
@@ -104,98 +67,27 @@ function useModalStyle(): Modal.Styles {
 
 export default function () {
   const modalStyle = useModalStyle();
-  const { active, activate } = useActiveWeb3React();
-
-  const [hasWallet, setHasWallet] = useState(true);
-  const [hasTried, setHasTried] = useState(false);
-
   const websocket = useWebSocket();
 
-  const connect = useCallback(() => {
-    // LOGIC to connect to wallet
-    // User should see the modal overlaying the main app
-    setHasTried(true);
-    activate(injected, undefined, true).catch((err) => {
-      console.error(`Failed to activate account`, err);
-      setHasWallet(false);
-      if (err instanceof NoEthereumProviderError) {
-      }
-    });
-  }, [activate]);
-
-  useEffect(() => {
-    if (!hasTried) {
-      connect();
-    }
-  }, [hasTried, connect]);
-
-  //Logic to use walletlink and connect to coinbase wallet
-  //https://github.com/walletlink/walletlink
-
-  const walletlinkcall = useCallback(() => {
-    // LOGIC to connect to wallet
-    // User should see the modal overlaying the main app
-    setHasTried(true);
-    activate(walletlink, undefined, true).catch((err) => {
-      console.error(`Failed to activate account`, err);
-      if (err instanceof NoEthereumProviderError) {
-        setHasWallet(false);
-      }
-    });
-  }, [activate]);
-
-  useEffect(() => {
-    if (!hasTried) {
-      connect();
-    }
-  }, [hasTried, connect]);
-
   function renderModal() {
-    if (websocket.loading || (!hasTried && !active)) {
+    if (websocket.loading) {
       return (
         <TextWrapper>
           <Loader size="100px" />
         </TextWrapper>
       );
-    } else if (hasTried && !active && hasWallet) {
-      return (
-        <>
-          <TextWrapper>
-            <h2>Welcome to Rubicon</h2>
-            <p>Please connect your browser wallet to begin trading.</p>
-          </TextWrapper>
-          <MainButton onClick={connect}>CONNECT</MainButton>
-        </>
-      );
     } else {
-      // they don't have an extension
       return (
         <>
           <TextWrapper>
             <h2>Welcome to Rubicon</h2>
             <p>
               To trade on Rubicon and connect to the Ethereum blockchain, please
-              install a browser wallet.
+              connect your wallet.
             </p>
-            <WalletOptionWrapper>
-              <a
-                href={'https://metamask.io/'}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MM src={mmLogo} alt="Metamask" />
-              </a>
-            </WalletOptionWrapper>
-            <WalletOptionWrapper>
-              <a
-                // href={'https://wallet.coinbase.com/'}
-                // target="_blank"
-                // rel="noopener noreferrer"
-                onClick={walletlinkcall}
-              >
-                <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
-              </a>
-            </WalletOptionWrapper>
+            <MetaMaskConnectorButton />
+            <WalletLinkConnectorButton />
+            <WalletConnectConnectorButton />
           </TextWrapper>
         </>
       );
