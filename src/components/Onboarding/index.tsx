@@ -10,28 +10,6 @@ import WalletLinkConnectorButton from './Walletlink';
 
 Modal.setAppElement('#root');
 
-const MainButton = styled.div`
-  background-color: ${({ theme }) => theme.colors.tertiary};
-  color: ${({ theme }) => theme.text.againstRed};
-  width: 80%;
-  border-radius: 4px;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 14px;
-  padding: 15px 0;
-  margin: auto;
-  margin-bottom: 15px;
-  margin-top: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 100ms ease-in;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const LogoWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 100%;

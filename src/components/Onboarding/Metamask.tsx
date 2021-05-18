@@ -11,7 +11,7 @@ import { WalletOptionWrapper } from './index';
 
 Modal.setAppElement('#root');
 
-const MM = styled.img`
+const MetaMaskConnectButton = styled.img`
   width: 100%;
   height: 85px;
   background-color: white;
@@ -92,7 +92,7 @@ function useMetaMaskModalStyle(): Modal.Styles {
   };
 }
 
-export default function MetaMaskConnector() {
+export default function MetaMaskConnectorButton() {
   const { ethereum } = window;
   const modalStyle = useMetaMaskModalStyle();
   const isMetaMask = !!(ethereum && ethereum.isMetaMask);
@@ -112,7 +112,7 @@ export default function MetaMaskConnector() {
   return (
     <WalletOptionWrapper>
       <div onClick={isMetaMask ? connect : () => setOpen(true)}>
-        <MM src={mmLogo} alt="Metamask" />
+        <MetaMaskConnectButton src={mmLogo} alt="Metamask" />
       </div>
       <Modal style={modalStyle} isOpen={open}>
         <ModalHeader>

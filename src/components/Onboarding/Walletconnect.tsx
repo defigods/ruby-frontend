@@ -7,9 +7,6 @@ import { walletConnect, resetWalletConnector } from '../../connectors';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
 import { WalletOptionWrapper } from './index';
 
-import { AbstractConnector } from '@web3-react/abstract-connector';
-import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
-
 const WalletConnect = styled.img`
   width: 100%;
   height: 85px;
