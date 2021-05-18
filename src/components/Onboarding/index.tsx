@@ -1,15 +1,12 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useContext } from 'react';
 import Modal from 'react-modal';
 import styled, { ThemeContext } from 'styled-components';
-import { useActiveWeb3React } from '../../hooks';
 import Loader from '../Loader';
-import coinbaseWalletLogo from '../../assets/img/coinbaseWalletLogo1.png';
-import walletConnectLogo from '../../assets/img/walletconnect-logo.png';
 import logo from '../../assets/img/logo-color.png';
-import { walletLink, walletConnect } from '../../connectors';
 import { useWebSocket } from '../SocketProvider';
-import MetaMaskConnector from './Metamask';
-import { NoEthereumProviderError } from '@web3-react/injected-connector';
+import MetaMaskConnectorButton from './Metamask';
+import WalletConnectConnectorButton from './Walletconnect';
+import WalletLinkConnectorButton from './Walletlink';
 
 Modal.setAppElement('#root');
 
@@ -51,7 +48,7 @@ const TextWrapper = styled.div`
   justify-content: center;
 `;
 
-const WalletOptionWrapper = styled.div`
+export const WalletOptionWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 100%;
   padding: 20px 50px 20px 50px;
@@ -65,23 +62,6 @@ const WalletOptionWrapper = styled.div`
 const Logo = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const CoinbaseWallet = styled.img`
-  width: 100%;
-  height: 85px;
-  background-color: white;
-  border-radius: 10px;
-  border: 0.5px solid black;
-`;
-
-const WalletConnect = styled.img`
-  width: 100%;
-  height: 85px;
-  background-color: white;
-  border-radius: 10px;
-  border: 0.5px solid black;
-  padding: 21px 10px 21px 10px;
 `;
 
 function useModalStyle(): Modal.Styles {
@@ -107,46 +87,6 @@ function useModalStyle(): Modal.Styles {
   };
 }
 
-// TODO: Apply DRY principle on Connectors
-
-function WalletLinkConnector() {
-  const { activate } = useActiveWeb3React();
-
-  const connect = useCallback(() => {
-    activate(walletLink, undefined, true).catch((err) => {
-      console.error(`Failed to activate account using walletLink`, err);
-    });
-  }, [activate]);
-
-  return (
-    <WalletOptionWrapper>
-      <div onClick={connect}>
-        <CoinbaseWallet src={coinbaseWalletLogo} alt="Coinbase" />
-      </div>
-    </WalletOptionWrapper>
-  );
-}
-
-function WalletConnectConnector() {
-  const { activate } = useActiveWeb3React();
-
-  const connect = useCallback(() => {
-    activate(walletConnect, undefined, true).catch((err) => {
-      console.error(`Failed to activate account using walletConnect`, err);
-      if (err instanceof NoEthereumProviderError) {
-      }
-    });
-  }, [activate]);
-
-  return (
-    <WalletOptionWrapper>
-      <div onClick={connect}>
-        <WalletConnect src={walletConnectLogo} alt="WalletConnect" />
-      </div>
-    </WalletOptionWrapper>
-  );
-}
-
 export default function () {
   const modalStyle = useModalStyle();
   const websocket = useWebSocket();
@@ -167,9 +107,9 @@ export default function () {
               To trade on Rubicon and connect to the Ethereum blockchain, please
               connect your wallet.
             </p>
-            <MetaMaskConnector />
-            <WalletLinkConnector />
-            <WalletConnectConnector />
+            <MetaMaskConnectorButton />
+            <WalletLinkConnectorButton />
+            <WalletConnectConnectorButton />
           </TextWrapper>
         </>
       );
