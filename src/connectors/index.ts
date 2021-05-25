@@ -2,25 +2,48 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import { WalletLinkConnector } from '@web3-react/walletlink-connector';
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import { AbstractConnector } from '@web3-react/abstract-connector';
-//
+import { Network } from '../types';
+
+export const optimismKovanParams = {
+  chainId: `0x${Network.OPTIMISM_KOVAN.toString(16)}`,
+  chainName: 'Optimism Kovan',
+  nativeCurrency: {
+    name: 'Optimism ETH',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: ['https://kovan.optimism.io'],
+  blockExplorerUrls: ['https://kovan-explorer.optimism.io/'],
+};
+
+export const validNetworks = [Network.KOVAN, Network.OPTIMISM_KOVAN];
+
 const RPC_URLS = {
-  1: 'https://mainnet.infura.io/v3/c7c4543c849a4d8d96b0fedeb8bb273c',
-  4: 'https://rinkeby.infura.io/v3/bd80ce1ca1f94da48e151bb6868bb150', //these are not ours
-  42: 'https://kovan.infura.io/v3/c7c4543c849a4d8d96b0fedeb8bb273c',
+  [Network.MAINNET]:
+    'https://mainnet.infura.io/v3/c7c4543c849a4d8d96b0fedeb8bb273c',
+  [Network.RINKEBY]:
+    'https://rinkeby.infura.io/v3/bd80ce1ca1f94da48e151bb6868bb150', //these are not ours
+  [Network.KOVAN]:
+    'https://kovan.infura.io/v3/c7c4543c849a4d8d96b0fedeb8bb273c',
+  [Network.OPTIMISM_KOVAN]: 'https://kovan.optimism.io/',
 };
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [42, 1],
+  supportedChainIds: [Network.MAINNET, Network.KOVAN, Network.OPTIMISM_KOVAN],
 });
 
 export const walletLink = new WalletLinkConnector({
-  url: RPC_URLS[1],
+  url: RPC_URLS[Network.KOVAN],
   appLogoUrl: 'https://app.rubicon.finance/logo.png',
   appName: 'Rubicon',
 });
 
 export const walletConnect = new WalletConnectConnector({
-  rpc: { 1: RPC_URLS[1], 42: RPC_URLS[42] },
+  rpc: {
+    [Network.MAINNET]: RPC_URLS[Network.MAINNET],
+    [Network.KOVAN]: RPC_URLS[Network.KOVAN],
+    [Network.OPTIMISM_KOVAN]: RPC_URLS[Network.OPTIMISM_KOVAN],
+  },
   bridge: 'https://bridge.walletconnect.org',
   qrcode: true,
 });

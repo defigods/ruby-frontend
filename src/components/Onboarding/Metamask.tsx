@@ -6,6 +6,7 @@ import mmLogoFox from '../../assets/img/metamask_logo.svg';
 import { X } from 'react-feather';
 import { useActiveWeb3React } from '../../hooks';
 import { injected } from '../../connectors';
+import { UnsupportedChainIdError } from '@web3-react/core';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
 import { WalletOptionWrapper } from './index';
 
@@ -105,6 +106,8 @@ export default function MetaMaskConnectorButton() {
       console.error(`Failed to activate account`, err);
       if (err instanceof NoEthereumProviderError) {
         console.log('is noEthereumProviderError');
+      } else if (err instanceof UnsupportedChainIdError) {
+        console.log('Wrong network');
       }
     });
   }, [activate]);
@@ -114,7 +117,11 @@ export default function MetaMaskConnectorButton() {
       <div onClick={isMetaMask ? connect : () => setOpen(true)}>
         <MetaMaskConnectButton src={mmLogo} alt="Metamask" />
       </div>
-      <Modal style={modalStyle} isOpen={open}>
+      <Modal
+        style={modalStyle}
+        isOpen={open}
+        onRequestClose={() => setOpen(false)}
+      >
         <ModalHeader>
           <MMLogo src={mmLogoFox} alt="Metamask" />
           <h2>Install MetaMask to use Rubicon</h2>

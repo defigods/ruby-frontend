@@ -1,5 +1,11 @@
 import { getAddress } from 'ethers/lib/utils';
-import { BaseToken, TimeHistory, TimeHistoryEntry, Token } from '../types';
+import {
+  BaseToken,
+  Network,
+  TimeHistory,
+  TimeHistoryEntry,
+  Token,
+} from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
 const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
@@ -9,6 +15,22 @@ const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
   5: 'goerli.',
   42: 'kovan.',
 };
+
+export function getChainLabel(chain: Network | undefined): string {
+  if (chain === undefined) {
+    return '';
+  } else {
+    const NETWORK_LABELS: { [key: number]: string } = {
+      [Network.MAINNET]: 'Mainnet',
+      [Network.ROPSTEN]: 'Ropsten',
+      [Network.RINKEBY]: 'Rinkeby',
+      [Network.GOERLI]: 'Görli',
+      [Network.KOVAN]: 'Kovan',
+      [Network.OPTIMISM_KOVAN]: 'Optimism Kovan',
+    };
+    return NETWORK_LABELS[chain];
+  }
+}
 
 export function getEtherscanLink(
   chainId: number,

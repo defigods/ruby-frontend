@@ -5,6 +5,7 @@ import logo from '../../assets/img/logo-text.png';
 import SidebarLinks from './SidebarLinks';
 import SidebarTotal from './SidebarTotal';
 import SidebarUser from './SidebarUser';
+import NetworkSettings from '../NetworkSettings';
 import UserSettings from '../UserSettings';
 import { useActiveWeb3React } from '../../hooks';
 
@@ -41,6 +42,7 @@ const ContentWrapper = styled.div`
 
 export default function () {
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
+  const [networkSettingsOpen, setNetworkSettingsOpen] = useState(false);
   const { account } = useActiveWeb3React();
 
   return (
@@ -54,10 +56,20 @@ export default function () {
         <SidebarTotal />
         <SidebarLinks />
       </ContentWrapper>
-      {!!account && <SidebarUser onOpen={() => setUserSettingsOpen(true)} />}
+      {!!account && (
+        <SidebarUser
+          onOpenUser={() => setUserSettingsOpen(true)}
+          onOpenNetwork={() => setNetworkSettingsOpen(true)}
+        />
+      )}
       <UserSettings
         isOpen={userSettingsOpen}
         onRequestClose={() => setUserSettingsOpen(false)}
+      />
+      <NetworkSettings
+        isOpen={networkSettingsOpen}
+        setIsOpen={setNetworkSettingsOpen}
+        onRequestClose={() => setNetworkSettingsOpen(false)}
       />
     </Wrapper>
   );
