@@ -104,9 +104,9 @@ export default function (props: NetworkSettingsProps) {
         )}
       </ModalHeader>
       <p>
-        Currently this dapp only supports Kovan and Optimism Kovan networks.
-        Please follow the instructions bellow to change to one of the supported
-        networks:
+        Currently this dapp only supports the Kovan and Optimism Kovan test
+        networks. Please follow the instructions bellow to switch to one of the
+        supported networks:
       </p>
       <NetworkInstructionWrapper>
         <h3>Kovan</h3>
@@ -131,9 +131,9 @@ export default function (props: NetworkSettingsProps) {
             network. Press "Approve" to add the new network to your wallet.
           </li>
           <li>
-            Once you added the new network, MetaMask will prompt you again and
-            request you to switch to the new network. Press "Switch Network" to
-            proceed.
+            Once you have added the new network, MetaMask will prompt you again
+            and request you to switch to the new network. Press "Switch Network"
+            to proceed.
           </li>
         </ul>
       </NetworkInstructionWrapper>
