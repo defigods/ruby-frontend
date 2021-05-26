@@ -421,11 +421,13 @@ export default function ({ isBuy, isOpen, onRequestClose }: TradeModalProps) {
 
   const maxQuantity = useMemo(() => {
     if (priceInput === '' || parseFloat(priceInput) == 0) return 0;
-    return new Decimal(walletBalance)
-      .div(1 + LIQUIDITY_PROVIDER_FEE)
-      .mul(sliderRatio)
-      .div(isBuy ? priceInput : 1)
-      .toNumber();
+    return (
+      new Decimal(walletBalance)
+        // .div(1 + LIQUIDITY_PROVIDER_FEE)
+        .mul(sliderRatio)
+        .div(isBuy ? priceInput : 1)
+        .toNumber()
+    );
   }, [walletBalance, priceInput]);
 
   const currentOffer = useMemo(() => {
