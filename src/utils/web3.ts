@@ -57,7 +57,7 @@ export async function executeMatchTrade(
 }
 
 export function getLibrary(provider: any): Web3Provider {
-  return new Web3Provider(provider);
+  return new Web3Provider(provider, 'any');
 }
 
 // account is not optional

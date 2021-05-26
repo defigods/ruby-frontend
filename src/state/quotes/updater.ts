@@ -19,7 +19,9 @@ export default function (): null {
       'LOAD_QUOTE_TOKENS',
       chainId || DEFAULT_CHAIN,
       (quotes: QuoteToken[]) => {
-        dispatch(selectQuoteToken(quotes[0].ticker));
+        if (quotes.length) {
+          dispatch(selectQuoteToken(quotes[0].ticker));
+        }
         dispatch(fetchQuoteList.fulfilled(quotes));
       },
     );

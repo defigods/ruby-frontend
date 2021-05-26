@@ -3,28 +3,18 @@ import { ChevronUp } from 'react-feather';
 import styled from 'styled-components';
 import { useActiveWeb3React } from '../../hooks';
 import { useBlockNumber } from '../../state/application/hooks';
-import { shortenAddress } from '../../utils';
+import { getChainLabel, shortenAddress } from '../../utils';
 import Identicon from '../Identicon';
 
 interface SidebarUserProps {
-  onOpen: () => void;
+  onOpenUser: () => void;
+  onOpenNetwork: () => void;
 }
-
-const NETWORK_LABELS: { [key: number]: string } = {
-  4: 'Rinkeby',
-  3: 'Ropsten',
-  5: 'Görli',
-  1: 'Mainnet',
-  42: 'Kovan',
-};
 
 const Wrapper = styled.div`
   margin-top: auto;
   position: relative;
-  display: flex;
-  justify-content: left;
   padding: 15px 15px;
-  align-items: center;
   background-color: ${({ theme }) => theme.colors.secondary};
   cursor: pointer;
 `;
@@ -45,6 +35,13 @@ const NetworkCard = styled.span`
   white-space: nowrap;
 `;
 
+const UserIdentification = styled.div`
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  width: 100%;
+`;
+
 const StyledChevronsUp = styled(ChevronUp)`
   margin-left: auto;
 `;
@@ -58,16 +55,19 @@ export default function (props: SidebarUserProps) {
   const { account, chainId } = useActiveWeb3React();
   const blockNumber = useBlockNumber();
 
+  const chainLabel = getChainLabel(chainId);
   return (
-    <Wrapper onClick={props.onOpen}>
-      {chainId && NETWORK_LABELS[chainId] && (
-        <NetworkCard>
-          {NETWORK_LABELS[chainId]} ({blockNumber})
+    <Wrapper>
+      {chainId && chainLabel && (
+        <NetworkCard onClick={props.onOpenNetwork}>
+          {chainLabel} ({blockNumber})
         </NetworkCard>
       )}
-      <Identicon />
-      <UserText>{shortenAddress(account!)}</UserText>
-      <StyledChevronsUp size={14} />
+      <UserIdentification onClick={props.onOpenUser}>
+        <Identicon />
+        <UserText>{shortenAddress(account!)}</UserText>
+        <StyledChevronsUp size={14} />
+      </UserIdentification>
     </Wrapper>
   );
 }

@@ -1,5 +1,14 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
+export enum Network {
+  MAINNET = 1,
+  ROPSTEN = 3,
+  RINKEBY = 4,
+  GOERLI = 5,
+  KOVAN = 42,
+  OPTIMISM_KOVAN = 69,
+}
+
 export enum TimeHistory {
   ONE_DAY = '1 day|1d',
   ONE_WEEK = '1 week|1w',
