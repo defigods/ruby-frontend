@@ -20,11 +20,11 @@ export const markets: Record<number, { address: string; blockNumber: number }> =
       blockNumber: 11734016,
     },
     [Network.KOVAN]: {
-      address: '0x9C735089059689803F507DAAad78c6970468124d',
+      address: '0x435fc1B52A3682b6F39a9c408e99BA6573816528',
       blockNumber: 20875039,
     },
     [Network.OPTIMISM_KOVAN]: {
-      address: '0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0',
+      address: '0x619beC3E00849e48112B162fDa1A6b1f8BC9d18F',
       blockNumber: 1, // TODO: Check!
     },
   };
